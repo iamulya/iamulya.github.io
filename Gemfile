@@ -24,3 +24,5 @@ gem "http_parser.rb", "~> 0.6.0", :platforms => [:jruby]
 
 # Compose plugin to make post creation easy - https://github.com/jekyll/jekyll-compose
 gem 'jekyll-compose', group: [:jekyll_plugins]
+
+gem 'jemoji', group: [:jekyll_plugins]

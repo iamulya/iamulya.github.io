@@ -42,12 +42,14 @@ How it works:
 
 What we need an access policy (a container for access level and service perimeter) for our purposes. We'll use Access Context Manager to create an access level defining the IP Address or the CIDR Range which will be allowed to access the service. 
 
-![ ](/assets/img/access-cm.png)
+![ ](/assets/img/access-cm.jpg)
 
 Here you can also restrict location, device and other parameters. 
 
 Next, we move to VPC Service Controls to define a service perimeter using the access level and other attributes. Make sure you first create the perimeter in dry run mode before trying the enforced mode.
 
-![ ](/assets/img/perimeter.png)
+![ ](/assets/img/perimeter.jpg)
 
 You can select which identities (Users/Service Accounts) are allowed make the calls and also if you want to restrict specific projects.
+
+This setup will give you a more secure access to your Vertex AI APIs, since you can now restrict access based on IP/User/Service Account/Region etc.

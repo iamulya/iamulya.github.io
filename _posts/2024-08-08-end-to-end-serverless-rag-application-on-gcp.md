@@ -1,7 +1,7 @@
 ---
 layout: postwithads
 title: End-to-End Serverless RAG Application on GCP
-date: 2024-08-08 10:00:00 +0100
+date: 2024-08-08 07:00:00 +0100
 categories: [Gen AI, RAG Applications, Serverless]
 tags: [Google Cloud, RAG, Serverless, Cloud Workflows]
 ---

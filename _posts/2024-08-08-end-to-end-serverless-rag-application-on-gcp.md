@@ -3,10 +3,8 @@ layout: postwithads
 title: End-to-End Serverless RAG Application on GCP
 date: 2024-08-08 07:00:00 +0100
 categories: [Gen AI, RAG Applications, Serverless]
-tags: [Google Cloud, RAG, Serverless, Cloud Workflows]
+tags: [Google Cloud, RAG Applications, Serverless, Cloud Workflows, Gemini, Gen AI]
 ---
-
-# End-to-End Serverless RAG Application on GCP
 
 Retrieval-Augmented Generation (RAG) is an approach in LLM-based Applications which enables an LLM like Gemini to answer queries regarding topics it wasn’t even trained with. This is done by **augmenting** the context of a query/prompt with the data necessary to answer the query, **retrieved** from an external source like a Database, so that the LLM can **generate** an answer. The data can be in the form of text, audio, images and even videos - basically anything that you can create embeddings for.
 
@@ -43,15 +41,15 @@ Finally, It’s time to introduce the serverless products that will help us perf
     - *Query*: Uses the “similarity search” retriever to retrieve the data similar to the query. That data is then sent along with the query to Gemini Pro on Vertex AI to generate an answer.
 - **Cloud Workflows** - Serverless orchestration tool where we put most of it together. The workflow gets triggered automatically when a file gets uploaded into a designated bucket using the Pre-signed URL Cloud Function. After this, the workflow calls the *Chunker* function, before *Indexer* kicks in.
 
-The use of Cloud Workflows also makes it easy to do error-handling, exponential-backoff retry in case of Quota issues, without writing any extra code! 
+The use of Cloud Workflows also makes it easy to do error-handling, exponential-backoff/retry in case of Quota issues, without writing any extra code! 
 
 You can find the code [here](https://github.com/iamulya/gcp-serverless-rag). It uses Langchain as the LLM-Framework but you can easily adjust it to use another Framework like Llamaindex.
 
 ## Next Steps
 
-Congratulations, you have built a serverless RAG application, albeit a very basic one. You can now expand this code to do more advanced stuff:
+Congratulations, you have built a serverless RAG application, albeit a very basic one and may not give satisfactory results to your queries. You can however expand this code to do more advanced stuff:
 
-1. Use different chunking techniques based on the type of data you input. For e.g. if you want to build a Q&A system for your source code, libraries like Llamaindex and Langchain have specific splitters for formats like Markdown, HTML, Programming languages like Javascript, Python etc. for which you can add support in the *Chunker* function.
-2. If the answers you are getting are not satisfactory, you either need to adjust your chunking strategy or retrieval strategy (in some cases both!). Llamaindex has support for a lot of advanced retrieval strategies which work well for complex structures. Add support for more retrieval strategies in the *Indexer*.
+1. If the answers you are getting are not satisfactory, you either need to adjust your chunking strategy or retrieval strategy (in some cases both!). Llamaindex has support for a lot of advanced retrieval strategies which work well for complex structures. Add support for more retrieval strategies in the *Indexer*.
+2. Use different chunking techniques based on the type of data you input. For e.g. if you want to build a Q&A system for your source code, libraries like Llamaindex and Langchain have specific splitters for formats like Markdown, HTML, Programming languages like Javascript, Python etc. for which you can add support in the *Chunker* function.
 3. Once you are out of the PoC mode and ready to increase the scope of your RAG, make sure your RAG application has enough Quota for the Prediction and Embedding calls. While the architecture is highly scalable, if you don’t have enough Quota, the Indexer will get stuck and the workflow will have to do multiple retry calls. Under high load, the Indexing process will be too slow if enough Quotas aren’t available.
 4. Before going to production, make sure to secure your Vertex AI API calls with VPC Service Controls. Also make sure that your service accounts have the least permissions needed to perform the tasks.

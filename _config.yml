@@ -29,7 +29,7 @@ github:
   username: iamulya # change to your github username
 
 twitter:
-  username: iamulya # change to your twitter username
+  username: amulya_bhatia # change to your twitter username
 
 google_adsense:
   client_id: ca-pub-0000000000000000         # adsense client id, ex: ca-pub-0000000000000000
@@ -43,7 +43,7 @@ social:
   email: amulya.bhatia@t-online.de # change to your email address
   links:
     # The first element serves as the copyright owner's link
-    - https://twitter.com/iamulya # change to your twitter homepage
+    - https://x.com/amulya_bhatia # change to your twitter homepage
     - https://github.com/iamulya # change to your github homepage
     # Uncomment below to add more social links
     # - https://www.facebook.com/username

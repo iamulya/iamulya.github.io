@@ -58,6 +58,13 @@ analytics:
   google:
     id: G-235VLCFN8R
 
+google_analytics:
+ id: G-235VLCFN8R # fill in your Google Analytics ID
+
+google:
+  tag_manager:
+    container_id: G-235VLCFN8R
+
 goatcounter:
   id: # fill in your Goatcounter ID
 

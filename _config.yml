@@ -32,7 +32,7 @@ twitter:
   username: amulya_bhatia # change to your twitter username
 
 google_adsense:
-  client_id: ca-pub-0000000000000000         # adsense client id, ex: ca-pub-0000000000000000
+  client_id: ca-pub-6782768985852900         # adsense client id, ex: ca-pub-0000000000000000
   slot_id: 0000000000           # adsense slot id, ex: 0000000000
   enabled: false
 

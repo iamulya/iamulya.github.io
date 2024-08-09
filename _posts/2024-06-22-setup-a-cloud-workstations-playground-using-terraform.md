@@ -1,7 +1,7 @@
 ---
 layout: postwithads
 title: Setup a Cloud Workstations Playground using Terraform
-date: 2024-08-08 09:00:00 +0100
+date: 2024-06-22 09:00:00 +0100
 categories: [Google Cloud, Cloud Workstations]
 tags: [Google Cloud, Cloud Workstations, DX, Developer Experience, CDE, Terraform]
 ---

@@ -1,7 +1,7 @@
 ---
 layout: postwithads
 title: Secure your Gemini Calls on Vertex AI
-date: 2024-08-08 12:00:00 +0100
+date: 2024-07-14 12:00:00 +0100
 categories: [Google Cloud, Vertex AI, Gemini]
 tags: [Google Cloud, Vertex AI, Gemini, VPC Service Controls, Access Context Manager]
 ---

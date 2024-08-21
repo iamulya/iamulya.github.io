@@ -19,7 +19,7 @@ This will be helpful for a lot of Gen AI Use Cases such as:
 
 3. Additional compute intensive workloads such as **image recognition**, online gaming, **video transcoding** and streaming, and more.
 
-In this article, I'll show how to quickly build a playground to run open-source LLMs of a certain size and test/serve them out using LangChain, LangServe and Ollama. Let's start with Ollama:
+In this article, I'll show how to quickly build a playground to run open-source LLMs of a certain size and test/serve them out using **LangChain**, **LangServe** and **Ollama**. Let's start with Ollama:
 
 ## Ollama
 

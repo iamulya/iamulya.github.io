@@ -6,7 +6,7 @@ categories: [Google Cloud, ARM-based Workloads]
 tags: [Google Cloud, ARM-based workloads, Compute Engine, GKE]
 ---
 
-Google first announced Axion at their NEXT Event in April, which has gone in Public Preview today. Axion is touted to outperform the rival ARM-based processors by **at least 10% per vCPU** on most workloads. It is based on Arm Neoverse™ V2 CPU, just like its counterpart AWS Graviton 4, whereas Azure Cobalt is relying on Arm Neoverse™ N2 Architecture. 
+Google first announced [Axion](https://cloud.google.com/products/axion) at their NEXT Event in April, which has gone in GA today. Axion is touted to outperform the ARM-based processors at the rival hyperscaler by **at least 10% per vCPU** on most workloads. It is based on Arm Neoverse™ V2 CPU, just like its counterpart AWS Graviton 4, whereas Azure Cobalt is relying on Arm Neoverse™ N2 Architecture. 
 
 In this article, I'll shed some light on why the hyperscalers are making a massive push towards fabricating their own ARM-based Silicon and then top it off by some metrics for Axion and how you can migrate your workloads to it.
 
@@ -59,8 +59,8 @@ The following table shows the current offerings - older AWS Graviton, Google Clo
 | Feature | AWS Graviton 4 | Google Cloud Axion | Azure Cobalt |
 | :---- | :---- | :---- | :---- |
 | **Processor Architecture** | ARM Neoverse V2 | ARM Neoverse V2 | ARM Neoverse N2 |
-| **Availability** | Generally available | Public Preview | Private Preview |
-| **Key Use Cases** | Application servers, midsize data stores, microservices, cluster computing, HPC, ML Inference, Gaming, Memory-cache | Web and App Servers, Databases, Gaming, Media Streaming, Ad Servers, BI & Data Analytics, ML Inference, Network Appliances, Memory-cache  | Web applications, microservices, and open-source databases |
+| **Availability** | Generally available | Generally available | Generally available |
+| **Key Use Cases** | Application servers, midsize data stores, microservices, cluster computing, HPC, ML Inference, Gaming, Memory-cache | Web and App Servers, Databases, Gaming, Media Streaming, Ad Servers, BI & Data Analytics, ML Inference, Network Appliances, Memory-cache  | Web applications, microservices, open-source databases, Memory-cache |
 | **Container/K8s Support** | Yes | Yes | Yes |
 | **Main Instance Types** | M8g, C8g, R8g | C4a (Standard, High-CPU, High-Mem) | Dpsv6, Dplsv6, Epsv6 |
 | **Region Availability** | Select Regions | Select Regions | Select Regions |
@@ -71,7 +71,9 @@ Axion is Google's custom ARM-based processor with:
 * Upto **50% better performance** and
 * Upto **60% better energy efficiency**
 
-compared to its x86 counterparts.
+compared to its x86 counterparts. For certain workloads, you can gain >100% efficiencies.  
+
+It allows upto 72 vCPUs, 576 gb RAM and 100 Gbps networking bandwidth. Configurations are available for the following CPU-to-Memory ratios - 1:2, 1:4 and 1:8 with Local SSD upto 6 TB.
 
 ### **Choosing the Right ARM-Based VM**
 
@@ -82,6 +84,8 @@ When selecting an ARM-based VM, consider the following factors:
 * **Pricing and Performance:** Compare pricing and performance metrics across different cloud providers to find the best fit for your budget and requirements.  
 * **Support and Tools:** Evaluate the availability of support resources, tools, and documentation for ARM-based VMs on each cloud platform.
 
+### Futher Links
+
 [ARM Workloads on GKE(YouTube)](https://www.youtube.com/watch?v=LZoy6jpzfqA)
 
 [Preparing ARM Workloads for deployment on GKE](https://cloud.google.com/kubernetes-engine/docs/how-to/prepare-arm-workloads-for-deployment)
@@ -89,5 +93,3 @@ When selecting an ARM-based VM, consider the following factors:
 [How to run anything on Google Axion Processors](https://www.youtube.com/watch?v=Ty9KiDF1pWg)
 
 [Google Axion Processors / x86 vs. ARM Processors](https://www.youtube.com/watch?v=0aDJ6GqsJqc)
-
-![VM Shapes and Sizes](image.png)

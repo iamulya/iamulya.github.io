@@ -242,8 +242,17 @@ This command starts a local web server (usually on `http://localhost:8000`), whe
 
 Once running, you can chat with YouBuddy:
 
-*   "Summarize the videos in the playlist `https://www.youtube.com/playlist?list=PL6gx4Cwl9DGCkg2uj3PxUWhMDuTw3VKjM`?"
+*   "Summarize the video: `https://www.youtube.com/watch?v=BJjsfNO5JTo`"
+*   "Summarize the videos in the playlist `https://www.youtube.com/playlist?list=PLIivdWyY5sqK5SRR9erGeAx_OTQpHy8cR`?"
 *   "Find videos from channel `UC_x5XG1OV2P6uZZ5FSM9Ttw` on 2024-03-10 and give me a combined summary."
+
+As you run these commands in the agent, check how it loads the mcp tools and calls them as needed in the terminal
+
+![loaded tools](/assets/img/tools.png)
+
+Here is a quick screengrab of the agent output for a playlist summary. On the left side, you can see all the events, requests, responses etc.:
+
+{% include embed-video.html url='/assets/videos/playlist-output.mp4' %}
 
 YouBuddy will:
 1.  Parse your request.

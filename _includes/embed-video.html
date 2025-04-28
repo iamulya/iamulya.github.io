@@ -1,0 +1,14 @@
+{%- if include.url -%}
+  <figure class="embed-video">
+    <video controls preload="metadata" style="width: 100%; max-width: 800px; display: block; margin: auto;">
+      <source src="{{ include.url | relative_url }}" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+    {%- if include.caption -%}
+      <figcaption>{{ include.caption }}</figcaption>
+    {%- endif -%}
+  </figure>
+{%- else -%}
+  <!-- Optional: Add an error message if the URL is missing -->
+  <p style="color: red;">Error: Video URL not provided in include tag.</p>
+{%- endif -%}

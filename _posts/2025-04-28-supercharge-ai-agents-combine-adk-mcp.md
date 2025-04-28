@@ -1,6 +1,6 @@
 ---
 title: Supercharge Your AI Agents: Combining Google's ADK and MCP
-date: 2025-04-28 17:00:00 +0100
+date: 2025-04-28 14:00:00 +0100
 categories: [Gen AI, Agent Development Kit]
 tags: [Generative AI, Agent Development Kit, Model Context Protocol]
 ---

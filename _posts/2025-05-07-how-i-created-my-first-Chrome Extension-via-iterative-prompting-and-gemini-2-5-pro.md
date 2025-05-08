@@ -226,5 +226,4 @@ This project demonstrates the utility of AI models like Gemini 2.5 Pro as intera
 *   Implement specific functional requirements (trigger conditions, text validation).
 *   Incorporate more nuanced logic (editable field checks, debouncing) that improve user experience.
 
-The AI's ability to understand functional requirements, provide relevant code structures (like regex for Unicode ranges or DOM traversal patterns), and adapt to iterative feedback significantly accelerated the development process, especially for an individual who might not be deeply familiar with all aspects of Chrome extension development. The key was clear communication of requirements and incremental refinement based on the AI's output.
-```
+Gemini's ability to understand functional requirements, provide relevant code structures, and adapt to iterative feedback significantly accelerated the development process, especially for an individual who might not be deeply familiar with all aspects of software development. The key is clear communication of requirements and incremental refinement based on the Gemini's output.

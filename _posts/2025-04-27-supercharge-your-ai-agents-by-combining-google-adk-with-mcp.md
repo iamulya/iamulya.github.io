@@ -1,8 +1,8 @@
 ---
 title: Supercharge Your AI Agents by Combining Google ADK with MCP
 date: 2025-04-27 14:00:00 +0100
-categories: [Gen AI, Agent Development Kit]
-tags: [Generative AI, Agent Development Kit, Model Context Protocol, MCP, Gen AI, Gemini]
+categories: [Gen AI, Agent Development Kit (ADK)]
+tags: [Generative AI, Agent Development Kit (ADK), Model Context Protocol, MCP, Gen AI, Gemini]
 ---
 
 Building sophisticated AI agents that can interact with various tools and services can be complex. You need to manage the agent's core logic, its interaction with language models, and how it communicates with external capabilities. Today, we'll explore how Google's Agent Development Kit (ADK) and the Model Context Protocol (MCP) work together to simplify this process, using a fun example project: **YouBuddy**, an AI assistant for YouTube.

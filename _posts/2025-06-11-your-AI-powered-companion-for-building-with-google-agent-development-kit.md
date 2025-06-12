@@ -1,8 +1,8 @@
 ---
 title: Your AI-Powered Companion for Building with Google's Agent Development Kit
 date: 2025-06-11 14:00:00 +0100
-categories: [Gen AI, Gemini, ADK]
-tags: [Generative AI, ADK, Agentic AI, Gen AI, Gemini]
+categories: [Gen AI, Gemini, Agent Development Kit (ADK)]
+tags: [Generative AI, Agent Development Kit (ADK), Agentic AI, Gen AI, Gemini]
 ---
 
 Building powerful AI agents is an exciting frontier, and Google's Agent Development Kit (ADK) provides a robust framework for doing just that. But as with any powerful tool, there's a learning curve. I've often found myself juggling documentation, debugging tricky issues, and spending valuable time on project artifacts instead of core agent logic.

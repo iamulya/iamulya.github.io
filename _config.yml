@@ -56,14 +56,14 @@ google_site_verification: # fill in to your verification string
 
 analytics:
   google:
-    id: G-235VLCFN8R
+    id: G-4NE1QCZZBL
 
 google_analytics:
- id: G-235VLCFN8R # fill in your Google Analytics ID
+ id: G-4NE1QCZZBL # fill in your Google Analytics ID
 
 google:
   tag_manager:
-    container_id: G-235VLCFN8R
+    container_id: G-4NE1QCZZBL
 
 goatcounter:
   id: # fill in your Goatcounter ID

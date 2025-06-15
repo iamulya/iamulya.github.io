@@ -2,7 +2,7 @@
 title: "A Developer's Guide to AI Agents: OpenAI Agents SDK vs. Google's ADK"
 date: 2025-06-15 13:00:00 +0100
 categories: [Gen AI, Agentic SDKs, Agent Development Kit (ADK)]
-tags: [Generative AI, Agent Development Kit (ADK), Agentic AI, Gen AI, Agentic SDKs]
+tags: [Generative AI, Agent Development Kit (ADK), Agentic AI, Gen AI, Agentic SDKs, OpenAI Agents SDK]
 ---
 
 The era of AI agents is upon us. As developers, we're moving beyond simple API calls to building sophisticated, autonomous systems that can reason, plan, and execute complex tasks. To empower this shift, major AI labs are releasing specialized frameworks. Two of the most prominent are the **OpenAI Agents SDK** and **Google's Agent Development Kit (ADK)**.

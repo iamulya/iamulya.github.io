@@ -1,0 +1,20 @@
+/* Custom styles for responsive tables */
+.md-content__inner table {
+  table-layout: fixed;
+  width: 100%;
+  word-wrap: break-word; /* For older browsers */
+  overflow-wrap: break-word; /* Standard property */
+}
+
+.md-content__inner th,
+.md-content__inner td {
+  /* Enforce wrapping within cells */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+
+  /* Optional: Adjust padding for better spacing */
+  padding: 8px 12px;
+
+  /* Optional: Vertically align text to the top of the cell */
+  vertical-align: top;
+}

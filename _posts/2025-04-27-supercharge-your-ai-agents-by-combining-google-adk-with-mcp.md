@@ -1,7 +1,7 @@
 ---
 title: Supercharge Your AI Agents by Combining Google ADK with MCP
 date: 2025-04-27 14:00:00 +0100
-categories: [Gen AI, Agent Development Kit (ADK)]
+categories: [Gen AI, Agentic SDKs, Agent Development Kit (ADK)]
 tags: [Generative AI, Agent Development Kit (ADK), Model Context Protocol, MCP, Gen AI, Gemini]
 ---
 

@@ -1,7 +1,7 @@
 ---
 title: Your AI-Powered Companion for Building with Google's Agent Development Kit
 date: 2025-06-11 14:00:00 +0100
-categories: [Gen AI, Gemini, Agent Development Kit (ADK)]
+categories: [Gen AI, Agentic SDKs, Agent Development Kit (ADK)]
 tags: [Generative AI, Agent Development Kit (ADK), Agentic AI, Gen AI, Gemini]
 ---
 

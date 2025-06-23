@@ -101,7 +101,8 @@ if __name__ == "__main__":
 At first glance, this might seem like more code for the same result. But the power lies in what's happening under the hood. The `Runner.run()` call initiates an **agent loop**, a process that can continue over multiple turns, call tools, and even hand off to other agents. We've moved from a simple function call to a robust, extensible workflow engine.
 
 
-> ## The Agent Loop is Key
+> The Agent Loop is Key
+> {:.title}
 > 
 > The fundamental difference between a direct LLM call and using the Agents SDK is the **agent loop**. The `Runner` class manages this loop, automatically handling the cycle of:
 > 
@@ -125,7 +126,8 @@ The world of AI frameworks is vast. The OpenAI Agents SDK differentiates itself 
 *   **Powerful Primitives:** The SDK focuses on a small but potent set of building blocks. By combining Agents, Tools, and Handoffs, you can model incredibly complex workflows, from simple tool-using bots to sophisticated multi-agent systems where different agents collaborate to solve a problem. It provides the "just enough" functionality to be immediately useful without becoming bloated.
 
 
-> ## Not Just for OpenAI Models
+> Not Just for OpenAI Models
+> {:.title}
 > 
 > The name "OpenAI Agents SDK" reflects its origin, but its capability extends far beyond. The integration with `litellm` and the underlying `ModelProvider` interface make it a versatile tool for any developer, regardless of their preferred LLM provider. Throughout this book, we will use Gemini models in our primary examples to underscore this flexibility.
 {: .prompt-info }

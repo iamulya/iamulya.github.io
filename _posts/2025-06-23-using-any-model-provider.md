@@ -3,6 +3,9 @@ title: "Chapter 3 - Beyond OpenAI: Using Any Model Provider"
 date: "2025-06-23 09:00:00 +0200"
 categories: [Gen AI, Agentic SDKs, OpenAI Agents SDK]
 tags: [Generative AI, Agentic AI, Gen AI, Agentic SDKs, OpenAI Agents SDK, Tinib00k]
+image:
+  path: /assets/img/tinibook-openai-agents-sdk-final.jpg
+  alt: "Tinib00k: OpenAI Agents SDK"
 ---
 
 > This article is part of my book [Tinib00k: OpenAI Agents SDK](https://gumroad.iamulya.one#WuWH2AdBm4qtHQojmRxBog==), which explores the OpenAI Agents SDK, its primitives, and patterns for building agentic AI systems. All of the chapters can be found [here](https://iamulya.one/tags/Tinib00k/) and the code is available on [Github](https://github.com/iamulya/openai-agentsdk-code). The book is available for free online and as a PDF eBook. If you find this content valuable, please consider supporting my work by purchasing the eBook (or download it for free!) or sharing it with others. For any issues around the book, contact me on [LinkedIn](https://www.linkedin.com/in/amulya-bhatia-01627a42/)

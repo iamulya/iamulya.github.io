@@ -64,7 +64,7 @@ if __name__ == "__main__":
 > *   **Goal:** "Your goal is to provide a concise summary of the provided text."
 > *   **Constraints:** "You must not use technical jargon. Always respond in under 100 words."
 > *   **Formatting:** "The output must be a markdown-formatted list."
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Advanced Model Control
 
@@ -142,7 +142,7 @@ When you run this, you'll see the print statements from both tools interleave, c
 > The ability to request multiple tools in one turn is an advanced feature. While newer OpenAI models (`gpt-4o`, etc.) excel at this, support among other providers varies. 
 > 
 > However, if you use a model that does not support it, the SDK will not fail. Instead, the model will likely fall back to calling the tools sequentially, one per turn, which will be less efficient. Always test this behavior with your chosen model.
-> {: .prompt-info }
+{: .prompt-info }
 
 ![*Sequence diagram for parallel tool calls.*](/assets/img/2025-06-23-anatomy-of-an-agent/figure-1.png)
 
@@ -151,7 +151,7 @@ When you run this, you'll see the print statements from both tools interleave, c
 > Forcing tool use with `tool_choice="required"` is powerful but dangerous. If you don't manage it carefully, you can create an infinite loop where the agent calls a tool, gets the result, and is then forced to call a tool again.
 > 
 > To prevent this, the SDK has a built-in safety feature: the `Agent`'s `reset_tool_choice` parameter, which defaults to `True`. After an agent turn in which a tool is used, the `Runner` will automatically reset the `tool_choice` setting to `"auto"` for the next turn, allowing the LLM to generate a final response instead of being forced to call another tool. You can disable this by setting `agent.reset_tool_choice = False` if you have a specific use case that requires continuous forced tool use.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Dynamic Instructions
 
@@ -269,7 +269,7 @@ if __name__ == "__main__":
 > ## Context is Local, Not Sent to the LLM
 > 
 > It's critical to understand that the `context` object itself is **never** sent to the LLM. It is a local Python object for your code's use only. If you need the LLM to be aware of information from the context (like a user's name), you must explicitly include it in the `instructions` or have a tool return that information into the conversation history.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Typed Outputs for Structured Data
 
@@ -302,7 +302,7 @@ event_extractor_agent = Agent(
 
 
 > By default, the SDK generates JSON schemas in **"strict mode"**. This enforces a subset of the JSON Schema standard that guarantees the LLM's output will be valid JSON. This means some Pydantic features, like `Union` types or dictionaries with non-string keys, are not supported in `output_type`. If you must use a non-strict schema, you can configure it by wrapping your type in `AgentOutputSchema(MyType, strict_json_schema=False)`.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Observing the Agent with Lifecycle Hooks
 

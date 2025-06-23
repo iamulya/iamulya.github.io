@@ -16,7 +16,7 @@ A trace is a comprehensive, structured log of a single end-to-end workflow. It c
 > ## Tracing is On by Default
 > 
 > The SDK is designed for observability from the ground up. Tracing is enabled by default and requires no special configuration to get started, provided you have a valid OpenAI API key set (as traces are uploaded to the OpenAI platform). If you are not using OpenAI for tracing, you will need to configure the SDK accordingly, as we'll discuss later.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## The Anatomy of a Trace: Traces and Spans
 
@@ -85,7 +85,7 @@ This structured, hierarchical view is invaluable. You can see exactly how long e
 > 1.  **Disable Tracing:** Set the environment variable `OPENAI_AGENTS_DISABLE_TRACING=1` or pass `RunConfig(tracing_disabled=True)` to the `Runner`.
 > 2.  **Use a Custom Trace Processor:** The SDK allows you to redirect trace data to other observability platforms (like Weights & Biases, Arize, etc.). This is an advanced topic covered in the documentation.
 > 
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Higher-Level Traces
 

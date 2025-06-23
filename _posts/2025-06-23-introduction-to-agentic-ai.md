@@ -112,7 +112,7 @@ At first glance, this might seem like more code for the same result. But the pow
 > 5.  Repeating until a final answer is generated.
 > 
 > This loop is the core of agentic behavior, and the SDK manages it for you.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Why the OpenAI Agents SDK?
 
@@ -128,7 +128,7 @@ The world of AI frameworks is vast. The OpenAI Agents SDK differentiates itself 
 > ## Not Just for OpenAI Models
 > 
 > The name "OpenAI Agents SDK" reflects its origin, but its capability extends far beyond. The integration with `litellm` and the underlying `ModelProvider` interface make it a versatile tool for any developer, regardless of their preferred LLM provider. Throughout this book, we will use Gemini models in our primary examples to underscore this flexibility.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Core Primitives at a Glance
 

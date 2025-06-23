@@ -84,7 +84,7 @@ The `@function_tool` decorator is doing a lot of heavy lifting for you. Here's a
 > ## Rich Type Support
 > 
 > The function tool schema generation supports more than just primitive types like `int` and `str`. You can use Pydantic models, `dataclass`es, or `TypedDict`s as arguments, and the SDK will generate a nested JSON schema accordingly. This allows you to pass complex, structured data to your tools.
-> {: .prompt-info }
+{: .prompt-info }
 
 Let's see an example with a Pydantic model as an input argument.
 
@@ -179,7 +179,7 @@ if __name__ == "__main__":
 
 
 > The string returned by your `failure_error_function` is crucial. A clear, descriptive error message gives the LLM the best chance to understand what went wrong. It might then decide to re-call the tool with corrected parameters or explain the problem to the end-user, leading to a much more robust application. Passing `failure_error_function=None` will cause the original exception to be raised, halting the run.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Hosted Tools: Provider-Managed Capabilities
 
@@ -195,7 +195,7 @@ Examples include:
 > **This is a critical point:** Hosted tools are generally specific to the provider that offers them. The tools listed above (`WebSearchTool`, `CodeInterpreterTool`, etc.) are designed for and supported by the **OpenAI Responses API**. They will **not** work when using Gemini or other third-party models via LiteLLM.
 > 
 > Attempting to use an unsupported hosted tool with a model provider will result in an error. Always check your provider's documentation for their supported tool-use capabilities. Because this book focuses on Gemini, we will not provide a runnable example for these tools, but show the syntax for completeness.
-> {: .prompt-info }
+{: .prompt-info }
 
 Here's how you would theoretically use the `WebSearchTool` if you were using an OpenAI model:
 

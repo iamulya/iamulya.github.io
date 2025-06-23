@@ -135,7 +135,7 @@ if __name__ == "__main__":
 > It might be tempting to use guardrails to implement primary application logic (e.g., "if the user says 'billing', trip the wire and then manually route to the billing agent"). This is an anti-pattern.
 > 
 > Guardrails are for validating inputs and outputs against *safety policies*. The core logic of *what to do* should be handled by the agent itself through its `instructions` and `tools`/`handoffs`. Let the agent reason about the next step; use guardrails to ensure it does so safely.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Output Guardrails: Validating the Agent's Response
 
@@ -230,7 +230,7 @@ This demonstrates a complete safety check. The `main_agent` is instructed to use
 > *   An agent's `output_guardrails` will only execute if it is the **last** agent to produce a `final_output`.
 > 
 > This design aligns with their intended purpose: validating the initial entry and final exit points of a workflow.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Chapter Summary
 

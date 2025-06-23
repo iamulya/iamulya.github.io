@@ -146,7 +146,7 @@ seat_booking_agent = Agent[AirlineAgentContext](
 > ## Context as a Side Channel
 > 
 > The `update_seat` tool reads `context.context.flight_number`. Where does this value come from? The user never provides it. As we'll see next, it's injected into the context *at the moment of handoff* by the `TriageAgent`. This "side channel" communication via a shared context object is a clean and powerful way for agents to collaborate without cluttering the main conversation history.
-> {: .prompt-info }
+{: .prompt-info }
 
 ### The Triage Agent
 

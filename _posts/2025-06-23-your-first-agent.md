@@ -12,7 +12,7 @@ In the [previous chapter](https://iamulya.one/posts/introduction-to-agentic-ai),
 
 
 > If you have already followed the steps in Appendix A to run the code examples (highly recommended), you don't necessarily need to follow all of the following steps. However, it's a good idea to glance over these sections before jumping to the "Hello, Agent!" section. 
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Environment Setup
 
@@ -46,7 +46,7 @@ export GOOGLE_API_KEY="your-api-key-here"
 > ## API Keys are Essential
 > 
 > The SDK needs credentials to communicate with LLM providers. If the appropriate environment variable (e.g., `GOOGLE_API_KEY`, `ANTHROPIC_API_KEY`) is not set, `litellm` will raise an authentication error when the `Runner` attempts to call the model. Always ensure your keys are correctly configured in your terminal session or environment management tool.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Hello, Agent!
 
@@ -299,7 +299,7 @@ def inspect_result():
 > result2 = Runner.run_sync(agent, next_turn_input)
 > # The agent will correctly answer "Your name is Alex."
 > ```
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Chapter Summary
 

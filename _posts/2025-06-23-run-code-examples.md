@@ -63,7 +63,7 @@ The project is structured as a Python package. This means you must run the examp
 
 
 > Make sure you are running the examples from the following directory: `openai-agentsdk-code/src/tinib00k`
-> {: .prompt-info }
+{: .prompt-info }
 
 For example, to run the basic agent example from the second chapter, you would use the following command:
 
@@ -81,7 +81,7 @@ You will often be prompted to type input directly into the terminal to interact 
 
 
 > Using the `-m` flag tells the Python interpreter to run a module as a script. This is crucial for our project structure. It adds the project's root directory to Python's path, allowing the interpreter to correctly find and import modules from other chapters or from the `utils.py` helper (e.g., `from utils import load_and_check_keys`).
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Understanding the Project Structure
 
@@ -111,4 +111,4 @@ To view a trace:
 
 
 > Even if your agents exclusively use other model providers like Gemini or Claude, the tracing feature **requires a valid OpenAI API key** to upload and host the trace data. If you do not have one or do not wish to use the feature, you can disable it globally by setting the environment variable `OPENAI_AGENTS_DISABLE_TRACING=1`.
-> {: .prompt-info }
+{: .prompt-info }

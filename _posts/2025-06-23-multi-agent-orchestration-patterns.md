@@ -186,7 +186,7 @@ if __name__ == "__main__":
 > ## Separating Conversation Histories
 > 
 > In the "LLM as a Judge" example, note that we maintain two separate contexts. The `coder_agent` has a `conversation_history` that evolves with feedback. The `reviewer_agent`, however, is called with fresh input each time (`review_input`). This is a deliberate design choice. The reviewer should provide an objective assessment of the code against the *original* request, without being biased by the back-and-forth of the revision process.
-> {: .prompt-info }
+{: .prompt-info }
 
 This pattern is incredibly versatile. It can be used for improving essays, validating plans, checking data for inconsistencies, and much more.
 

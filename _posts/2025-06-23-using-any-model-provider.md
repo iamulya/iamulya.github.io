@@ -92,7 +92,7 @@ This example seamlessly orchestrates agents powered by two different model provi
 > - For Cohere, `COHERE_API_KEY`, and so on.
 > 
 > Before running code that uses multiple providers, ensure you have set all the necessary environment variables. You can find the specific variable names in the [LiteLLM documentation](https://docs.litellm.ai/docs/providers).
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Handling Provider Incompatibilities
 
@@ -185,7 +185,7 @@ if __name__ == "__main__":
 > ## Prompt-Based JSON is Brittle
 > 
 > Relying on prompting to get structured data is significantly less reliable than using a model's native JSON mode. The model may fail to produce valid JSON, add extra conversational text, or ignore the format entirely. This will lead to parsing errors in your application code. Whenever possible, choose a model that natively supports structured outputs if your application depends on them.
-> {: .prompt-info }
+{: .prompt-info }
 
 ### Parallel Tool Calling
 

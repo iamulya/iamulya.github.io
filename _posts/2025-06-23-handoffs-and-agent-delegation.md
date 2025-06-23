@@ -131,7 +131,7 @@ if __name__ == "__main__":
 ```
 
 
-> ## Descriptions Drive Routing
+>  Descriptions Drive Routing
 > 
 > The most important factor in the LLM's decision to hand off is the quality of the tool description. Be explicit. Instead of "Billing agent," a description like "Use for all questions about invoices, payment methods, subscription status, and refunds" gives the model a much clearer signal for when to use the handoff.
 {: .prompt-info }
@@ -260,7 +260,7 @@ if __name__ == "__main__":
 
 
 
-> ## Be Careful with Context Removal
+>  Be Careful with Context Removal
 > 
 > While powerful, `input_filter` should be used with care. Aggressively removing history can cause the next agent to lose crucial context, leading it to ask for information the user has already provided. The `remove_all_tools` filter is generally safe, but custom filters that remove user or assistant messages should be tested thoroughly.
 {: .prompt-info }

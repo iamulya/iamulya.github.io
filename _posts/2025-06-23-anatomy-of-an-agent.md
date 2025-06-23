@@ -56,7 +56,7 @@ if __name__ == "__main__":
 ```
 
 
-> ## Crafting Effective Instructions
+>  Crafting Effective Instructions
 > 
 > The `instructions` parameter is your primary tool for prompt engineering. A good system prompt should be clear, specific, and provide context. Consider including:
 > 
@@ -137,7 +137,7 @@ if __name__ == "__main__":
 When you run this, you'll see the print statements from both tools interleave, confirming they were executed concurrently. You'll also see the model's reasoning printed before the final output.
 
 
-> ## `parallel_tool_calls` is Provider-Dependent
+>  `parallel_tool_calls` is Provider-Dependent
 > 
 > The ability to request multiple tools in one turn is an advanced feature. While newer OpenAI models (`gpt-4o`, etc.) excel at this, support among other providers varies. 
 > 
@@ -266,7 +266,7 @@ if __name__ == "__main__":
     main()
 ```
 
-> ## Context is Local, Not Sent to the LLM
+>  Context is Local, Not Sent to the LLM
 > 
 > It's critical to understand that the `context` object itself is **never** sent to the LLM. It is a local Python object for your code's use only. If you need the LLM to be aware of information from the context (like a user's name), you must explicitly include it in the `instructions` or have a tool return that information into the conversation history.
 {: .prompt-info }

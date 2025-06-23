@@ -130,7 +130,7 @@ if __name__ == "__main__":
 ```
 
 
-> ## Guardrails are for Safety, Not Logic
+>  Guardrails are for Safety, Not Logic
 > 
 > It might be tempting to use guardrails to implement primary application logic (e.g., "if the user says 'billing', trip the wire and then manually route to the billing agent"). This is an anti-pattern.
 > 
@@ -222,7 +222,7 @@ if __name__ == "__main__":
 This demonstrates a complete safety check. The `main_agent` is instructed to use the sensitive term, but the `pii_check_guardrail` inspects its final output and triggers the tripwire, preventing the leak.
 
 
-> ## Guardrail Scope: First and Last Agents
+>  Guardrail Scope: First and Last Agents
 > 
 > An important implementation detail to remember:
 > 

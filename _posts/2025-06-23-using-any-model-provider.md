@@ -182,7 +182,7 @@ if __name__ == "__main__":
 ```
 
 
-> ## Prompt-Based JSON is Brittle
+>  Prompt-Based JSON is Brittle
 > 
 > Relying on prompting to get structured data is significantly less reliable than using a model's native JSON mode. The model may fail to produce valid JSON, add extra conversational text, or ignore the format entirely. This will lead to parsing errors in your application code. Whenever possible, choose a model that natively supports structured outputs if your application depends on them.
 {: .prompt-info }

@@ -43,7 +43,7 @@ export GOOGLE_API_KEY="your-api-key-here"
 ```
 
 
-> ## API Keys are Essential
+>  API Keys are Essential
 > 
 > The SDK needs credentials to communicate with LLM providers. If the appropriate environment variable (e.g., `GOOGLE_API_KEY`, `ANTHROPIC_API_KEY`) is not set, `litellm` will raise an authentication error when the `Runner` attempts to call the model. Always ensure your keys are correctly configured in your terminal session or environment management tool.
 {: .prompt-info }

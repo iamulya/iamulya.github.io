@@ -81,7 +81,7 @@ The `@function_tool` decorator is doing a lot of heavy lifting for you. Here's a
 
 
 
-> ## Rich Type Support
+>  Rich Type Support
 > 
 > The function tool schema generation supports more than just primitive types like `int` and `str`. You can use Pydantic models, `dataclass`es, or `TypedDict`s as arguments, and the SDK will generate a nested JSON schema accordingly. This allows you to pass complex, structured data to your tools.
 {: .prompt-info }

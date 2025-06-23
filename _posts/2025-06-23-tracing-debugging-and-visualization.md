@@ -13,7 +13,7 @@ As agentic workflows grow in complexity, understanding *what* they did and *why*
 A trace is a comprehensive, structured log of a single end-to-end workflow. It captures every significant event, providing a "glass box" view into your agent's execution. This chapter will cover how tracing works automatically, how to create custom traces and events, how to control sensitive data, and how to visualize your agent architectures.
 
 
-> ## Tracing is On by Default
+>  Tracing is On by Default
 > 
 > The SDK is designed for observability from the ground up. Tracing is enabled by default and requires no special configuration to get started, provided you have a valid OpenAI API key set (as traces are uploaded to the OpenAI platform). If you are not using OpenAI for tracing, you will need to configure the SDK accordingly, as we'll discuss later.
 {: .prompt-info }

@@ -1,6 +1,6 @@
 ---
 title: A Cheatsheet to Level Up Your Terraform
-date: 2025-06-27 14:00:00 +0100
+date: 2025-06-29 14:00:00 +0100
 categories: [Cloud-Native, IaC, Terraform]
 tags: [Cloud-Native, IaC, Terraform, Infrastructure as Code, Cheatsheet]
 image:

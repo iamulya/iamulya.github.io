@@ -14,7 +14,7 @@ It’s time to level up.
 
 This guide moves beyond the fundamentals and into the patterns, functions, and architectural decisions that separate a simple configuration from a scalable, maintainable, and production-grade Infrastructure as Code (IaC) system. We'll cover how to write smarter HCL and automate with confidence.
 
-### Mastering HCL: From Static to Dynamic Code
+### Mastering HCL
 
 The key to reducing repetition and increasing flexibility is to master Terraform's HashiCorp Configuration Language (HCL). This means moving from static resource blocks to dynamic, data-driven configurations.
 
@@ -313,6 +313,28 @@ resource "null_resource" "db_migrator" {
 - **For VM Image Creation:** Use Packer.
 - **For System Configuration:** Use `cloud-init` (`user_data`), Ansible, Puppet, or Chef.
 - **For Application Deployment:** Use container orchestrators (ECS, Kubernetes), Lambda, or dedicated deployment tools.
+
+### Tools for DRY Configurations: Terragrunt
+
+When the directory layering pattern leads to too much repeated code (e.g., every `backend.tf` is identical), use a wrapper tool like [Terragrunt](https://terragrunt.gruntwork.io/).
+
+**What it does:** Terragrunt is a thin wrapper that provides extra tools for keeping your configurations DRY, managing remote state, and handling dependencies.
+
+**Core Concept:** You write a `terragrunt.hcl` file in each environment directory, which programmatically generates the `backend.tf` and variable inputs for Terraform.
+
+```hcl
+
+# Include the root config to avoid repetition
+include "root" {
+  path = find_in_parent_folders()
+}
+
+# Define inputs specific to this component
+inputs = {
+  instance_count = 10
+  instance_type  = "m5.large"
+}
+```
 
 ### Performance & CLI Power-Ups
 

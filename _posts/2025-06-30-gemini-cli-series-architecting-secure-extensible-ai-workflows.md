@@ -1,6 +1,6 @@
 ---
 title: "Gemini CLI Series: Architecting Secure, Extensible AI Workflows"
-date: 2025-06-30 10:00:00 +0100
+date: 2025-06-30 12:00:00 +0100
 categories: [Gen AI, AI Coding Agents, Gemini CLI]
 tags: [Gen AI, Gemini, Gemini CLI, AI Coding Agents, Gemini CLI Series]
 image:

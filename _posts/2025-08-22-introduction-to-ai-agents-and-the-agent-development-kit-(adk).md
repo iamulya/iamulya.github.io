@@ -156,7 +156,7 @@ The `LangGraphAgent` class within ADK suggests that ADK can leverage LangGraph a
 
 Understanding the main components of ADK is key to effectively using it.
 
-![*Diagram: Main components in the ADK Architecture*](/assets/img/2025-08-22-introduction-to-ai-agents-and-the-agent-development-Kit-(adk)/figure-1.png)
+![*Diagram: Main components in the ADK Architecture*](/assets/img/intro-to-ai-agents/figure-1.png)
 
 
 - **Runner (`google.adk.runners.Runner`):** The engine that executes agents. It manages the interaction flow, session state, and communication between the user, agents, and various services.

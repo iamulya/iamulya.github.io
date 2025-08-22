@@ -837,7 +837,7 @@ YOU: {prompt}")
 
 When you send your query for the first time, it will kickoff the OAuth Flow. Upon successful authorization, the LLM will be in a position to provide the correct answer.
 
-![Calendar Agent](adk-calendar.png)
+![Calendar Agent](/assets/img/adk-calendar.png)
 
 **What's Next?**
 

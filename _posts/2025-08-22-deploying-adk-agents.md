@@ -346,7 +346,7 @@ $AGENT_PATH
 
 Once deployed, you'll get a URL like `https://simple-echo-service-xxxxxx.region.a.run.app` where you can **access the Web UI**. This provides the easiest way to test your deployment.
 
-![Cloud Run demo](echo.png)
+![Cloud Run demo](/assets/img/echo.png)
 
 You can also interact with this deployed agent by sending HTTP POST requests to its `/run_sse` endpoint as well.
 

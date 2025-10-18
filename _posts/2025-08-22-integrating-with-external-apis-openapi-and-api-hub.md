@@ -1,5 +1,5 @@
 ---
-title: "Chapter 7 - Integrating with External APIs: OpenAPI & API Hub"
+title: "Chapter 7 - Integrating with External APIs: OpenAPI and API Hub"
 date: "2025-08-22 11:00:00 +0200"
 categories: [Gen AI, Agentic SDKs, Agent Development Kit]
 tags: [Generative AI, Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]

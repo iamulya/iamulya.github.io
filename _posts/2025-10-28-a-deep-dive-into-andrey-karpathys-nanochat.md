@@ -71,7 +71,7 @@ It is notable that these conversational tokens are absent during the base pretra
 
 ## **The Multi-Stage Training Protocol: Mastering Chat Behavior**
 
-The nanochat training pipeline is a sequential, three-stage process, managed by dedicated scripts ([base_train.py](http://github.com/karpathy/nanochat/blob/master/scripts/base_train.py), [mid_train.py](https://github.com/karpathy/nanochat/blob/master/scripts/mid_train.py), [chat_sft.py](https://github.com/karpathy/nanochat/blob/master/scripts/chat_sft.py)). This structured curriculum is the primary factor enabling micro-models to achieve useful conversational abilities.
+The nanochat training pipeline is a sequential, three-stage process, managed by dedicated scripts ([base_train.py](https://github.com/karpathy/nanochat/blob/master/scripts/base_train.py), [mid_train.py](https://github.com/karpathy/nanochat/blob/master/scripts/mid_train.py), [chat_sft.py](https://github.com/karpathy/nanochat/blob/master/scripts/chat_sft.py)). This structured curriculum is the primary factor enabling micro-models to achieve useful conversational abilities.
 
 ### **Stage 1: Base Model Pretraining (Knowledge Acquisition)**
 

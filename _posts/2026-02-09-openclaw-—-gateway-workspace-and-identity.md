@@ -5,7 +5,7 @@ categories: [Gen AI, Personal AI Assistants, OpenClaw]
 tags: [Generative AI, Agentic AI, Gen AI, OpenClaw, Personal AI Assistants, AI Assistants]
 image:
   path: /assets/img/openclaw.png
-  alt: "Advanced Tips for Mastering Google Antigravity"
+  alt: "OpenClaw: a personal AI assistant"
 ---
 
 > This article is part of a series of articles around OpenClaw. All of the articles can be found [here](https://iamulya.one/tags/openclaw/)

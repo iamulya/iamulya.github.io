@@ -1,5 +1,5 @@
 ---
-title: OpenClaw — Tools, Sandbox, and Scheduler
+title: 4. OpenClaw — Tools, Sandbox, and Scheduler
 date: "2026-02-09 13:30:00 +0100"
 categories: [Gen AI, Personal AI Assistants, OpenClaw]
 tags: [Generative AI, Agentic AI, Gen AI, OpenClaw, Personal AI Assistants, AI Assistants]

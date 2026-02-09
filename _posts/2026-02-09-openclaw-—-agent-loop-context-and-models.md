@@ -1,5 +1,5 @@
 ---
-title: OpenClaw — Agent Loop, Context, and Models
+title: 2. OpenClaw — Agent Loop, Context, and Models
 date: "2026-02-09 13:10:00 +0100"
 categories: [Gen AI, Personal AI Assistants, OpenClaw]
 tags: [Generative AI, Agentic AI, Gen AI, OpenClaw, Personal AI Assistants, AI Assistants]

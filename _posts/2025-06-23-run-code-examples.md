@@ -92,8 +92,6 @@ You will often be prompted to type input directly into the terminal to interact 
 
 The companion repository is organized to be clean and intuitive.
 
-![*High-level overview of the companion repository structure.*](/assets/img/2025-06-23-run-code-examples/figure-1.png)
-
 
 *   **/src/tinib00k/chapter.../**: Each folder contains the Python scripts corresponding to a chapter in this book.
 *   **/src/tinib00k/utils.py**: The helper script to load and validate your API keys.

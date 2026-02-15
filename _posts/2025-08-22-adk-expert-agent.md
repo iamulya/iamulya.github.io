@@ -30,7 +30,41 @@ The ADK Expert Agent is not a single monolithic agent but rather a multi-agent s
 
 **High-Level Architecture:** (Please Zoom-In)
 
-![*Diagram: High-Level Architecture of the ADK Expert Agent system.*](/assets/img/2025-08-22-adk-expert-agent/figure-1.png)
+```mermaid
+---
+title: High-Level Architecture of the ADK Expert Agent system.
+---
+graph TD
+    User["User via Web UI"] --> RootAgent["RootAgent (adk_expert_orchestrator)"];
+
+    RootAgent -- General ADK Query --> LLM_Root["LLM (ADK Context Loaded)"];
+    LLM_Root -- Response --> RootAgent;
+
+    RootAgent -- GitHub Issue Query --> GitHubIssueAgent["AgentTool(github_issue_processing_agent)"];
+    GitHubIssueAgent -- Uses --> Tool_GetIssue["GetGithubIssueDescriptionTool"];
+    GitHubIssueAgent -- Uses --> Tool_CleanText["CleanGitHubIssueTextTool"];
+    GitHubIssueAgent -- Uses --> Tool_ADKGuidance["ADKGuidanceTool"];
+    Tool_ADKGuidance -- Uses --> LLM_Guidance["LLM (ADK Context Loaded)"];
+    GitHubIssueAgent -- Result --> RootAgent;
+
+    RootAgent -- Document Request --> PrepDocTool["PrepareDocumentContentTool"];
+    PrepDocTool -- Prepared Content --> RootAgent;
+    RootAgent -- Prepared Content --> DocGenAgent["AgentTool(document_generator_agent)"];
+    DocGenAgent -- Uses --> Tool_MarpPDF["FunctionTool(generate_pdf_...)"];
+    DocGenAgent -- Uses --> Tool_MarpHTML["FunctionTool(generate_html_...)"];
+    DocGenAgent -- Uses --> Tool_MarpPPTX["FunctionTool(generate_pptx_...)"];
+    Tool_MarpPDF -- GCS URL --> DocGenAgent;
+    DocGenAgent -- GCS URL --> RootAgent;
+    
+    RootAgent -- Diagram Request --> DiagramOrchAgent["AgentTool(mermaid_diagram_orchestrator_agent)"];
+    DiagramOrchAgent -- Query --> SyntaxGenAgent["AgentTool(mermaid_syntax_generator_agent)"];
+    SyntaxGenAgent -- Mermaid Syntax --> DiagramOrchestrator;
+    DiagramOrchestrator -- Mermaid Syntax --> Tool_MermaidToPNG["MermaidToPngAndUploadTool"];
+    Tool_MermaidToPNG -- GCS URL --> DiagramOrchestrator;
+    DiagramOrchestrator -- GCS URL --> RootAgent;
+
+    RootAgent -- Final Response --> User;
+```
 
 
 The system's entry point is the `root_agent` defined in `expert-agents/agent.py`.
@@ -63,7 +97,6 @@ root_agent = ADKAgent(
     # ... callbacks and config ...
 )
 ```
-
 
 > ## Orchestrator Pattern
 > 
@@ -166,7 +199,6 @@ Use your ADK knowledge to answer the user's query: "{user_query_text}" directly.
         return None # Default: let LLM summarize
     ```
 
-
 > ## Callbacks for Inter-Agent Data Transformation
 > 
 > The `after_tool_callback` in the `root_agent` is crucial for transforming the output of sub-agents (which might be JSON strings or complex dicts when called via `AgentTool`) into a format (like `genai_types.Content`) that the orchestrator's LLM can readily consume for its next reasoning step or for generating the final user-facing response, especially when the defualt summarization is skipped (skip_summarization = True).
@@ -204,11 +236,10 @@ github_issue_processing_agent = SequentialAgent(
 )
 ```
 
-
 > ## Custom `BaseAgent` for Deterministic Steps
 > 
 > The `FormatOutputAgent` within the `github_issue_processing_agent` is a great example of a custom `BaseAgent`. Its job is purely deterministic: find the output of the previous step and format it into the final JSON structure. This doesn't require an LLM, making it faster, cheaper, and more reliable than prompting an LLM to do the formatting.
-> {: .prompt-info }
+> {: .prompt-tip }
 
 **2. `mermaid_diagram_orchestrator_agent`:**
 
@@ -236,11 +267,10 @@ mermaid_diagram_orchestrator_agent = ADKAgent(
 
 Its `instruction_provider` checks if Mermaid syntax has been generated in a previous turn. If not, it instructs the LLM to call the `mermaid_syntax_generator_agent`. If syntax *is* present, it instructs the LLM to call the `mermaid_to_png_and_gcs_upload` tool with that syntax.
 
-
 > ## Chaining `AgentTool` Calls
 > 
 > When one `LlmAgent` (Orchestrator) calls another `LlmAgent` (Specialist) via `AgentTool`, the `input_schema` of the Specialist and the `after_agent_callback` of the Specialist are crucial. The Orchestrator's LLM needs to provide input matching the Specialist's `input_schema` (often as a JSON string). The Specialist's `after_agent_callback` should ensure its final output (which the `AgentTool` returns) is in a format the Orchestrator's `after_tool_callback` can parse and relay effectively.
-> {: .prompt-info }
+> {: .prompt-danger }
 
 ## Crafting Specialized Tools
 
@@ -300,11 +330,10 @@ The `expert-agents/tools/` directory is rich with examples of custom tools.
     ```
     The same pattern is used in `marp_document_tools.py` to call `marp-cli`.
 
-
 > ## Best Practice: Tools for IO and External Interactions
 > 
 > Encapsulate all interactions with external systems—APIs, CLIs, file system within tools. This keeps the agent logic (LLM prompts and reasoning) focused on *what* to do, while tools handle *how* to do it.
-> {: .prompt-info }
+> {: .prompt-tip }
 
 ## State Management and Data Passing (`ToolContext`)
 
@@ -333,11 +362,10 @@ This agent system demonstrates how state is used to pass results from one tool t
         return genai_types.Content(parts=[genai_types.Part(text="Error: Could not find document link.")])
     ```
 
-
 > ## Use `ToolContext.state` for Intermediate Data
 > 
 > Using the `temp:` state scope (e.g., `State.TEMP_PREFIX + "gcs_link_for_diagram"`) is a good way to pass data between a tool and a callback within a single invocation turn without cluttering the persistent session state.
-> {: .prompt-info }
+> {: .prompt-tip }
 
 
 ## Configuration, Secrets, and Context Loading

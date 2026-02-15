@@ -116,7 +116,7 @@ Then memory becomes: `Layers × Tokens × d_head × 2`, instead of: `Layers × T
 That can reduce KV size by 8×–32×. 
 
 ### MLA: The Compression Trick
-While PagedAttention manages memory *allocation*, it doesn't reduce the *amount* of data. In 2025, DeepSeek introduced **MLA (Multi-Head Latent Attention)**.
+In 2025, DeepSeek introduced **MLA (Multi-Head Latent Attention)**.
 
 Instead of storing huge matrices for every single attention head, MLA compresses them into a tiny "Latent Vector." It reduces the memory footprint by 90%, allowing massive context windows (128k+) on consumer hardware.
 

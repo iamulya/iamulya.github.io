@@ -198,15 +198,17 @@ sequenceDiagram
 ```
 
 
-> ## Best Practice: Design Sub-Agents for Clear Handoffs
+> **Best Practice: Design Sub-Agents for Clear Handoffs**
+> {:.title}
 > 
 > When using SequentialAgent, ensure each sub-agent clearly defines its expected inputs (often from session state set by previous agents) and its outputs (again, often by updating session state for subsequent agents). Clear instructions within each LlmAgent are key to this.
-> {: .prompt-tip }
+{: .prompt-tip }
 
-> ## SequentialAgent for Deterministic Workflows
+> **SequentialAgent for Deterministic Workflows**
+> {:.title}
 > 
 > SequentialAgent is excellent for workflows where the order of operations is fixed and known. It provides a simpler alternative to coding complex sequential logic within a single orchestrator LLM's instructions.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## ParallelAgent: For Concurrent Task Execution or Ensemble Methods
 
@@ -379,15 +381,17 @@ sequenceDiagram
 ```
 
 
-> ## `event.branch` for Disambiguating Parallel Outputs
+> **`event.branch` for Disambiguating Parallel Outputs**
+> {:.title}
 > 
 > When events are yielded from a ParallelAgent, the event.branch attribute is automatically set by ADK to indicate which sub-agent generated that event (e.g., "parent_agent_name.sub_agent_name"). This is crucial for any subsequent logic or agent that needs to process or combine the results from the parallel tasks correctly.
-> {: .prompt-info }
+{: .prompt-info }
 
-> ## Resource Consumption with ParallelAgent
+> **Resource Consumption with ParallelAgent**
+> {:.title}
 > 
 > Running many complex sub-agents in parallel can consume significant resources (CPU, memory, LLM API quotas). Be mindful of the number and complexity of agents launched concurrently.
-> {: .prompt-danger }
+{: .prompt-danger }
 
 ## LoopAgent: For Iterative Tasks or Retries
 
@@ -549,15 +553,17 @@ sequenceDiagram
 ```
 
 
-> ## Best Practice: Clear Exit Conditions for Loops
+> **Best Practice: Clear Exit Conditions for Loops**
+> {:.title}
 > 
 > Ensure the sub-agent(s) within a LoopAgent have clear logic and instructions for when to call exit_loop. Also, always set a reasonable max_iterations on the LoopAgent itself as a safeguard against infinite loops, especially during development.
-> {: .prompt-tip }
+{: .prompt-tip }
 
-> ## Iterative Refinement and Polling
+> **Iterative Refinement and Polling**
+> {:.title}
 > 
 > LoopAgent combined with stateful sub-agents is powerful for tasks involving iterative refinement (like the drafting example) or for scenarios where an agent needs to poll an external system until a certain status is achieved.
-> {: .prompt-tip }
+{: .prompt-tip }
 
 **What's Next?**
 

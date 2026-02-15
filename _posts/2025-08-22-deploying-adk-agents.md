@@ -41,10 +41,11 @@ my_adk_app/
 
 ```
 
-> ## Best Practice: Minimal requirements.txt/pyproject.toml
+> **Best Practice: Minimal requirements.txt/pyproject.toml**
+> {:.title}
 > 
 > Aim for a minimal requirements.txt/pyproject.toml that only includes packages truly needed at runtime. Avoid including development-only dependencies (like pytest, pylint, pyink) in your deployment image to keep it lean and reduce potential vulnerabilities. Use dependency groups in pyproject.toml (if using uv or poetry) to manage dev vs. runtime dependencies.
-> {: .prompt-tip }
+{: .prompt-tip }
 
 ## Deployment Options
 
@@ -69,7 +70,7 @@ Let's start with the deployment to Vertex AI Agent Engine.
 ## Deploying to Vertex AI Agent Engine
 
 > The support for Vertex AI Agent Engine is currently classified as experimental/in preview and thus can sometimes lead to unpredictable behavior  
-> {: .prompt-danger }
+{: .prompt-danger }
 
 Okay, let's create a simple ADK agent and then outline the steps to deploy it to Vertex AI Agent Engine using the `adk deploy` command.
 
@@ -340,7 +341,7 @@ $AGENT_PATH
 - Upon successful deployment, it will output the **Service URL**.
 
 > To deploy with the Web UI, include the `--with_ui` flag in your `adk deploy cloud_run` command. Use this option only in development or testing environments, as the Web UI is **not intended for production use**. Ideally you would have your own frontend which will communicate with the ADK agent through the API server (You can use the `adk api_server` command to run the ADK agent backend), which we will discuss in the next secion.
-> {: .prompt-info }
+{: .prompt-info }
 
 Once deployed, you'll get a URL like `https://simple-echo-service-xxxxxx.region.a.run.app` where you can **access the Web UI**. This provides the easiest way to test your deployment.
 
@@ -377,7 +378,8 @@ curl -X POST -H "Authorization: Bearer $TOKEN" \
 
 ```
 
-> ## Best Practice: Use Secret Manager for Sensitive Data
+> **Best Practice: Use Secret Manager for Sensitive Data**
+> {:.title}
 > 
 > Do not pass API keys or database passwords directly as environment variables in the deploy command for production. Instead:
 >  
@@ -386,7 +388,7 @@ curl -X POST -H "Authorization: Bearer $TOKEN" \
 > 3. In your `agent.py` or initialization code, fetch these secrets at startup using the Secret Manager client libraries.
 > 
 > The `adk deploy cloud_run` command has options (`-set-secrets`) to help integrate with Secret Manager.
-> {: .prompt-tip }
+{: .prompt-tip }
 
 **Using Persistent Services with Cloud Run:**
 If your agent uses `DatabaseSessionService`, `GcsArtifactService`, or `VertexAiRagMemoryService`:
@@ -402,10 +404,11 @@ If your agent uses `DatabaseSessionService`, `GcsArtifactService`, or `VertexAiR
     - The runtime service account needs permissions for Vertex AI and RAG operations.
     - Pass the RAG Corpus ID as an environment variable.
 
-> ## `adk_version` in `adk deploy cloud_run`
+> **`adk_version` in `adk deploy cloud_run`**
+> {:.title}
 > 
 > The adk deploy cloud_run command allows specifying `--adk_version desired_version`. By default, it uses the version of ADK you have installed locally when generating the Dockerfile. If you need to pin the ADK version in your deployed container to a specific release for stability, use this option.
-> {: .prompt-tip }
+{: .prompt-tip }
 
 ## Other Deployment targets
 
@@ -444,10 +447,11 @@ The `adk api_server` command and the underlying FastAPI application provide a me
     - In a production environment, you would replace `http://localhost:3000` with the actual domain of your deployed frontend application (e.g., `https://my-frontend-app.com`).
     - You can specify multiple origins by repeating the option: `--allow_origins http://localhost:3000 --allow_origins https://dev.example.com`.
 
-> ## Importance of `--allow_origins`
+> **Importance of `--allow_origins`**
+> {:.title}
 > 
 > The `--allow_origins` flag is essential for a decoupled frontend/backend setup. Without correctly configuring it, your frontend application will be unable to communicate with the `adk api_server` due to browser security restrictions (CORS errors).
-> {: .prompt-danger }
+{: .prompt-danger }
 
 **Example Scenario:**
 
@@ -492,10 +496,11 @@ The `adk api_server` command and the underlying FastAPI application provide a me
 - `--trace_to_cloud`: Enables exporting traces to Google Cloud Trace.
 - `--reload`: Enables auto-reloading the server on code changes (useful for development, default is `True`).
 
-> ## Difference from `adk web`
+> **Difference from `adk web`**
+> {:.title}
 > 
 > The `adk web` command starts a similar FastAPI backend but *also* serves the ADK's built-in web UI from the same origin. This is convenient for local development and testing within a single process. `adk api_server`, on the other hand, *only* runs the API, expecting the frontend to be served independently. This is the standard approach for building scalable and maintainable web applications.
-> {: .prompt-info }
+{: .prompt-info }
 
 By using `adk api_server` and correctly configuring `--allow_origins`, you can effectively separate your ADK backend logic from your frontend presentation layer, allowing for independent development, deployment, and scaling of both components while managing browser security policies for cross-origin communication.
 

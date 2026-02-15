@@ -10,6 +10,7 @@ image:
 ---
 
 > This article is part of a series of articles around OpenClaw. All of the articles can be found [here](https://iamulya.one/tags/openclaw/)
+{: .prompt-info }
 
 When you run OpenClaw, you are handing an AI model the keys to your shell. This is a powerful capability, but it transforms your machine into a high-value target.
 
@@ -67,9 +68,10 @@ You must explicitly click "Approve" for the command to proceed.
 
 
 
-> ## The Browser Risk
+> **The Browser Risk**
+> {:.title}
 > Enabling the `browser` tool gives the agent control over a Chrome instance. If that browser is logged into your Gmail or GitHub, the agent has full access to those accounts. Treat browser control with the same extreme caution as shell access. Use a dedicated, isolated browser profile for the agent, not your personal daily driver.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Observability & Recovery
 
@@ -92,6 +94,7 @@ Configuration drift is the enemy of stability. You might update Node.js, break a
 Running `openclaw doctor --fix` will attempt to auto-remediate common issues, such as fixing file permissions or restarting a stuck daemon.
 
 
-> ## OpenTelemetry
+> **OpenTelemetry**
+> {:.title}
 > Enabling `diagnostics.otel` allows you to export traces and metrics to standard observability platforms (like Jaeger or Honeycomb). This lets you visualize the exact latency of every step in the Agent Loop, from the WhatsApp webhook to the Anthropic API call and back.
-> {: .prompt-info }
+{: .prompt-info }

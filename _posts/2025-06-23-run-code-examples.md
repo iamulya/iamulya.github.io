@@ -66,7 +66,8 @@ If a required key is missing, the script will raise an error with instructions.
 The project is structured as a Python package. This means you must run the example files as modules to ensure that all imports resolve correctly.
 
 
-> Make sure you are running the examples from the following directory: `openai-agentsdk-code/src/tinib00k`
+> **Make sure you are running the examples from the following directory: `openai-agentsdk-code/src/tinib00k`**
+> {:.title}
 {: .prompt-info }
 
 For example, to run the basic agent example from the second chapter, you would use the following command:

@@ -9,7 +9,7 @@ image:
   alt: "Generative AI Handbook by Amulya Bhatia"
 ---
 
-> This article is part of my web book series. All of the chapters can be found [here](https://iamulya.one/tags/generative-ai-handbook//). For any issues around this book or if you'd like the pdf/epub version, contact me on [LinkedIn](https://www.linkedin.com/in/amulya-bhatia-01627a42/)
+> This article is part of my book [Generative AI Handbook](https://iamulya.one/tags/generative-ai-handbook). For any issues around this book or if you'd like the pdf/epub version, contact me on [LinkedIn](https://www.linkedin.com/in/amulya-bhatia-01627a42/)
 {: .prompt-info }
 
 In the world of  training a model is like building a skyscraper: it’s a massive, one-time expense (CapEx).
@@ -32,11 +32,12 @@ Deep Learning workloads fall into two categories:
 Imagine a factory worker (the GPU Core) who can assemble a car in 1 second. However, the parts for the car are stored in a warehouse 10 miles away (the VRAM). The truck driver (Memory Bandwidth) takes 1 hour to bring the parts.
 It doesn't matter if the worker gets 10x faster. The factory is limited by the speed of the truck.
 
-> ## The Arithmetic Intensity Gap
+> **The Arithmetic Intensity Gap**
+> {:.title}
 > To generate **one single word** from a 70B parameter model, the GPU must load all 140GB (FP16: Uses 2 bytes per parameter, hence 70 x 2 = 140 GB) of the model's weights from memory into the chip, do the math, and output... one word.
 > Then, for the next word, it has to load all 140GB *again*.
 > This is why **Memory Bandwidth** (measured in TB/s), not TFLOPS (Math Speed), is the most critical metric for running LLMs.
-> {: .prompt-danger }
+{: .prompt-danger }
 
 ## Quantization: The MP3 of AI
 
@@ -89,7 +90,8 @@ Instead, we save the math results for the previous words in a cache. This is cal
 The problem? This cache grows linearly.
 For a massive model with a massive context window (e.g., summarizing a book), the KV-Cache can become bigger than the model itself. The KV cache is what makes long context expensive — not the parameters!
 
-> ## KV size
+> **KV size**
+> {:.title}
 > Lets go through an example. Following is a simplified formula for calculating KV size:
 > 
 > KV size ≈ `Layers × Tokens (Input prompt AND output tokens) × d_model (Model Dimensions = Token Embedding Size) × 2(K and V)`
@@ -103,7 +105,7 @@ For a massive model with a massive context window (e.g., summarizing a book), th
 > 
 > This will result in ≈ 524 GB of KV size (Max) **for each user request**! Imagine how much memory would be need for serving millions of user requests per second. This is a problem rife for optimization.
 > There are many solutions that are used to combat these including, **Grouped-query attention, Sliding window attention, Chunked attention** etc. but we will look at some of the other approaches.
-> {: .prompt-tip }
+{: .prompt-tip }
 
 ### Multi-Query Attention
 

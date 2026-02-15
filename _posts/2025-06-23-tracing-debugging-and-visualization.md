@@ -17,7 +17,8 @@ As agentic workflows grow in complexity, understanding *what* they did and *why*
 A trace is a comprehensive, structured log of a single end-to-end workflow. It captures every significant event, providing a "glass box" view into your agent's execution. This chapter will cover how tracing works automatically, how to create custom traces and events, how to control sensitive data, and how to visualize your agent architectures.
 
 
->  Tracing is On by Default
+> ** Tracing is On by Default**
+> {:.title}
 > 
 > The SDK is designed for observability from the ground up. Tracing is enabled by default and requires no special configuration to get started, provided you have a valid OpenAI API key set (as traces are uploaded to the OpenAI platform). If you are not using OpenAI for tracing, you will need to configure the SDK accordingly, as we'll discuss later.
 {: .prompt-info }
@@ -43,8 +44,6 @@ Let's run a simple tool-using agent and examine the trace it produces.
 
 ```python
 from agents import Agent, Runner, function_tool, RunConfig
-from tinib00k.utils import DEFAULT_LLM, load_and_check_keys
-load_and_check_keys()
 
 @function_tool
 def get_user_city() -> str:
@@ -57,7 +56,7 @@ def main():
     weather_agent = Agent(
         name="Weather Assistant",
         instructions="You are a helpful assistant. Use your tools to find the user's city and then tell them it's always sunny there.",
-        model=DEFAULT_LLM,
+        model="litellm/gemini/gemini-2.0-flash",
         tools=[get_user_city]
     )
 
@@ -77,11 +76,32 @@ if __name__ == "__main__":
 
 After running this code, a link to the trace will be printed in your terminal. Opening it reveals a timeline visualization.
 
-![*A conceptual representation of the trace for the weather agent.*](/assets/img/2025-06-23-tracing-debugging-and-visualization/figure-1.png)
+```mermaid
+---
+title: A conceptual representation of the trace for the weather agent.
+---
+gantt
+    title Trace: Simple Weather Lookup
+    dateFormat  X
+    axisFormat  %s
+
+    section Agent: Weather Assistant (Turn 1)
+    LLM Generation     :llm1, 0, 2
+    Tool Call          :tool1, 2, 3
+
+    section Agent: Weather Assistant (Turn 2)
+    LLM Generation     :llm2, 3, 4
+
+    %% Annotations
+    %% Note: Mermaid Gantt doesn't support nesting well,
+    %% so this is a simplified visual. In the real UI,
+    %% the LLM/Tool spans would be nested inside the Agent spans.
+```
 
 This structured, hierarchical view is invaluable. You can see exactly how long each step took, what data was passed between them, and how the agent made its decisions.
 
-
+> **Why Do I Need an OpenAI API Key for Tracing?**
+> {:.title}
 > By default, trace data is securely exported to the OpenAI platform for visualization in the Traces dashboard. This export process requires authentication via an OpenAI API key.
 > 
 > If you are exclusively using other model providers (like Google's Gemini) and do not have an OpenAI key, you have two main options:
@@ -89,7 +109,7 @@ This structured, hierarchical view is invaluable. You can see exactly how long e
 > 1.  **Disable Tracing:** Set the environment variable `OPENAI_AGENTS_DISABLE_TRACING=1` or pass `RunConfig(tracing_disabled=True)` to the `Runner`.
 > 2.  **Use a Custom Trace Processor:** The SDK allows you to redirect trace data to other observability platforms (like Weights & Biases, Arize, etc.). This is an advanced topic covered in the documentation.
 > 
-{: .prompt-info }
+{: .prompt-danger }
 
 ## Higher-Level Traces
 
@@ -98,15 +118,13 @@ The `Runner` automatically creates a trace for each run. However, sometimes a si
 ```python
 import asyncio
 from agents import Agent, Runner, trace, TResponseInputItem
-from tinib00k.utils import DEFAULT_LLM, load_and_check_keys
-load_and_check_keys()
 
 async def main():
 
     concise_agent = Agent(
         name="Concise Agent",
         instructions="You are extremely concise. Respond in 20 words or less.",
-        model=DEFAULT_LLM,
+        model="litellm/gemini/gemini-2.0-flash",
     )
 
     # Wrap multiple Runner calls in a single trace
@@ -178,8 +196,6 @@ The `RunConfig` object provides `trace_include_sensitive_data` to control this. 
 
 ```python
 from agents import Agent, Runner, RunConfig, function_tool
-from tinib00k.utils import DEFAULT_LLM, load_and_check_keys
-load_and_check_keys()
 
 @function_tool
 def process_user_data(user_id: str, personal_note: str) -> str:
@@ -190,7 +206,7 @@ def main():
     sensitive_agent = Agent(
         name="Processor",
         instructions="Process the data.",
-        model=DEFAULT_LLM,
+        model="litellm/gemini/gemini-2.0-flash",
         tools=[process_user_data]
     )
 
@@ -229,8 +245,6 @@ The `draw_graph` function from `agents.extensions.visualization` inspects your t
 ```python
 from agents import Agent, function_tool
 from agents.extensions.visualization import draw_graph
-from tinib00k.utils import DEFAULT_LLM, load_and_check_keys
-load_and_check_keys()
 
 # --- Define a complex agent architecture ---
 @function_tool
@@ -245,14 +259,14 @@ support_agent = Agent(
     name="Support Agent",
     instructions="I help with support tickets.",
     tools=[general_knowledge_qa],
-    model=DEFAULT_LLM,
+    model="litellm/gemini/gemini-2.0-flash",
     handoffs=[shipping_agent]
 )
 
 triage_agent = Agent(
     name="Triage Agent",
     instructions="I route users to the correct department.",
-    model=DEFAULT_LLM,
+    model="litellm/gemini/gemini-2.0-flash",
     handoffs=[support_agent, billing_agent]
 )
 
@@ -263,8 +277,31 @@ print("Graph saved to triage_system_architecture.png")
 
 This code generates a PNG file visualizing your entire agent system, making it easy to understand the possible flows of control and capabilities at a glance.
 
-![*The architecture of our sample triage system.*](/assets/img/2025-06-23-tracing-debugging-and-visualization/figure-2.png)
+```mermaid
+---
+title: The architecture of our sample triage system.
+---
+graph TD
+    subgraph TriageSystem
+        Start["__start__"] --> Triage;
 
+        Triage(Triage Agent) -->|Handoff| Support(Support Agent);
+        Triage -->|Handoff| Billing(Billing Agent);
+
+        Support -->|Tool| QA(general_knowledge_qa);
+        Support -->|Handoff| Shipping(Shipping Agent);
+
+        Billing --> End["__end__"];
+        Shipping --> End;
+        QA --> Support;
+    end
+
+    style Triage fill:#f9f,stroke:#333,stroke-width:2px
+    style Support fill:#f9f,stroke:#333,stroke-width:2px
+    style Billing fill:#f9f,stroke:#333,stroke-width:2px
+    style Shipping fill:#f9f,stroke:#333,stroke-width:2px
+    style QA fill:#cfc,stroke:#333,stroke-width:2px
+```
 
 ## Chapter Summary
 

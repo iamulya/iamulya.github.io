@@ -62,7 +62,7 @@ The evolution of AI agents has been rapid, fueled by advancements in LLMs. Early
 Imagine a customer service agent that can understand a user's complex query, look up order details from a database (using a tool), check shipping status via another API (another tool), and then compose a helpful, contextual response. Or consider a research assistant that can browse the web, summarize articles, and compile a report on a given topic. These are the kinds of sophisticated systems ADK helps you build.
 
 > The "Perceive, Reason/Plan, Act" cycle is fundamental to understanding how most AI agents operate, including those built with ADK. Visualizing your agent's tasks in terms of this loop can help in designing its logic and tool interactions.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Why ADK? Core Philosophy: Code-first, Modularity, Flexibility
 
@@ -77,10 +77,11 @@ While various frameworks exist for building AI agents, Google's ADK stands out w
 
 ADK is not just about building a single chatbot; it's about engineering robust, maintainable, and scalable AI agent systems.
 
-> ## Best Practice: Embrace Code-First for Complex Agents
+> **Best Practice: Embrace Code-First for Complex Agents**
+> {:.title}
 > 
 > While visual builders have their place, ADK's code-first approach shines for complex, production-grade agents. It allows for robust testing, version control (e.g., with Git), and easier integration into existing software development lifecycles. Treat your agent code like any other critical software component.
-> {: .prompt-tip }
+{: .prompt-tip }
 
 ## Key Features and Advantages of ADK
 
@@ -108,10 +109,11 @@ Building on its core philosophy, ADK offers several key features:
 - **Developer-Friendly UI:**
     - An integrated web UI for local development, testing, debugging, and showcasing your agents.
     
-> ## Avoid Over-Reliance on a Single "Mega-Agent"
+> **Avoid Over-Reliance on a Single "Mega-Agent"**
+> {:.title}
 > 
 > While ADK allows for powerful single agents, its modularity encourages breaking down complex problems into smaller, specialized agents. Avoid the temptation to build one monolithic agent that tries to do everything; this often leads to systems that are hard to debug, maintain, and scale.
-> {: .prompt-warning }
+{: .prompt-warning }
 
 ## ADK vs. LangGraph
 
@@ -199,10 +201,11 @@ graph TD
 - **Memory Service (`google.adk.memory.BaseMemoryService`):** Provides agents with the ability to store and retrieve information over the long term, going beyond a single session's context.
 - **ADK CLI & Dev UI:** Command-line tools and a web-based UI to aid in agent creation, local development, testing, and evaluation.
 
-> ## Services are Pluggable
+> **Services are Pluggable**
+> {:.title}
 > 
 > A key architectural strength of ADK is that services like SessionService, ArtifactService, and MemoryService are defined by interfaces (Base...Service). This means you can start with simple in-memory versions for development and later swap them out for persistent, cloud-based implementations (like DatabaseSessionService or GcsArtifactService) without changing your core agent logic.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## A Glimpse of a Simple ADK Agent
 
@@ -259,7 +262,7 @@ if __name__ == "__main__":
 An error occurred: {e}")
 ```
 > As mentioned in the Preface, check out Appendix A to get started on running the code examples in your local environment.
-> {: .prompt-danger }
+{: .prompt-danger }
 
 Upon running the code in the CLI, you should see:
     
@@ -298,7 +301,7 @@ Exiting Simple Assistant. Goodbye!
 > ```
 > This shows how easy it is to create a functioning agent in ADK.
 > 
-> {: .prompt-info }
+{: .prompt-info }
 
 **What's Next?**
 

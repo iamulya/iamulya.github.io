@@ -310,15 +310,17 @@ sequenceDiagram
 ```
 
 
-> ## Best Practice: Well-Defined operationId and summary/description
+> **Best Practice: Well-Defined operationId and summary/description**
+> {:.title}
 > 
 > The operationId in your OpenAPI spec is typically used to generate the tool name (converted to snake_case). Make it descriptive. The summary and description fields for paths and operations are crucial for the LLM to understand what each tool does and when to use it. Invest time in writing clear and concise OpenAPI documentation.
-> {: .prompt-tip }
+{: .prompt-tip }
 
-> ## Reusability and Standardization
+> **Reusability and Standardization**
+> {:.title}
 > 
 > OpenAPI is a widely adopted standard. If an API has an OpenAPI spec, you can integrate it into ADK with minimal effort using OpenAPIToolset. This promotes reusability and standardization in how your agents interact with diverse APIs.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Handling Authentication with OpenAPI Tools
 
@@ -585,10 +587,11 @@ YOU: {prompt_text}")
     asyncio.run(main_loop())
 ```
 
-> ## Declarative Auth in OpenAPI
+> **Declarative Auth in OpenAPI**
+> {:.title}
 > 
 > Defining security schemes directly in your OpenAPI spec is the best practice. RestApiTool will automatically pick these up. You then only need to provide the corresponding AuthCredential (e.g., the actual API key, OAuth client secrets) to the tool or toolset.
-> {: .prompt-tip }
+{: .prompt-tip }
 
 ## The `APIHubToolset`: Connecting to Google's API Hub
 
@@ -753,10 +756,11 @@ The `APIHubToolset` handles:
 4. Downloading the OpenAPI spec content.
 5. Instantiating an `OpenAPIToolset` with the fetched spec.
 
-> ## Centralized API Management with API Hub
+> **Centralized API Management with API Hub**
+> {:.title}
 > 
 > If your organization uses API Hub, APIHubToolset is the preferred way to integrate those APIs into ADK. It ensures your agents are always using the centrally managed and governed API definitions.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Using Pre-packaged Google API Toolsets
 
@@ -769,7 +773,8 @@ ADK provides pre-packaged toolsets for common Google APIs (like BigQuery, Calend
 3. Initializes an `OpenAPIToolset` with this generated spec.
 4. Wraps the resulting `RestApiTool`s into `GoogleApiTool` instances, which are pre-configured to use Google's OAuth2 (OpenID Connect) for authentication.
 
-> ## OAuth2/OpenID Connect User Interaction Flow
+> **OAuth2/OpenID Connect User Interaction Flow**
+> {:.title}
 > 
 > For OAuth2 Authorization Code Grant or OpenID Connect, the process involves redirecting the user to an authorization server. ADK's ToolAuthHandler facilitates this by:
 >  
@@ -781,14 +786,14 @@ ADK provides pre-packaged toolsets for common Google APIs (like BigQuery, Calend
 > 6. The `ToolAuthHandler` then uses this code to exchange it for an access token with the `OAuth2CredentialExchanger`.
 > 
 > This flow requires coordination between ADK, the agent, and the user interface. The Dev UI has some built-in support for handling these requests. We will use this when we write the Calendar agent next.
-> {: .prompt-info }
+{: .prompt-info }
 
 You typically need to provide `client_id` and `client_secret` for your OAuth 2.0 application that has been authorized for the required Google API scopes.
 
 Following is a Calendar agent which uses `CalendarToolset` from Google API Toolsets and filters in only the tools related to Events. You can use it to answer queries like "What are the next 3 events on my primary calendar?"
 
 > This example should be run using the `adk web .` command, since OAuth Flow is triggered to authorize the reading of the calendar data.
-> {: .prompt-danger }
+{: .prompt-danger }
 
 ```python
 from google.adk.agents import Agent
@@ -849,10 +854,11 @@ YOU: {prompt}")
         print("  The Dev UI will guide you through authorizing access to your Google Calendar.")
 ```
 
-> ## Use adk web for Google API Tools Requiring OAuth
+> **Use adk web for Google API Tools Requiring OAuth**
+> {:.title}
 > 
 > Tools for Google APIs (Calendar, Gmail, Docs, etc.) usually require OAuth 2.0. The ADK Development UI (adk web) has built-in support to facilitate the OAuth consent and authorization code flow during local development, making it much easier to test these tools. Running them purely from a command-line script that doesn't handle web redirects for OAuth is challenging.
-> {: .prompt-tip }
+{: .prompt-tip }
 
 When you send your query for the first time, it will kickoff the OAuth Flow. Upon successful authorization, the LLM will be in a position to provide the correct answer.
 

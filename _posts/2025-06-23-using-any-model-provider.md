@@ -36,8 +36,6 @@ Let's build a multi-agent workflow that uses both a Gemini and a Claude model in
 
 ```python
 from agents import Agent, Runner
-from tinib00k.utils import DEFAULT_LLM, load_and_check_keys
-load_and_check_keys()
 
 def main():
 
@@ -45,7 +43,7 @@ def main():
     code_explainer_agent = Agent(
         name="Code Explainer",
         instructions="You are an expert at explaining complex code in simple terms.",
-        model=DEFAULT_LLM,
+        model="litellm/gemini/gemini-2.0-flash",
         handoff_description="Use for explaining code."
     )
 
@@ -61,7 +59,7 @@ def main():
     triage_agent = Agent(
         name="Triage Agent",
         instructions="Analyze the user's request and hand off to the appropriate specialist agent.",
-        model=DEFAULT_LLM,
+        model="litellm/gemini/gemini-2.0-flash",
         handoffs=[code_explainer_agent, poem_writer_agent]
     )
 
@@ -88,7 +86,8 @@ if __name__ == "__main__":
 ```
 This example seamlessly orchestrates agents powered by two different model providers. The `MultiProvider` handles the routing automatically based on the model string prefix.
 
-
+> **API Key Management with LiteLLM**
+> {:.title}
 > The `litellm` library is designed to find API keys from environment variables automatically. The convention is `<PROVIDER>_API_KEY`.
 > 
 > - For Google models, it looks for `GOOGLE_API_KEY`.
@@ -96,7 +95,7 @@ This example seamlessly orchestrates agents powered by two different model provi
 > - For Cohere, `COHERE_API_KEY`, and so on.
 > 
 > Before running code that uses multiple providers, ensure you have set all the necessary environment variables. You can find the specific variable names in the [LiteLLM documentation](https://docs.litellm.ai/docs/providers).
-{: .prompt-info }
+{: .prompt-tip }
 
 ## Handling Provider Incompatibilities
 
@@ -110,12 +109,7 @@ The `Agent`'s `output_type` parameter is a powerful feature that relies on the m
 
 ```
 # Fictional error message
-BadRequestError: Error code: 400 - 
-{
-    'error': {
-                'message': "'response_format' is not a valid parameter for this model."
-            }
-}
+BadRequestError: Error code: 400 - {'error': {'message': "'response_format' is not a valid parameter for this model."}}
 ```
 
 **Solution:**
@@ -130,9 +124,6 @@ BadRequestError: Error code: 400 -
 import json
 from pydantic import BaseModel, ValidationError
 from agents import Agent, Runner
-
-from tinib00k.utils import DEFAULT_LLM, load_and_check_keys
-load_and_check_keys()
 
 class UserProfile(BaseModel):
     name: str
@@ -151,7 +142,7 @@ def main():
         {json.dumps(UserProfile.model_json_schema(), indent=2)}
         ```
         """,
-        model=DEFAULT_LLM
+        model="litellm/gemini/gemini-2.0-flash"
     )
 
     # After running, you would need to manually parse the `result.final_output` string
@@ -185,11 +176,11 @@ if __name__ == "__main__":
     main()
 ```
 
-
->  Prompt-Based JSON is Brittle
+> **Prompt-Based JSON is Brittle**
+> {:.title}
 > 
 > Relying on prompting to get structured data is significantly less reliable than using a model's native JSON mode. The model may fail to produce valid JSON, add extra conversational text, or ignore the format entirely. This will lead to parsing errors in your application code. Whenever possible, choose a model that natively supports structured outputs if your application depends on them.
-{: .prompt-info }
+{: .prompt-warning }
 
 ### Parallel Tool Calling
 

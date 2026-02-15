@@ -142,10 +142,11 @@ Tools are a primary way agents interact with the outside world, making their des
     - Design tools to perform specific, narrow functions rather than broad, overly powerful actions.
     - Example: Instead of a generic "execute_sql" tool, create more specific tools like "get_customer_order_details(order_id: str)".
 
-> ## Best Practice: Parameterize Tools, Don't Let LLMs Construct Code/Queries Directly
+> **Best Practice: Parameterize Tools, Don't Let LLMs Construct Code/Queries Directly**
+> {:.title}
 > 
 > Avoid designing tools where the LLM provides a raw SQL query or a full command string to be executed. Instead, have the LLM provide parameters that your tool then uses to safely construct the query or command using parameterized queries or safe shell execution libraries. This significantly reduces the risk of injection attacks.
-> {: .prompt-tip }
+{: .prompt-tip }
 
 ## Input Validation and Sanitization (Agent Level)
 
@@ -216,14 +217,15 @@ This was covered extensively before, but it's worth reiterating key points:
     
 - **ADK's Auth Framework for OpenAPI/GoogleAPI Tools:** Leverage `AuthCredential` (especially for `AuthCredentialTypes.SERVICE_ACCOUNT` with ADC, or OAuth2 where client secrets are passed at toolset configuration) to let ADK manage the token acquisition and injection. This keeps the raw secrets out of individual tool calls.
 
-> ## Best Practice: Rotate Credentials Regularly
+> **Best Practice: Rotate Credentials Regularly**
+> {:.title}
 > 
 > Implement a policy for regularly rotating API keys and other sensitive credentials, even if stored securely.
-> {: .prompt-tip }
+{: .prompt-tip }
 
 ## Considerations for Code Execution Environments
 
-If your agent uses code execution (@sec-code-execution), the security of the execution environment is paramount.
+If your agent uses code execution, the security of the execution environment is paramount.
 
 - **`BuiltInCodeExecutor` :**
     - **Security:** High. Code runs in a sandbox environment.
@@ -244,10 +246,11 @@ If your agent uses code execution (@sec-code-execution), the security of the exe
     - **Security:** High. Uses Google's managed Vertex AI Code Interpreter service, which runs code in a sandboxed environment.
     - **Recommendation:** Preferred cloud-native solution for scalable and secure Python code execution.
 
-> ## Libraries in Code Execution Environments
+> **Libraries in Code Execution Environments**
+> {:.title}
 > 
 > Be mindful of the Python libraries available in your code execution environment (especially for `ContainerCodeExecutor` where you define the image). If an LLM generates code that tries to use a library that isn't installed, it will fail. Conversely, avoid installing unnecessary libraries to reduce the attack surface. `VertexAiCodeExecutor` comes with common data science libraries pre-installed.
-> {: .prompt-danger }
+{: .prompt-danger }
 
 ## Mitigating Prompt Injection
 
@@ -282,10 +285,11 @@ Prompt injection is an attack where a user crafts input designed to trick the LL
 7. **Sandboxing Actions:**
     - Ensure that any actions an agent takes (especially tool calls or code execution) are performed in a sandboxed or least-privilege environment.
 
-> ## Defense in Depth for Prompt Injection
+> **Defense in Depth for Prompt Injection**
+> {:.title}
 > 
 > There's no silver bullet for prompt injection. Employ multiple layers of defense: strong initial instructions, input/output validation where possible, secure tool design, and human oversight for critical operations. Stay updated on research in this area, as techniques evolve.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Session State and Artifact Security
 
@@ -300,10 +304,11 @@ Prompt injection is an attack where a user crafts input designed to trick the LL
 - **Cloud Run/Kubernetes/VMs:** Follow general cloud security best practices for your chosen deployment platform (network security groups, minimal IAM permissions for runtime service accounts, OS hardening, regular patching).
 - **Dependency Scanning:** Regularly scan your Python dependencies (in `requirements.txt` or `pyproject.toml`) for known vulnerabilities using tools like `pip-audit` or Snyk.
 
-> ## Best Practice: Regular Security Audits and Testing
+> **Best Practice: Regular Security Audits and Testing**
+> {:.title}
 > 
 > Periodically review your agent's design, tool interactions, and deployment configuration for potential security weaknesses. Consider penetration testing for critical agent applications.
-> {: .prompt-tip }
+{: .prompt-tip }
 
 **What's Next?**
 

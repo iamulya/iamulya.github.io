@@ -210,10 +210,11 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-> ## InMemoryMemoryService is for Prototyping Only
+> **InMemoryMemoryService is for Prototyping Only**
+> {:.title}
 > 
 > Due to its simple keyword matching and lack of persistence, InMemoryMemoryService should not be used for production applications requiring reliable long-term memory. It's primarily for understanding the mechanics and for basic local testing.
-> {: .prompt-danger }
+{: .prompt-danger }
 
 ## `VertexAiRagMemoryService`: Leveraging Vertex AI RAG
 
@@ -317,21 +318,23 @@ sequenceDiagram
 ```
 
 
-> ## Best Practice: Semantic Search with VertexAiRagMemoryService
+> **Best Practice: Semantic Search with VertexAiRagMemoryService**
+> {:.title}
 > 
 > For intelligent recall based on meaning rather than just keywords, VertexAiRagMemoryService is the way to go. It allows your agent to find relevant past conversations even if the exact phrasing isn't used in the current query. This is crucial for building truly knowledgeable and context-aware long-term memory.
-> {: .prompt-tip }
+{: .prompt-tip }
 
-> ## RAG Corpus Setup and Costs
+> **RAG Corpus Setup and Costs**
+> {:.title}
 > 
 > - Setting up a Vertex AI RAG Corpus and ensuring your service account has the right permissions (e.g., "Vertex AI User", "Storage Object User" for the underlying GCS bucket of the RAG corpus) is essential.
 > - Vertex AI RAG and its underlying services (like Vector Search, GCS) incur costs. Monitor your usage and understand the pricing model.
 > - Ingestion into RAG is asynchronous. There might be a delay between calling `add_session_to_memory` and the data being fully searchable.
-> {: .prompt-danger }
+{: .prompt-danger }
 
 ## Tools for Memory Interaction: `LoadMemoryTool` and `PreloadMemoryTool`
 
-As briefly introduced in @sec-prebuilt-tools and demonstrated in the `InMemoryMemoryService` example, ADK provides two key tools for agents to interact with the configured `MemoryService`:
+As briefly introduced earlier and demonstrated in the `InMemoryMemoryService` example, ADK provides two key tools for agents to interact with the configured `MemoryService`:
 
 - **`google.adk.tools.load_memory_tool` (LoadMemoryTool)**:
     - A standard `FunctionTool` that an LLM can explicitly call.
@@ -426,7 +429,8 @@ YOU: {prompt_text}")
     asyncio.run(main())
 ```
 
-> ## Combining PreloadMemoryTool and LoadMemoryTool
+> **Combining PreloadMemoryTool and LoadMemoryTool**
+> {:.title}
 > 
 > For many applications, using both tools provides a good balance:
 > 
@@ -434,9 +438,10 @@ YOU: {prompt_text}")
 > - `LoadMemoryTool` allows the LLM to dig deeper or search for different aspects of the memory if the preloaded information isn't sufficient or if it needs to answer a very specific historical question.
 > 
 > Your agent's instruction should guide it on how and when to use `load_memory` if `preload_memory` is also active.
-> {: .prompt-info }
+{: .prompt-info }
 
-> ## Querying Effectiveness of Memory Search
+> **Querying Effectiveness of Memory Search**
+> {:.title}
 > 
 > The quality of results from search_memory (and thus the effectiveness of both memory tools) heavily depends on:
 > 
@@ -444,7 +449,7 @@ YOU: {prompt_text}")
 > - **For `VertexAiRagMemoryService`:** The quality of the embeddings, the semantic similarity between the `query` and the stored content, and the RAG configuration (chunking strategy, `similarity_top_k`, etc.).
 > 
 > Crafting effective queries (either by the LLM for `LoadMemoryTool` or by using the user's direct input for `PreloadMemoryTool`) is key.
-> {: .prompt-info }
+{: .prompt-info }
 
 **What's Next?**
 

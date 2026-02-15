@@ -9,7 +9,7 @@ image:
   alt: "Generative AI Handbook by Amulya Bhatia"
 ---
 
-> This article is part of my web book series. All of the chapters can be found [here](https://iamulya.one/tags/generative-ai-handbook//). For any issues around this book or if you'd like the pdf/epub version, contact me on [LinkedIn](https://www.linkedin.com/in/amulya-bhatia-01627a42/)
+> This article is part of my book [Generative AI Handbook](https://iamulya.one/tags/generative-ai-handbook). For any issues around this book or if you'd like the pdf/epub version, contact me on [LinkedIn](https://www.linkedin.com/in/amulya-bhatia-01627a42/)
 {: .prompt-info }
 
 In 2017, a team at Google Brain released a paper with a cocky title: *"Attention Is All You Need."*
@@ -131,9 +131,10 @@ After Attention, the model creates a **Weighted Sum**. It takes the vector for "
 
 The result is a new vector that is still "Bank," but now it is **flavored** by its context. It is now a "River-Bank."
 
-> ## Why this changed the world
+> **Why this changed the world**
+> {:.title}
 > In an RNN, if "River" was 50 words away from "Bank", the flavor would have washed away by the time the model got there. In Attention, the distance doesn't matter. The "flavor" is teleported instantly.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Masked Attention: The "No Spoilers" Rule
 

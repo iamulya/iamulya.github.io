@@ -79,15 +79,12 @@ The OpenAI Agents SDK provides the lightweight framework to build these processe
 import asyncio
 from agents import Agent, Runner
 
-from tinib00k.utils import DEFAULT_LLM, load_and_check_keys
-load_and_check_keys()
-
 async def main():
     # Define an Agent: an LLM configured with instructions
     haiku_agent = Agent(
         name="Haiku Poet",
         instructions="You are a poetic assistant who only responds in haikus (5-7-5 syllables).",
-        model=DEFAULT_LLM # Using the 'litellm/' prefix
+        model="litellm/gemini/gemini-2.0-flash" # Using the 'litellm/' prefix
     )
 
     # Use the Runner to execute the agent
@@ -104,8 +101,8 @@ if __name__ == "__main__":
 
 At first glance, this might seem like more code for the same result. But the power lies in what's happening under the hood. The `Runner.run()` call initiates an **agent loop**, a process that can continue over multiple turns, call tools, and even hand off to other agents. We've moved from a simple function call to a robust, extensible workflow engine.
 
-
-> The Agent Loop is Key
+> **The Agent Loop is Key**
+> {:.title}
 > 
 > The fundamental difference between a direct LLM call and using the Agents SDK is the **agent loop**. The `Runner` class manages this loop, automatically handling the cycle of:
 > 
@@ -116,7 +113,7 @@ At first glance, this might seem like more code for the same result. But the pow
 > 5.  Repeating until a final answer is generated.
 > 
 > This loop is the core of agentic behavior, and the SDK manages it for you.
-{: .prompt-info }
+{: .prompt-tip }
 
 ## Why the OpenAI Agents SDK?
 
@@ -128,29 +125,70 @@ The world of AI frameworks is vast. The OpenAI Agents SDK differentiates itself 
 
 *   **Powerful Primitives:** The SDK focuses on a small but potent set of building blocks. By combining Agents, Tools, and Handoffs, you can model incredibly complex workflows, from simple tool-using bots to sophisticated multi-agent systems where different agents collaborate to solve a problem. It provides the "just enough" functionality to be immediately useful without becoming bloated.
 
-
-> Not Just for OpenAI Models
+> **Not Just for OpenAI Models**
+> {:.title}
 > 
-> The name "OpenAI Agents SDK" reflects its origin, but its capability extends far beyond. The integration with `litellm` and the underlying `ModelProvider` interface make it a versatile tool for any developer, regardless of their preferred LLM provider. Throughout this book, we will use Gemini models in our primary examples to underscore this flexibility.
+> The name "OpenAI Agents SDK" reflects its origin, but its capability extends far beyond. The integration with `litellm` and the underlying `ModelProvider` interface (`src/agents/models/interface.py`) make it a versatile tool for any developer, regardless of their preferred LLM provider. Throughout this book, we will use Gemini models in our primary examples to underscore this flexibility.
 {: .prompt-info }
 
-## Core Primitives at a Glance
+## 1.3 Core Primitives at a Glance
 
 This entire book is dedicated to exploring the SDK's components in detail, but let's take a high-level look at the five key primitives that form the foundation of any application you build.
 
-1.  **Agent:** The central building block. It's an LLM configured with a name, instructions (a system prompt), and a set of available `tools` and `handoffs`. Think of it as a blueprint for a specialized AI worker.
+1.  **Agent:** The central building block. It's an LLM configured with a name, instructions (a system prompt), and a set of available `tools` and `handoffs`. Think of it as a blueprint for a specialized AI worker. (Covered in **Chapter 3**)
 
-2.  **Tool:** An action an Agent can take. This is typically a Python function exposed to the LLM, allowing it to interact with the outside world, fetch data, or perform calculations.
+2.  **Tool:** An action an Agent can take. This is typically a Python function exposed to the LLM, allowing it to interact with the outside world, fetch data, or perform calculations. (Covered in **Chapter 4**)
 
-3.  **Handoff:** A specialized type of tool that allows one agent to delegate the entire task to another, more specialized agent. This is the primary mechanism for creating multi-agent systems.
+3.  **Handoff:** A specialized type of tool that allows one agent to delegate the entire task to another, more specialized agent. This is the primary mechanism for creating multi-agent systems. (Covered in **Chapter 5**)
 
-4.  **Runner:** The engine that executes the agentic workflow. You provide it with a starting agent and an initial input, and the `Runner` manages the entire multi-turn agent loop until a final result is achieved.
+4.  **Runner:** The engine that executes the agentic workflow. You provide it with a starting agent and an initial input, and the `Runner` manages the entire multi-turn agent loop until a final result is achieved. (Covered in **Chapter 2**)
 
-5.  **Tracing:** A built-in observability system that records every step of your agent's execution—every LLM call, every tool use, every handoff. This is an indispensable tool for debugging, monitoring, and improving your agents.
+5.  **Tracing:** A built-in observability system that records every step of your agent's execution—every LLM call, every tool use, every handoff. This is an indispensable tool for debugging, monitoring, and improving your agents. (Covered in **Chapter 8**)
 
 These components interact in a predictable flow, which we can visualize as follows:
 
-![*High-level architecture of the Agents SDK.*](/assets/img/2025-06-23-introduction-to-agentic-ai/figure-1.png)
+```mermaid
+---
+title: High-level architecture of the Agents SDK.
+---
+graph TD
+    subgraph "User Interaction"
+        A[User Request]
+    end
+
+    subgraph "Agents SDK Workflow"
+        B(Runner starts Agent Loop)
+        subgraph "Agent Loop"
+            direction LR
+            C{Agent}
+            D[LLM]
+            E[Tools]
+            F[Handoffs]
+
+            C -- Prompts --> D
+            D -- Reasons & Decides --> C
+            C -- Invokes --> E
+            E -- Returns Data --> C
+            C -- Delegates to --> F
+        end
+    end
+
+    subgraph "Safety & Observability"
+        G(Guardrails Validate I/O)
+        H(Tracing Records Everything)
+    end
+
+    I[Final Response]
+
+    A --> B
+    B -- Manages --> C
+    B -- Is Monitored By --> H
+    B -- Is Protected By --> G
+    B --> I
+
+    style C fill:#f9f,stroke:#333,stroke-width:2px
+    style B fill:#bbf,stroke:#333,stroke-width:2px
+```
 
 
 In the [next chapter](https://iamulya.one/posts/your-first-agent), we will dive straight into the code, setting up your environment and building a functional, tool-using agent from scratch. Let's get started.

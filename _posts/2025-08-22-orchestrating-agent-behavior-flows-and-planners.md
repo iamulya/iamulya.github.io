@@ -40,7 +40,7 @@ You typically don't instantiate `BaseLlmFlow` directly. Instead, `LlmAgent` inst
 - **`SingleFlow` (`google.adk.flows.llm_flows.single_flow.SingleFlow`):**
     - This is the default flow for an `LlmAgent` that is not configured for complex multi-agent transfers (i.e., an agent that primarily interacts with tools and the user directly).
     - It handles the basic loop of LLM calls and tool executions until a final textual response is generated.
-    - The diagram in @sec-first-agent illustrated a simplified version of this flow.
+    - The diagram earlier illustrated a simplified version of this flow.
 - **`AutoFlow` (`google.adk.flows.llm_flows.auto_flow.AutoFlow`):**
     - Inherits from `SingleFlow` and adds capabilities for **agent-to-agent transfer**.
     - It automatically includes the necessary logic and internal tools (like `transfer_to_agent`) to allow the LLM to decide to delegate a task to another registered sub-agent or its parent agent.
@@ -71,10 +71,11 @@ You typically don't instantiate `BaseLlmFlow` directly. Instead, `LlmAgent` inst
 
 The specific flow an agent uses is determined internally by ADK based on the agent's configuration (e.g., presence of sub-agents, transfer disallow flags).
 
-> ## Flows Encapsulate Interaction Logic
+> **Flows Encapsulate Interaction Logic**
+> {:.title}
 > 
 > LLM Flows are a powerful abstraction within ADK. They separate the how of LLM interaction (the loop, tool handling, processor invocation) from the what (the agent's specific instructions, tools, and model). This allows ADK to evolve its interaction patterns without requiring changes to your core agent definitions.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## LLM Flow Processors: Customizing the Request-Response Cycle
 
@@ -236,15 +237,17 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-> ## `BuiltInPlanner` for Simplicity with Capable Models
+> **`BuiltInPlanner` for Simplicity with Capable Models**
+> {:.title}
 > 
 > If your target LLM offers robust built-in planning or "thinking" capabilities, `BuiltInPlanner` is often the easiest way to leverage them. You configure the desired `ThinkingConfig` and ADK handles passing it to the model. The model then internally structures its intermediate reasoning steps and tool calls.
-> {: .prompt-info }
+{: .prompt-info }
 
-> ## Model Support for `ThinkingConfig`
+> **Model Support for `ThinkingConfig`**
+> {:.title}
 > 
 > Not all models support `ThinkingConfig`, or they may support different modes and options. Always consult the documentation for your specific model version to understand its planning capabilities and the correct `ThinkingConfig` parameters. Using unsupported configurations can lead to errors or unexpected behavior.
-> {: .prompt-danger }
+{: .prompt-danger }
 
 ## `PlanReActPlanner`: Implementing the ReAct (Reason+Act) Pattern
 
@@ -425,17 +428,19 @@ if __name__ == "__main__":
 
 The parts tagged with `/*PLANNING*/` and `/*REASONING*/` would be marked as `part.thought = True` by the `PlanReActPlanner`'s `process_planning_response` method and typically not shown directly to the user but logged in the trace.
 
-> ## Best Practice: Use PlanReActPlanner for Explicit Step-by-Step Reasoning
+> **Best Practice: Use PlanReActPlanner for Explicit Step-by-Step Reasoning**
+> {:.title}
 > 
 > PlanReActPlanner is excellent when you want the LLM to explicitly show its work and follow a structured problem-solving approach. It makes the agent's reasoning process more transparent and debuggable by inspecting the tagged thoughts and actions in the trace. It's particularly good for tasks that naturally break down into sequential steps involving tool use and observation.
-> {: .prompt-tip }
+{: .prompt-tip }
 
-> ## Prompt Verbosity and LLM Adherence with PlanReActPlanner
+> **Prompt Verbosity and LLM Adherence with PlanReActPlanner**
+> {:.title}
 > 
 > - The instructions injected by `PlanReActPlanner` are quite detailed and add to the prompt length.
 > - The effectiveness heavily relies on the LLM's ability to consistently follow the tagging format (`/*PLANNING*/`, `/*ACTION*/`, etc.). Stronger reasoning models tend to perform better. Less capable models might struggle with the format or skip steps.
 > - You might need to fine-tune the agent's main instruction to reinforce the ReAct pattern if the LLM deviates.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Practical Example: Research Assistant Agent with a Planner
 
@@ -522,10 +527,11 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-> ## Using `google_search` along with other tools in the same agent can result in error!
+> **Using `google_search` along with other tools in the same agent can result in error!**
+> {:.title}
 > 
 > If you try to use `google_search` along with any other tool, you will get the following error: 'Tool use with function calling is unsupported’. That is the reason why a separate agent had to be used just for the search feature instead of just adding `google_search` as a normal tool in the tool list for research_assistant instead of as an `AgentTool` (an agent that acts as a tool)
-> {: .prompt-danger }
+{: .prompt-danger }
 
 Running this example (especially with `adk web .` to see the trace) would demonstrate the agent:
 

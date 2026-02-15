@@ -47,10 +47,11 @@ At the very core of ADK are **Agents**. An agent is an entity capable of perceiv
     ```
     
 
-> ## Best Practice: Clear Agent Descriptions
+> **Best Practice: Clear Agent Descriptions**
+> {:.title}
 > 
 > For LlmAgent, the name should be a concise identifier, while the description should be a clear, natural language explanation of *what the agent does and when it should be used*. This description is often used by an orchestrating LLM (in multi-agent systems) to decide if this agent is the right one for a task. Make it informative!
-> {: .prompt-tip }
+{: .prompt-tip }
 
 Agents are the fundamental actors in an ADK system. They can be simple, single-purpose entities or complex orchestrators managing other sub-agents.
 
@@ -143,10 +144,11 @@ sequenceDiagram
 ```
 
 
-> ## InMemoryRunner vs. Runner
+> **InMemoryRunner vs. Runner**
+> {:.title}
 > 
 > Use InMemoryRunner for quick local tests, examples, and when you don't need conversation history or state to persist between runs. Switch to the base Runner class when you need to integrate with persistent services like DatabaseSessionService or VertexAiSessionService for more robust applications.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Tools & Toolsets: Extending Agent Capabilities (`BaseTool`, `BaseToolset`, `FunctionTool`)
 
@@ -192,15 +194,17 @@ LLMs are powerful, but their knowledge is limited to their training data and the
     ```
     
 
-> ## Best Practice: Docstrings are Tool Descriptions
+> **Best Practice: Docstrings are Tool Descriptions**
+> {:.title}
 > 
 > For FunctionTool, the Python function's docstring becomes the description provided to the LLM. Write clear, comprehensive docstrings explaining what the function does, its parameters (including their types if not obvious from type hints), and what it returns. This directly impacts how well the LLM can understand and use your tool.
-> {: .prompt-tip }
+{: .prompt-tip }
 
-> ## Tool Name Uniqueness and LLM Interpretation
+> **Tool Name Uniqueness and LLM Interpretation**
+> {:.title}
 > 
 > Ensure tool names are unique within the set of tools an agent can access. Also, be mindful that LLMs interpret tool names and descriptions literally. A poorly named or described tool can lead to the LLM misusing it or failing to use it when appropriate.
-> {: .prompt-warning }
+{: .prompt-warning }
 
 - **`google.adk.tools.BaseToolset`**: An abstract class for grouping related tools. Toolsets can dynamically provide a list of tools based on context. Examples include `OpenAPIToolset` (from OpenAPI specs) and `GoogleApiToolset` (for Google APIs).
 
@@ -279,10 +283,11 @@ Agents often need to remember past parts of a conversation or maintain informati
     - **App State:** `state['app:global_config'] = value` (persists across all users and sessions for that app).
     - **Temp State:** `state['temp:transient_info'] = value` (not persisted by `DatabaseSessionService`). Temp state changes are available only for one user-turn.
 
-> ## Scoped State for Clarity
+> **Scoped State for Clarity**
+> {:.title}
 > 
 > Using state scopes (user:, app:) helps organize your session data and clarify its intended lifecycle and persistence. For example, user:theme_preference is clearly tied to a specific user across sessions, while app:api_version could be a global setting. temp: is useful for data that should not be persisted by DatabaseSessionService but is needed during a single Runner.run() invocation.
-> {: .prompt-info }
+{: .prompt-info }
 
 - **`google.adk.sessions.BaseSessionService`**: An abstract class defining the interface for managing session persistence.
     - `create_session(...)`
@@ -365,15 +370,17 @@ sequenceDiagram
 ```
 
 
-> ## Best Practice: Leverage Event Granularity for Debugging
+> **Best Practice: Leverage Event Granularity for Debugging**
+> {:.title}
 > 
 > The stream of Event objects provides a fine-grained log of the agent's activity. When debugging, inspect the sequence of events (especially in the Dev UI's Trace view) to understand the exact flow of text, tool calls, tool responses, and state changes. This is much more powerful than simple print debugging.
-> {: .prompt-tip }
+{: .prompt-tip }
 
-> ## Partial Events in Streaming
+> **Partial Events in Streaming**
+> {:.title}
 > 
 > When streaming responses from an LLM, you'll receive multiple Event objects where event.partial is True, followed by a final event where event.partial is False (or None). Your application code consuming these events needs to handle this by accumulating partial text if a continuous stream is desired for the UI.
-> {: .prompt-warning }
+{: .prompt-warning }
 
 ## Contexts
 
@@ -393,10 +400,11 @@ ADK uses context objects to pass around necessary information during agent execu
 
 These context objects ensure that different parts of the ADK framework have the necessary information to perform their tasks without tightly coupling them.
 
-> ## Context Objects for Decoupling
+> **Context Objects for Decoupling**
+> {:.title}
 > 
 > InvocationContext, CallbackContext, and ToolContext are key to ADK's modularity. They provide necessary information to components (agents, callbacks, tools) without requiring direct dependencies on the Runner or other high-level orchestrators. This promotes cleaner, more testable code.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Artifacts: Storing and Retrieving Agent-Generated Files (`BaseArtifactService`)
 

@@ -35,8 +35,6 @@ Let's build a simple content creation pipeline. A `BrainstormerAgent` will gener
 
 from pydantic import BaseModel, Field
 from agents import Agent, Runner, trace
-from tinib00k.utils import DEFAULT_LLM, load_and_check_keys
-load_and_check_keys()
 
 class BlogIdeas(BaseModel):
     ideas: list[str] = Field(description="A list of three creative blog post titles.")
@@ -47,7 +45,7 @@ def main():
     brainstormer_agent = Agent(
         name="Brainstormer",
         instructions="You are an expert idea generator. Generate creative blog post titles based on the user's topic.",
-        model=DEFAULT_LLM,
+        model="litellm/gemini/gemini-2.0-flash",
         output_type=BlogIdeas # We use a structured output
     )
 
@@ -55,7 +53,7 @@ def main():
     writer_agent = Agent(
         name="Writer",
         instructions="You are a professional writer. Write a short, engaging blog post (2-3 paragraphs) based on the provided title.",
-        model=DEFAULT_LLM 
+        model="litellm/gemini/gemini-2.0-flash" 
     )
 
     # --- Code-driven Orchestration ---
@@ -92,7 +90,19 @@ if __name__ == "__main__":
 
 This pattern is simple, robust, and easy to debug. The flow of control is explicit in your code. You can chain as many agents as necessary, creating sophisticated pipelines for tasks like report generation (research -> outline -> draft -> format) or data processing.
 
-![*A deterministic chain where the output of one agent is the input to the next.*](/assets/img/2025-06-23-multi-agent-orchestration-patterns/figure-1.png)
+```mermaid
+---
+title: A deterministic chain where the output of one agent is the input to the next.
+---
+graph TD
+    A[User Topic] --> B(Brainstormer Agent);
+    B --> C{BlogIdeas Output};
+    C -->|Code Logic Selects One| D(Writer Agent);
+    D --> E[Final Blog Post];
+
+    style B fill:#cde,stroke:#333,stroke-width:2px
+    style D fill:#cde,stroke:#333,stroke-width:2px
+```
 
 
 ## LLM as a Judge (Critique and Refinement)
@@ -108,8 +118,6 @@ Let's build a system where a `CoderAgent` writes a Python function, and a `Revie
 from typing import Literal
 from pydantic import BaseModel, Field
 from agents import Agent, Runner, trace, TResponseInputItem
-from tinib00k.utils import DEFAULT_LLM, load_and_check_keys
-load_and_check_keys()
 
 class CodeEvaluation(BaseModel):
     score: Literal["pass", "fail"] = Field(description="Does the code meet the requirements and seem correct?")
@@ -121,7 +129,7 @@ def main():
     coder_agent = Agent(
         name="Python Coder",
         instructions="You are a skilled Python developer. Write a single Python function to solve the user's request. Do not write any explanations, just the code block.",
-        model=DEFAULT_LLM
+        model="litellm/gemini/gemini-2.0-flash"
     )
 
     # 2. The Judge Agent with a structured output
@@ -129,7 +137,7 @@ def main():
         name="Code Reviewer",
         instructions="You are a senior code reviewer. Evaluate the provided Python function based on the original request. Check for correctness and style. Provide a 'pass' or 'fail' score and feedback.",
         output_type=CodeEvaluation,
-        model=DEFAULT_LLM
+        model="litellm/gemini/gemini-2.0-flash"
     )
 
     # --- Orchestration Loop ---
@@ -186,15 +194,32 @@ if __name__ == "__main__":
     main()
 ```
 
-
->  Separating Conversation Histories
+> **Separating Conversation Histories**
+> {:.title}
 > 
 > In the "LLM as a Judge" example, note that we maintain two separate contexts. The `coder_agent` has a `conversation_history` that evolves with feedback. The `reviewer_agent`, however, is called with fresh input each time (`review_input`). This is a deliberate design choice. The reviewer should provide an objective assessment of the code against the *original* request, without being biased by the back-and-forth of the revision process.
 {: .prompt-info }
 
 This pattern is incredibly versatile. It can be used for improving essays, validating plans, checking data for inconsistencies, and much more.
 
-![*A critique and refinement loop using a generator and a judge.*](/assets/img/2025-06-23-multi-agent-orchestration-patterns/figure-2.png)
+```mermaid
+---
+title: A critique and refinement loop using a generator and a judge.
+---
+graph TD
+    subgraph "Refinement Loop"
+        direction LR
+        A(Coder Agent) -->|Generates| B[Code];
+        B --> C(Reviewer Agent);
+        C -->|Judges| D{Evaluation};
+    end
+    Start[User Request] --> A;
+    D -->|Feedback, if fail| A;
+    D -->|Final Code, if pass| End[Output];
+
+    style A fill:#cde,stroke:#333,stroke-width:2px
+    style C fill:#f9d,stroke:#333,stroke-width:2px
+```
 
 
 ## Parallelization (Fan-Out/Fan-In)
@@ -210,13 +235,11 @@ Common use cases include:
 Let's implement the multi-perspective analysis pattern.
 
 ```python
- #
+#
 # A fan-out/fan-in pattern for parallel execution.
 #
 import asyncio
 from agents import Agent, Runner, trace
-from tinib00k.utils import DEFAULT_LLM, load_and_check_keys
-load_and_check_keys()
 
 async def main():
 
@@ -224,24 +247,24 @@ async def main():
     optimist_agent = Agent(
         name="Optimist",
         instructions="You are an eternal optimist. You see the best in every situation and focus only on the positive outcomes.",
-        model=DEFAULT_LLM
+        model="litellm/gemini/gemini-2.0-flash"
     )
     pessimist_agent = Agent(
         name="Pessimist",
         instructions="You are a deep pessimist. You see the worst in every situation and focus only on the risks and negative outcomes.",
-        model=DEFAULT_LLM
+        model="litellm/gemini/gemini-2.0-flash"
     )
     realist_agent = Agent(
         name="Realist",
         instructions="You are a balanced realist. You weigh the pros and cons objectively.",
-        model=DEFAULT_LLM
+        model="litellm/gemini/gemini-2.0-flash"
     )
 
     # 2. Define the synthesizer agent (the "Fan-In")
     synthesizer_agent = Agent(
         name="Synthesizer",
         instructions="You have been given three perspectives on a topic: one optimistic, one pessimistic, and one realistic. Your job is to synthesize these into a single, balanced, final answer.",
-        model=DEFAULT_LLM
+        model="litellm/gemini/gemini-2.0-flash"
     )
 
     # --- Orchestration ---
@@ -290,7 +313,28 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-![*A fan-out/fan-in parallelization pattern.*](/assets/img/2025-06-23-multi-agent-orchestration-patterns/figure-3.png)
+```mermaid
+---
+title: A fan-out/fan-in parallelization pattern.
+---
+graph TD
+    subgraph Fan-Out
+        direction LR
+        B(Optimist Agent)
+        C(Pessimist Agent)
+        D(Realist Agent)
+    end
+    subgraph Fan-In
+        E(Synthesizer Agent)
+    end
+    A[User Topic] --> B;
+    A --> C;
+    A --> D;
+    B --> E;
+    C --> E;
+    D --> E;
+    E --> F[Final Report];
+```
 
 
 ## Chapter Summary

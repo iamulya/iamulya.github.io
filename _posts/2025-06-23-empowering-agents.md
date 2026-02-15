@@ -24,8 +24,6 @@ Let's start with the simplest possible example: a tool that adds two numbers.
 
 ```python
 from agents import Agent, Runner, function_tool
-from tinib00k.utils import DEFAULT_LLM, load_and_check_keys
-load_and_check_keys()
 
 # 1. Define a regular Python function and decorate it
 @function_tool
@@ -46,7 +44,7 @@ def main():
     calculator_agent = Agent(
         name="Calculator Agent",
         instructions="You are a calculator. Use your tools to perform calculations.",
-        model=DEFAULT_LLM,
+        model="litellm/gemini/gemini-2.0-flash",
         tools=[add] # Pass the decorated function directly
     )
 
@@ -81,11 +79,39 @@ The `@function_tool` decorator is doing a lot of heavy lifting for you. Here's a
 3.  **Schema Generation:** It dynamically builds a Pydantic model representing the function's arguments. This model is then converted into a JSON schema.
 4.  **LLM Presentation:** This final JSON schema is what's presented to the LLM, giving it a structured understanding of the tool's capabilities.
 
-![*The process of turning a Python function into a schema for the LLM.*](/assets/img/2025-06-23-empowering-agents/figure-1.png)
+```mermaid
+---
+title: The process of turning a Python function into a schema for the LLM.
+---
+graph TD
+    subgraph "Developer's Code"
+        A[Python Function ]
+    end
+
+    subgraph "Agents SDK"
+        B(Inspect Signature)
+        C(Parse Docstring)
+        D(Generate Pydantic Model)
+        E(Create JSON Schema)
+    end
+
+    subgraph "Interaction with LLM"
+        F{LLM}
+    end
+
+    A --> B
+    A --> C
+    B & C --> D
+    D --> E
+    E --> F
+
+    style A fill:#cde,stroke:#333,stroke-width:2px
+    style F fill:#f9f,stroke:#333,stroke-width:2px
+```
 
 
-
->  Rich Type Support
+> **Rich Type Support**
+> {:.title}
 > 
 > The function tool schema generation supports more than just primitive types like `int` and `str`. You can use Pydantic models, `dataclass`es, or `TypedDict`s as arguments, and the SDK will generate a nested JSON schema accordingly. This allows you to pass complex, structured data to your tools.
 {: .prompt-info }
@@ -93,12 +119,8 @@ The `@function_tool` decorator is doing a lot of heavy lifting for you. Here's a
 Let's see an example with a Pydantic model as an input argument.
 
 ```python
-from agents import Agent, Runner, function_tool
+# ... (imports) ...
 from pydantic import BaseModel
-
-from tinib00k.utils import DEFAULT_LLM, load_and_check_keys
-load_and_check_keys()
-
 
 class Location(BaseModel):
     city: str
@@ -113,18 +135,13 @@ def get_forecast(location: Location) -> str:
 weather_agent = Agent(
     name="Weather Agent",
     instructions="Provide weather forecasts using your tools.",
-    model=DEFAULT_LLM,
+    model="litellm/gemini/gemini-1.5-flash-latest",
     tools=[get_forecast]
 )
 
-def main():
-    result = Runner.run_sync(weather_agent, "What's the weather like in Paris, France?")
-    print(f"
-Final Answer: {result.final_output}")
-
-
-if __name__ == "__main__":
-    main()
+# ... main function ...
+# result = Runner.run_sync(weather_agent, "What's the weather like in Paris, France?")
+# ...
 ```
 The LLM will correctly generate a JSON object like `{"location": {"city": "Paris", "country": "France"}}` to call this tool.
 
@@ -136,8 +153,6 @@ You can provide a callable that receives the context and the exception, and its 
 
 ```python
 from agents import Agent, Runner, function_tool, RunContextWrapper, ModelSettings
-from tinib00k.utils import DEFAULT_LLM, load_and_check_keys
-load_and_check_keys()
 
 
 def custom_error_handler(ctx: RunContextWrapper, error: Exception) -> str:
@@ -158,7 +173,7 @@ def main():
     error_handling_agent = Agent(
         name="Error Handling Agent",
         instructions="Perform the division using the divide tool. If an error occurs, explain it to the user.",
-        model=DEFAULT_LLM,
+        model="litellm/gemini/gemini-2.0-flash",
         tools=[divide],
         model_settings=ModelSettings(
             tool_choice="required",            # Must call tools on the first turn
@@ -181,9 +196,10 @@ if __name__ == "__main__":
 # Final Answer: I'm sorry, but I cannot perform that calculation. The tool failed with an error because you cannot divide by zero. Please provide a non-zero divisor.
 ```
 
-
+> **Help the LLM Understand Errors**
+> {:.title}
 > The string returned by your `failure_error_function` is crucial. A clear, descriptive error message gives the LLM the best chance to understand what went wrong. It might then decide to re-call the tool with corrected parameters or explain the problem to the end-user, leading to a much more robust application. Passing `failure_error_function=None` will cause the original exception to be raised, halting the run.
-{: .prompt-info }
+{: .prompt-tip }
 
 ## Hosted Tools: Provider-Managed Capabilities
 
@@ -195,11 +211,12 @@ Examples include:
 *   `CodeInterpreterTool`: Provides a sandboxed environment for running code.
 *   `FileSearchTool`: Allows the agent to retrieve information from vector stores you've created.
 
-
+> **Provider Compatibility is Key**
+> {:.title}
 > **This is a critical point:** Hosted tools are generally specific to the provider that offers them. The tools listed above (`WebSearchTool`, `CodeInterpreterTool`, etc.) are designed for and supported by the **OpenAI Responses API**. They will **not** work when using Gemini or other third-party models via LiteLLM.
 > 
 > Attempting to use an unsupported hosted tool with a model provider will result in an error. Always check your provider's documentation for their supported tool-use capabilities. Because this book focuses on Gemini, we will not provide a runnable example for these tools, but show the syntax for completeness.
-{: .prompt-info }
+{: .prompt-warning }
 
 Here's how you would theoretically use the `WebSearchTool` if you were using an OpenAI model:
 
@@ -239,10 +256,8 @@ Every `Agent` instance has an `.as_tool()` method that converts it into a `Funct
 Let's build a translation orchestrator. It will receive a request to translate text into multiple languages and will call specialized agents for each language in parallel.
 
 ```python
+import os
 from agents import Agent, Runner, trace
-
-from tinib00k.utils import DEFAULT_LLM, load_and_check_keys
-load_and_check_keys()
 
 def main():
 
@@ -250,20 +265,20 @@ def main():
     spanish_translator = Agent(
         name="Spanish Translator",
         instructions="You are an expert translator. Translate the user's text into Spanish.",
-        model=DEFAULT_LLM,
+        model="litellm/gemini/gemini-2.0-flash",
     )
 
     french_translator = Agent(
         name="French Translator",
         instructions="You are an expert translator. Translate the user's text into French.",
-        model=DEFAULT_LLM,
+        model="litellm/gemini/gemini-2.0-flash",
     )
 
     # 2. Define the Orchestrator and provide the specialists as tools
     orchestrator = Agent(
         name="Translation Orchestrator",
         instructions="You are a project manager for translations. Use your tools to fulfill the user's request. Call all relevant tools.",
-        model=DEFAULT_LLM,
+        model="litellm/gemini/gemini-2.0-flash",
         tools=[
             spanish_translator.as_tool(
                 tool_name="translate_to_spanish",
@@ -298,7 +313,17 @@ if __name__ == "__main__":
 
 In this workflow, the orchestrator agent receives the request and sees two tools available: `translate_to_spanish` and `translate_to_french`. It correctly reasons that it should call both. The SDK executes these two sub-agent runs, collects their `final_output`, and passes them back to the orchestrator, which then synthesizes the final report.
 
-![*An orchestrator agent calling two specialist agents as tools.*](/assets/img/2025-06-23-empowering-agents/figure-2.png)
+```mermaid
+---
+title: An orchestrator agent calling two specialist agents as tools.
+---
+graph TD
+    A[Orchestrator Agent] -->|Tool Call: translate_to_spanish| B(Spanish Translator Agent);
+    A -->|Tool Call: translate_to_french| C(French Translator Agent);
+    B -->|Result: 'hola mundo'| A;
+    C -->|Result: 'bonjour le monde'| A;
+    A --> D{Final Response};
+```
 
 
 You can even customize what data the sub-agent returns using the `custom_output_extractor` argument in `.as_tool()`. This lets you, for example, return a specific field from a sub-agent's structured output instead of the entire text response.

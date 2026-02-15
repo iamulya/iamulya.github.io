@@ -40,17 +40,17 @@ Next, install the necessary packages. We'll need `openai-agents` for the SDK its
 pip install "openai-agents[litellm]"
 ```
 
-Finally, you must provide an API key for the model provider you intend to use. Since we are using Gemini in these examples (Read the Preface to understand why), you will need to get a key from [Google AI Studio](https://aistudio.google.com/app/apikey) and set it as an environment variable.
+Finally, you must provide an API key for the model provider you intend to use. Since we are using Gemini in these examples, you will need to get a key from [Google AI Studio](https://aistudio.google.com/app/apikey) and set it as an environment variable.
 
 ```bash
 export GOOGLE_API_KEY="your-api-key-here"
 ```
 
-
->  API Keys are Essential
+> **API Keys are Essential**
+> {:.title}
 > 
 > The SDK needs credentials to communicate with LLM providers. If the appropriate environment variable (e.g., `GOOGLE_API_KEY`, `ANTHROPIC_API_KEY`) is not set, `litellm` will raise an authentication error when the `Runner` attempts to call the model. Always ensure your keys are correctly configured in your terminal session or environment management tool.
-{: .prompt-info }
+{: .prompt-danger }
 
 ## Hello, Agent!
 
@@ -67,15 +67,13 @@ Here is the complete code:
 #
 
 from agents import Agent, Runner
-from tinib00k.utils import DEFAULT_LLM, load_and_check_keys
-load_and_check_keys()
 
 def main():
     # 1. Define the Agent
     polite_agent = Agent(
         name="Polite Assistant",
         instructions="You are a helpful and polite assistant. You always answer in a clear and friendly tone.",
-        model=DEFAULT_LLM
+        model="litellm/gemini/gemini-2.0-flash"
     )
 
     # 2. Define the input
@@ -95,7 +93,23 @@ if __name__ == "__main__":
 
 In this example, the `Runner` takes our `polite_agent` and the `user_input`, sends them to the Gemini model, and receives a single, complete response. This single-turn interaction is the most basic form of the **Agent Loop**.
 
-![*Sequence diagram of a simple, single-turn Agent Loop.*](/assets/img/2025-06-23-your-first-agent/figure-1.png)
+```mermaid
+---
+title: Sequence diagram of a simple, single-turn Agent Loop.
+---
+sequenceDiagram
+    participant User
+    participant Runner
+    participant Agent
+    participant LLM
+
+    User->>+Runner: run_sync(agent, input)
+    Runner->>+Agent: Get model & instructions
+    Agent-->>-Runner: Return config
+    Runner->>+LLM: Send prompt (instructions + input)
+    LLM-->>-Runner: Generate response
+    Runner-->>-User: Return final_output
+```
 
 
 The `result` object returned by the `Runner` is an instance of `RunResult`. For now, we are only interested in the `final_output` property, which contains the agent's text response. We'll explore the other properties of `RunResult` later in this chapter.
@@ -115,9 +129,6 @@ Let's create a simple tool and give it to a new agent.
 
 import random
 from agents import Agent, Runner, function_tool
-
-from tinib00k.utils import DEFAULT_LLM, load_and_check_keys
-load_and_check_keys()
 
 # --- Tool Definition ---
 @function_tool
@@ -140,7 +151,7 @@ def main():
     financial_agent = Agent(
         name="Financial Assistant",
         instructions="You are a financial assistant. Use your tools to answer questions. Be concise.",
-        model=DEFAULT_LLM,
+        model="litellm/gemini/gemini-2.0-flash",
         tools=[get_stock_price] # The tool is passed in a list
     )
 
@@ -192,7 +203,31 @@ The previous example involved a multi-turn interaction with the LLM, all managed
 
 This multi-turn process is the essence of how agents reason and act.
 
-![*Sequence diagram of a multi-turn Agent Loop with a tool call.*](/assets/img/2025-06-23-your-first-agent/figure-2.png)
+```mermaid
+---
+title: Sequence diagram of a multi-turn Agent Loop with a tool call.
+---
+sequenceDiagram
+    participant User
+    participant Runner
+    participant Agent
+    participant LLM
+    participant get_stock_price
+
+    User->>+Runner: run_sync(agent, "Price of GOOGL?")
+    Note over Runner,LLM: Turn 1: Reasoning
+    Runner->>+LLM: Send prompt + tool schema
+    LLM-->>-Runner: Return `ToolCall(name='get_stock_price', args={'symbol': 'GOOGL'})`
+
+    Note over Runner,get_stock_price: SDK Action: Tool Execution
+    Runner->>+get_stock_price: get_stock_price(symbol="GOOGL")
+    get_stock_price-->>-Runner: return 178.45
+
+    Note over Runner,LLM: Turn 2: Synthesis
+    Runner->>+LLM: Send updated history (User Prompt + Tool Result)
+    LLM-->>-Runner: Return final text: "The price is $178.45"
+    Runner-->>-User: Return result.final_output
+```
 
 
 ## Async and Streaming
@@ -290,7 +325,8 @@ def inspect_result():
 #  - Type: message_output_item, Agent: Financial Assistant
 ```
 
-
+> **From Result to Conversation**
+> {:.title}
 > The `result.to_input_list()` method is the key to creating conversational agents. By taking the result of one run and using it as the basis for the input to the next, you build up a conversation history that the agent can refer to.
 > 
 > ```python
@@ -303,7 +339,7 @@ def inspect_result():
 > result2 = Runner.run_sync(agent, next_turn_input)
 > # The agent will correctly answer "Your name is Alex."
 > ```
-{: .prompt-info }
+{: .prompt-tip }
 
 ## Chapter Summary
 

@@ -22,9 +22,28 @@ This chapter will explore the two types of guardrails—Input and Output—and d
 
 The core mechanism that makes guardrails effective is the **tripwire**. When you define a guardrail, you implement a function that returns a `GuardrailFunctionOutput` object. This object has a critical boolean property: `tripwire_triggered`.
 
-If this property is `True`, the `Runner` immediately stops processing and raises an `InputGuardrailTripwireTriggered` or `OutputGuardrailTripwireTriggered` exception. This "fail-fast" behavior is crucial for efficiency. Imagine your main agent uses a powerful but slow and expensive model. Your guardrail, however, can be a much smaller, faster model. The guardrail can analyze an incoming user request and reject it *before* the expensive model is ever invoked, saving both time and money.
+If this property is `True`, the `Runner` immediately stops processing and raises an `InputGuardrailTripwireTriggered` or `OutputGuardrailTripwireTriggered` exception. This "fail-fast" behavior is crucial for efficiency. Imagine your main agent uses a powerful but slow and expensive model like Gemini 1.5 Pro. Your guardrail, however, can be a much smaller, faster model like Gemini 1.5 Flash. The guardrail can analyze an incoming user request and reject it *before* the expensive model is ever invoked, saving both time and money.
 
-![*An input guardrail halting execution before the main agent runs.*](/assets/img/2025-06-23-guardrails-for-safety-and-control/figure-1.png)
+```mermaid
+---
+title: An input guardrail halting execution before the main agent runs.
+---
+sequenceDiagram
+    participant User
+    participant Runner
+    participant Guardrail
+    participant MainAgent as "Main Agent (Slow/Expensive)"
+
+    User->>+Runner: run(agent, "Off-topic query")
+    Runner-->>+Guardrail: Run check in parallel
+    Runner-->>MainAgent: Begin executing...
+
+    Guardrail->>Guardrail: Detects policy violation
+    Guardrail-->>-Runner: Return tripwire_triggered=True
+    Note right of Runner: Tripwire detected!
+    Runner-xMainAgent: Halt execution of Main Agent
+    Runner-->>-User: Raise InputGuardrailTripwireTriggered
+```
 
 
 ## Input Guardrails: Validating the User's Request
@@ -102,7 +121,7 @@ def main():
     coding_agent = Agent(
         name="Python Expert",
         instructions="You are an expert Python developer who provides concise, accurate code solutions.",
-        model=DEFAULT_LLM,
+        model="litellm/gemini/gemini-1.5-pro-latest",
         input_guardrails=[topic_check_guardrail] # Attach the guardrail
     )
 
@@ -133,13 +152,13 @@ if __name__ == "__main__":
     main()
 ```
 
-
->  Guardrails are for Safety, Not Logic
+> **Guardrails are for Safety, Not Logic**
+> {:.title}
 > 
 > It might be tempting to use guardrails to implement primary application logic (e.g., "if the user says 'billing', trip the wire and then manually route to the billing agent"). This is an anti-pattern.
 > 
 > Guardrails are for validating inputs and outputs against *safety policies*. The core logic of *what to do* should be handled by the agent itself through its `instructions` and `tools`/`handoffs`. Let the agent reason about the next step; use guardrails to ensure it does so safely.
-{: .prompt-info }
+{: .prompt-danger }
 
 ## Output Guardrails: Validating the Agent's Response
 
@@ -160,9 +179,6 @@ Let's build a guardrail that checks if an agent's response contains a (fictional
 from pydantic import BaseModel
 from agents import Agent, Runner, output_guardrail, GuardrailFunctionOutput, RunContextWrapper, OutputGuardrailTripwireTriggered
 
-from tinib00k.utils import DEFAULT_LLM, load_and_check_keys
-load_and_check_keys()
-
 # 1. Main agent's output type
 class AgentResponse(BaseModel):
     response: str
@@ -177,7 +193,7 @@ pii_checker_agent = Agent(
     name="PII Checker",
     instructions="Analyze the text. Does it contain the secret project codename 'Bluebird'?",
     output_type=PIIAnalysis,
-    model=DEFAULT_LLM
+    model="litellm/gemini/gemini-2.0-flash"
 )
 
 # 4. The output guardrail function. Note the type hint for `output`.
@@ -206,7 +222,7 @@ main_agent = Agent(
     name="Internal Comms Agent",
     instructions="You are writing an internal company update. The secret project is codenamed 'Project Bluebird'. Announce that its launch has been successful.",
     output_type=AgentResponse,
-    model=DEFAULT_LLM,
+    model="litellm/gemini/gemini-2.0-flash",
     output_guardrails=[pii_check_guardrail]
 )
 
@@ -225,8 +241,8 @@ if __name__ == "__main__":
 ```
 This demonstrates a complete safety check. The `main_agent` is instructed to use the sensitive term, but the `pii_check_guardrail` inspects its final output and triggers the tripwire, preventing the leak.
 
-
->  Guardrail Scope: First and Last Agents
+> **Guardrail Scope: First and Last Agents**
+> {:.title}
 > 
 > An important implementation detail to remember:
 > 

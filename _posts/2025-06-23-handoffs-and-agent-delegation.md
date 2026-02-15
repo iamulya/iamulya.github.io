@@ -28,8 +28,6 @@ Let's build a simple triage system where a frontline agent determines the user's
 
 ```python
 from agents import Agent, Runner, trace
-from tinib00k.utils import DEFAULT_LLM, load_and_check_keys
-load_and_check_keys()
 
 def main():
 
@@ -37,20 +35,20 @@ def main():
     spanish_agent = Agent(
         name="Spanish Specialist",
         instructions="You are a helpful assistant who communicates only in Spanish.",
-        model=DEFAULT_LLM
+        model="litellm/gemini/gemini-2.0-flash"
     )
 
     english_agent = Agent(
         name="English Specialist",
         instructions="You are a helpful assistant who communicates only in English.",
-        model=DEFAULT_LLM
+        model="litellm/gemini/gemini-2.0-flash"
     )
 
     # 2. Define the Triage Agent with its handoff targets
     triage_agent = Agent(
         name="Triage Agent",
         instructions="You are a language routing agent. Based on the user's language, hand off to the correct specialist. Do not answer the question yourself.",
-        model=DEFAULT_LLM,
+        model="litellm/gemini/gemini-2.0-flash",
         handoffs=[spanish_agent, english_agent] # List of possible handoff targets
     )
 
@@ -75,7 +73,26 @@ if __name__ == "__main__":
 
 In this example, the `Triage Agent` never answers the question. Its LLM recognizes the input is Spanish and calls the automatically generated `transfer_to_spanish_specialist` tool. The SDK then stops the `Triage Agent` and starts a new agent loop with the `Spanish Specialist`, which then generates the final answer.
 
-![*Sequence diagram of a basic handoff.*](/assets/img/2025-06-23-handoffs-and-agent-delegation/figure-1.png)
+```mermaid
+---
+title: Sequence diagram of a basic handoff.
+---
+sequenceDiagram
+    participant Runner
+    participant TriageAgent as "Triage Agent"
+    participant SpanishAgent as "Spanish Specialist"
+    participant LLM
+
+    Runner->>+TriageAgent: Run("Hola...")
+    TriageAgent->>+LLM: Prompt with handoff tools
+    LLM-->>-TriageAgent: Decide to call<br>`transfer_to_spanish_specialist`
+
+    Note over Runner,TriageAgent: Handoff triggered!
+    Runner->>+SpanishAgent: Take over with history
+    SpanishAgent->>+LLM: Prompt for final answer
+    LLM-->>-SpanishAgent: "La capital es..."
+    SpanishAgent-->>-Runner: Return final_output
+```
 
 
 ## Customizing Handoffs with the `handoff()` Helper
@@ -89,8 +106,6 @@ Let's create a more explicit handoff to a billing agent, logging the event.
 
 ```python
 from agents import Agent, Runner, handoff, RunContextWrapper
-from tinib00k.utils import DEFAULT_LLM, load_and_check_keys
-load_and_check_keys()
 
 # 1. Define the on_handoff callback
 def log_billing_transfer(ctx: RunContextWrapper) -> None:
@@ -101,7 +116,7 @@ def log_billing_transfer(ctx: RunContextWrapper) -> None:
 billing_agent = Agent(
     name="Billing Department",
     instructions="You help users with their billing inquiries.",
-    model=DEFAULT_LLM,
+    model="litellm/gemini/gemini-2.0-flash",
     # We can add a description that the orchestrator will see
     handoff_description="Use for questions about invoices, payments, or subscriptions."
 )
@@ -118,7 +133,7 @@ custom_handoff = handoff(
 triage_agent = Agent(
     name="Triage Agent",
     instructions="You are a support router.",
-    model=DEFAULT_LLM,
+    model="litellm/gemini/gemini-2.0-flash",
     handoffs=[custom_handoff]
 )
 
@@ -134,11 +149,11 @@ if __name__ == "__main__":
 # (Followed by the billing agent's response)
 ```
 
-
->  Descriptions Drive Routing
+> **Descriptions Drive Routing**
+> {:.title}
 > 
 > The most important factor in the LLM's decision to hand off is the quality of the tool description. Be explicit. Instead of "Billing agent," a description like "Use for all questions about invoices, payment methods, subscription status, and refunds" gives the model a much clearer signal for when to use the handoff.
-{: .prompt-info }
+{: .prompt-tip }
 
 ## Passing Structured Data During Handoffs
 
@@ -149,8 +164,6 @@ When `input_type` is set to a Pydantic model, the SDK instructs the LLM to provi
 ```python
 from pydantic import BaseModel, Field
 from agents import Agent, Runner, handoff, RunContextWrapper
-from tinib00k.utils import DEFAULT_LLM, load_and_check_keys
-load_and_check_keys()
 
 # 1. Define the data schema for the handoff
 class EscalationData(BaseModel):
@@ -171,7 +184,7 @@ human_support_agent = Agent(name="Human Support Team", instructions="...")
 triage_agent = Agent(
     name="Triage Agent",
     instructions="You are an AI assistant. If you cannot resolve the issue, escalate to a human.",
-    model=DEFAULT_LLM,
+    model="litellm/gemini/gemini-2.0-flash",
     handoffs=[
         handoff(
             agent=human_support_agent,
@@ -204,8 +217,6 @@ Let's see it in action.
 ```python
 from agents import Agent, Runner, handoff, function_tool
 from agents.extensions import handoff_filters
-from tinib00k.utils import DEFAULT_LLM, load_and_check_keys
-load_and_check_keys()
 
 @function_tool
 def check_system_status() -> str:
@@ -216,14 +227,14 @@ def check_system_status() -> str:
 faq_agent = Agent(
     name="FAQ Agent",
     instructions="Answer questions concisely. Do not comment on your tools or previous turns.",
-    model=DEFAULT_LLM
+    model="litellm/gemini/gemini-2.0-flash"
 )
 
 # Triage agent has a tool and a handoff with a filter
 triage_agent = Agent(
     name="Triage Agent",
     instructions="Use your tool to check status, or handoff to the FAQ agent.",
-    model=DEFAULT_LLM,
+    model="litellm/gemini/gemini-2.0-flash",
     tools=[check_system_status],
     handoffs=[
         handoff(
@@ -260,14 +271,28 @@ if __name__ == "__main__":
     main()
 ```
 
-![*An `input_filter` modifying the context before passing it to the next agent.*](/assets/img/2025-06-23-handoffs-and-agent-delegation/figure-2.png)
+```mermaid
+---
+title: An input_filter modifying the context before passing it to the next agent.
+---
+sequenceDiagram
+    participant TriageAgent
+    participant Runner
+    participant FAQAgent
+
+    TriageAgent->>Runner: Has history: [User msg, Tool call, Tool output, User msg]
+    Note right of Runner: Handoff to FAQ Agent triggered
+    Runner->>Runner: Apply `input_filter`
+    Note right of Runner: History becomes:<br>[User msg, User msg]
+    Runner->>FAQAgent: Run with filtered history
+```
 
 
-
->  Be Careful with Context Removal
+> **Be Careful with Context Removal**
+> {:.title}
 > 
 > While powerful, `input_filter` should be used with care. Aggressively removing history can cause the next agent to lose crucial context, leading it to ask for information the user has already provided. The `remove_all_tools` filter is generally safe, but custom filters that remove user or assistant messages should be tested thoroughly.
-{: .prompt-info }
+{: .prompt-warning }
 
 ## Chapter Summary
 

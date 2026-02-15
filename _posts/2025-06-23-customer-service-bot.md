@@ -29,7 +29,39 @@ The components are:
 
 This architecture creates a clear separation of concerns, making the system easier to build, test, and extend.
 
-![*The architecture of the Airline Customer Service Bot.*](/assets/img/2025-06-23-customer-service-bot/figure-1.png)
+```mermaid
+---
+title: The architecture of the Airline Customer Service Bot.
+---
+graph TD
+    subgraph "User Interaction"
+        A[User Query]
+    end
+
+    subgraph "Agent System"
+        B(Triage Agent)
+        C(FAQ Agent)
+        D(Seat Booking Agent)
+        E[Tool: faq_lookup]
+        F[Tool: update_seat]
+
+        B -- Handoff --> C
+        B -- Handoff --> D
+        C -- Uses --> E
+        D -- Uses --> F
+
+        C -- Handoff Back --> B
+        D -- Handoff Back --> B
+    end
+
+    A --> B
+
+    style B fill:#f9f,stroke:#333,stroke-width:2px
+    style C fill:#cde,stroke:#333,stroke-width:2px
+    style D fill:#cde,stroke:#333,stroke-width:2px
+    style E fill:#cfc,stroke:#333,stroke-width:2px
+    style F fill:#cfc,stroke:#333,stroke-width:2px
+```
 
 
 ## Managing State: The `AirlineAgentContext`
@@ -96,7 +128,7 @@ faq_agent = Agent[AirlineAgentContext](
     2. Use the faq lookup tool to answer the question. Do not rely on your own knowledge.
     3. If you cannot answer the question, transfer back to the triage agent.""",
     tools=[faq_lookup_tool],
-    model=DEFAULT_LLM,
+    model="litellm/gemini/gemini-2.0-flash",
 )
 ```
 
@@ -142,12 +174,12 @@ seat_booking_agent = Agent[AirlineAgentContext](
     3. Use the update seat tool to update the seat on the flight.
     If the customer asks a question that is not related to the routine, transfer back to the triage agent. """,
     tools=[update_seat],
-    model=DEFAULT_LLM,
+    model="litellm/gemini/gemini-2.0-flash",
 )
 ```
 
-
->  Context as a Side Channel
+> **Context as a Side Channel**
+> {:.title}
 > 
 > The `update_seat` tool reads `context.context.flight_number`. Where does this value come from? The user never provides it. As we'll see next, it's injected into the context *at the moment of handoff* by the `TriageAgent`. This "side channel" communication via a shared context object is a clean and powerful way for agents to collaborate without cluttering the main conversation history.
 {: .prompt-info }
@@ -183,7 +215,7 @@ triage_agent = Agent[AirlineAgentContext](
         faq_agent,
         handoff(agent=seat_booking_agent, on_handoff=on_seat_booking_handoff),
     ],
-    model=DEFAULT_LLM,
+    model="litellm/gemini/gemini-2.0-flash",
 )
 
 faq_agent.handoffs.append(triage_agent)

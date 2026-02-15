@@ -240,17 +240,19 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-> ## Best Practice: Scoped State for Personalization and Configuration
+> **Best Practice: Scoped State for Personalization and Configuration**
+> {:.title}
 > 
 > - Use **user-scoped state** (`user:key`) for user preferences, past summaries relevant to that user, or any data that should follow the user across different conversations.
 > - Use **app-scoped state** (`app:key`) for global configurations, system-wide announcements, or data shared among all users of the application.
 > - Use **session-scoped state** (no prefix) for context relevant only to the current ongoing conversation.
-> {: .prompt-tip }
+{: .prompt-tip }
 
-> ## State Merging Order and Overwrites
+> **State Merging Order and Overwrites**
+> {:.title}
 > 
 > When a session is loaded, ADK (or the SessionService implementation) merges these states into the session.state object. Typically, session-specific values can override user-scoped values, and user-scoped can override app-scoped values if keys conflict (though using distinct keys is better). Be aware of this potential if you use identical keys across scopes. DatabaseSessionService manages these scopes in distinct tables, merging them on load.
-> {: .prompt-danger }
+{: .prompt-danger }
 
 ## Session Service Implementations
 
@@ -293,10 +295,11 @@ The service defines tables for `sessions`, `events`, `app_states`, and `user_sta
     
     ```
     
-> ## Best Practice: DatabaseSessionService for Production with Relational DBs
+> **Best Practice: DatabaseSessionService for Production with Relational DBs**
+> {:.title}
 > 
 > If you need persistent sessions and are using a relational database, DatabaseSessionService is a solid choice. SQLite is great for single-process local persistence, while PostgreSQL or MySQL are suitable for production deployments.
-> {: .prompt-tip }
+{: .prompt-tip }
 
 **3. `VertexAiSessionService` (`google.adk.sessions.vertex_ai_session_service`):**
 
@@ -323,12 +326,13 @@ It interacts with the Vertex AI "Reasoning Engines" API endpoints for session op
     
     ```
     
-> ## Choose SessionService Based on Deployment Needs
+> **Choose SessionService Based on Deployment Needs**
+> {:.title}
 > 
 > - **Local Dev/Test:** `InMemorySessionService`.
 > - **Self-Hosted with DB:** `DatabaseSessionService`.
 > - **Google Cloud Managed Deployment:** `VertexAiSessionService`.
-> {: .prompt-info }
+{: .prompt-info }
 
 **What's Next?**
 

@@ -9,7 +9,7 @@ image:
   alt: "Generative AI Handbook by Amulya Bhatia"
 ---
 
-> This article is part of my web book series. All of the chapters can be found [here](https://iamulya.one/tags/generative-ai-handbook//). For any issues around this book or if you'd like the pdf/epub version, contact me on [LinkedIn](https://www.linkedin.com/in/amulya-bhatia-01627a42/)
+> This article is part of my book [Generative AI Handbook](https://iamulya.one/tags/generative-ai-handbook). For any issues around this book or if you'd like the pdf/epub version, contact me on [LinkedIn](https://www.linkedin.com/in/amulya-bhatia-01627a42/)
 {: .prompt-info }
 
 Before a generative model can write a sonnet or summarize a legal document, it must cross a massive divide: **The Language Barrier.**
@@ -60,9 +60,10 @@ graph TD
 ```
 
 
-> ## Byte Pair Encoding (BPE)
+> **Byte Pair Encoding (BPE)**
+> {:.title}
 > The algorithm used to decide *how* to chop up words is often called **BPE**. It's essentially a frequency contest. If "ing" appears together frequently in the training books, BPE glues them together into a single token. If "zqv" never appears, it keeps them as separate letters.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## From Words to Numbers (The ID System)
 
@@ -132,11 +133,12 @@ To measure how similar two words are, the computer calculates the **Cosine Simil
 *   If the angle is 0° (the arrows point the same way), the words mean the same thing.
 *   If the angle is 90° (the arrows are perpendicular), the words are unrelated.
 
-> ## High-Dimensional Brains
+> **High-Dimensional Brains**
+> {:.title}
 > Humans can visualize 3 dimensions (Length, Width, Height). LLMs use thousands of dimensions (e.g., 4096 dimensions).
 > 
 > Imagine an object that has 4,096 different attributes (Sweetness, Fluffiness, Political Leaning, Color, Speed, etc.). The Embedding Vector captures every single one of such nuances for every word.
-> {: .prompt-warning }
+{: .prompt-warning }
 
 ## The Missing Piece: Position
 

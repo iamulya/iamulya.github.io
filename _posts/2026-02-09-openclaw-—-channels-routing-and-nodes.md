@@ -10,6 +10,7 @@ image:
 ---
 
 > This article is part of a series of articles around OpenClaw. All of the articles can be found [here](https://iamulya.one/tags/openclaw/)
+{: .prompt-info }
 
 In OpenClaw, the **Gateway** serves as the central nervous system. It does not just run the LLM; it manages the physical and digital interfaces that allow the agent to exist in your environment. These interfaces come in two forms: **Channels** (messaging platforms like WhatsApp and Discord) and **Nodes** (physical devices like iPhones, Androids, and desktops).
 
@@ -52,9 +53,10 @@ The `role` field determines the client's privileges:
 *   **`node`**: Functional access. Exposes capabilities (like a camera) to the gateway but cannot reconfigure the server.
 
 
-> ## Device Identity
+> **Device Identity**
+> {:.title}
 > OpenClaw uses cryptographic device identity. During the handshake, a client presents a `device.id` derived from a keypair. This allows the Gateway to recognize a specific iPhone returning after a network drop, even if its IP address has changed.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Nodes & Peripherals
 
@@ -104,9 +106,10 @@ This changes the session key generation strategy:
 *   **Secure:** `agent:main:whatsapp:15550001` (Isolated)
 
 
-> ## The Shared Inbox Risk
+> **The Shared Inbox Risk**
+> {:.title}
 > If you expose your bot to a group chat or allow DMs from multiple users without Secure DM Mode, you are effectively creating a public bulletin board. Always use `per-channel-peer` scope unless the bot is strictly for your personal, private use across your own devices.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## The Connectivity Stack
 
@@ -117,6 +120,7 @@ Connecting the Gateway to the outside world requires navigating the treacherous 
 3.  **Tailscale Serve/Funnel:** The Gateway exposes a public HTTPS endpoint via Tailscale's relay infrastructure. This is required for webhooks (like Twilio or Gmail Pub/Sub) that need to reach your local machine from the public internet.
 
 
-> ## Wide-Area Bonjour
+> **Wide-Area Bonjour**
+> {:.title}
 > While standard Bonjour (mDNS) only works on a local LAN, OpenClaw supports "Wide-Area Bonjour" over Tailscale. By running a local DNS server and publishing SRV records, your iPhone can discover your home Gateway automatically, even when you are on cellular data hundreds of miles away.
-> {: .prompt-info }
+{: .prompt-info }

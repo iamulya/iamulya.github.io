@@ -84,10 +84,11 @@ report_orchestrator_agent = Agent(
 - The parent agent can then be instructed to delegate tasks to its sub-agents.
 - Each sub-agent can have its own model, instructions, tools, and even its own sub-agents, allowing for nested hierarchies.
 
-> ## Description is Key for Delegation
+> **Description is Key for Delegation**
+> {:.title}
 > 
 > When a parent agent (or its LLM) decides whether to delegate a task to a sub-agent, it heavily relies on the description of the sub-agents. Write clear, concise, and accurate descriptions that highlight each sub-agent's unique capabilities and when it should be invoked.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Agent Communication: The Role of Agent Transfer
 
@@ -177,7 +178,8 @@ sequenceDiagram
 ```
 
 
-> ## Transfer Loops and Deadlocks
+> **Transfer Loops and Deadlocks**
+> {:.title}
 > 
 > Poorly designed instructions or agent descriptions can lead to agents endlessly transferring tasks back and forth or getting stuck. Ensure:
 > 
@@ -185,7 +187,7 @@ sequenceDiagram
 > - Transfer conditions are well-defined in the orchestrator's instructions.
 > - Sub-agents have a clear way to signal task completion (either by providing a final answer or by explicitly transferring back if designed to do so).
 > - ADK's `max_llm_calls` in `RunConfig` can act as a failsafe against runaway loops.
-> {: .prompt-danger }
+{: .prompt-danger }
 
 ## Common Multi-Agent Patterns
 
@@ -207,7 +209,7 @@ ADK's flexible agent definition and transfer mechanism support various common MA
     4. `ReportGenerationAgent`: Formats the analysis into a report.
 - **ADK Implementation:**
     - Can be implemented with a master orchestrator agent that calls sub-agents in sequence.
-    - Alternatively, ADK provides `google.adk.agents.SequentialAgent` (a `BaseAgent` subclass, not an `LlmAgent`) which explicitly runs its `sub_agents` one after the other. This will be covered in @sec-shell-agents.
+    - Alternatively, ADK provides `google.adk.agents.SequentialAgent` (a `BaseAgent` subclass, not an `LlmAgent`) which explicitly runs its `sub_agents` one after the other. This will be covered later.
 
 ```mermaid
 ---
@@ -237,7 +239,7 @@ graph TD
 - **Example:** Three different `SummarizationAgent`s using slightly different instructions or models process the same document. An `EvaluationAgent` then picks the best summary.
 - **ADK Implementation:**
     - An orchestrator can be programmed to invoke multiple sub-agents conceptually in parallel (though true parallelism depends on how `asyncio` schedules their `run_async` calls).
-    - ADK provides `google.adk.agents.ParallelAgent` (a `BaseAgent` subclass) for explicitly running sub-agents in parallel and gathering their distinct outputs. This will be covered in @sec-shell-agents.
+    - ADK provides `google.adk.agents.ParallelAgent` (a `BaseAgent` subclass) for explicitly running sub-agents in parallel and gathering their distinct outputs. This will be covered later.
 
 ```mermaid
 ---
@@ -265,10 +267,11 @@ graph TD
 ```
 
 
-> ## Best Practice: Start with Simple Patterns
+> **Best Practice: Start with Simple Patterns**
+> {:.title}
 > 
 > When designing your first MAS, start with simpler patterns like a clear hierarchy or a short pipeline. As you gain experience, you can explore more complex coordination strategies. Clearly defining each agent's API (its description and how it expects input/provides output) is crucial.
-> {: .prompt-tip }
+{: .prompt-tip }
 
 ## Case Study: Designing a Research Assistant MAS
 
@@ -312,7 +315,8 @@ Let's outline the design for a multi-agent research assistant that takes a user'
 
 This case study illustrates how breaking down a complex task (research) into specialized agent roles can lead to a more structured and potentially more effective system. The orchestrator manages the high-level flow, while sub-agents handle their expert tasks. Communication happens via the orchestrator transferring control and context (implicitly through session history/state, or explicitly by instructing agents to output data for the next agent).
 
-> ## State Management for Inter-Agent Communication
+> **State Management for Inter-Agent Communication**
+> {:.title}
 > 
 > In MAS like the research assistant, session state (tool_context.state or callback_context.state) becomes crucial for passing information between agents. For example:
 > 
@@ -320,7 +324,7 @@ This case study illustrates how breaking down a complex task (research) into spe
 > - `MainResearchOrchestrator`, in its next turn, reads `state['refined_questions']` and uses it as input for `WebSearchAgent`.
 > 
 > Use clear, agreed-upon state keys.
-> {: .prompt-tip }
+{: .prompt-tip }
 
 **What's Next?**
 

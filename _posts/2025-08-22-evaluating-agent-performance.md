@@ -48,10 +48,11 @@ ADK offers two primary ways to run evaluations:
         - `evaluate(agent_module, eval_dataset_file_path_or_dir, ...)`: Similar to the CLI, handles loading from files/directories.
         - `migrate_eval_data_to_new_schema(...)`: A utility to convert older eval data formats to the current `EvalSet` Pydantic schema.
 
-> ## `adk eval` for Standardized Testing
+> **`adk eval` for Standardized Testing**
+> {:.title}
 > 
 > For most evaluation needs, the adk eval CLI is the recommended approach. It provides a consistent and reproducible way to test your agents. Reserve direct use of AgentEvaluator for scenarios requiring deeper programmatic control over the evaluation loop.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Defining Evaluation Data: `EvalSet` and `EvalCase`
 
@@ -142,7 +143,8 @@ This data is typically stored in a JSON file (e.g., `my_agent_tests.evalset.json
 
 ```
 
-> ## Best Practice: Craft Comprehensive EvalCases
+> **Best Practice: Craft Comprehensive EvalCases**
+> {:.title}
 > 
 > Good EvalCases are the cornerstone of effective evaluation. For each case:
 > 
@@ -151,7 +153,7 @@ This data is typically stored in a JSON file (e.g., `my_agent_tests.evalset.json
 > - Provide a clear `final_response` that represents the ideal agent output.
 > - Use `session_input` to set up any prerequisite state needed for the test.
 > - Give descriptive `eval_id`s.
-> {: .prompt-tip }
+{: .prompt-tip }
 
 ## Understanding Evaluation Metrics and Criteria
 
@@ -193,14 +195,15 @@ You would create a `test_config.json` file in the same directory as your evaluat
 
 When using the new `EvalSet` format and `AgentEvaluator.evaluate_eval_set`, you pass the criteria dictionary programmatically.
 
-> ## Choose Metrics Relevant to Your Agent's Task
+> **Choose Metrics Relevant to Your Agent's Task**
+> {:.title}
 > 
 > - If your agent's primary job is accurate tool use (e.g., an API orchestrator), `tool_trajectory_avg_score` is paramount.
 > - If factual accuracy in the response is key, `response_match_score` against a good reference is important.
 > - For overall conversational quality, helpfulness, and coherence, `response_evaluation_score` (LLM-based) provides a more holistic measure.
 > 
 > Often, a combination of these metrics is used.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Automated Evaluation with `EvaluationGenerator`
 
@@ -253,10 +256,11 @@ The ADK Development UI (`adk web`) typically includes an "Eval" tab. This tab al
     - A side-by-side comparison of expected vs. actual tool calls and responses.
     - Links to the full trace of the agent's execution for that specific eval case run, allowing you to debug failures directly.
 
-> ## Best Practice: Use Dev UI for Debugging Eval Failures
+> **Best Practice: Use Dev UI for Debugging Eval Failures**
+> {:.title}
 > 
 > When an evaluation fails, the Dev UI's Eval tab is invaluable. It not only shows you what failed (e.g., wrong tool called, response didn't match) but often links directly to the Trace view for that specific failing run. This allows you to immediately inspect the LLM prompts, tool arguments, and agent reasoning that led to the failure.
-> {: .prompt-tip }
+{: .prompt-tip }
 
 **Example: Running an Evaluation via CLI**
 
@@ -410,12 +414,13 @@ eval_sets/tests.evalset.json:
   Tests failed: 0
 ```
 
-> ## `AgentEvaluator` and Vertex AI SDK
+> **`AgentEvaluator` and Vertex AI SDK**
+> {:.title}
 > 
 > `AgentEvaluator` (and specifically its `ResponseEvaluator` component) in `google-adk` leverages the `vertexai.preview.evaluation.EvalTask` from the `google-cloud-aiplatform` (Vertex AI) library. This evaluation task, even for metrics that might seem computable locally (like `ROUGE`), often performs an initialization step that expects a valid Google Cloud Project to be configured for Vertex AI.
 > 
 > This is why when running `adk eval` through command-line, you would need to set the GOOGLE_CLOUD_PROJECT environment variable to a valid Google Cloud Project ID, even if you are not using Vertex AI (`GOOGLE_GENAI_USE_VERTEXAI` is set to `false`).
-> {: .prompt-danger }
+{: .prompt-danger }
 
 **What's Next?**
 

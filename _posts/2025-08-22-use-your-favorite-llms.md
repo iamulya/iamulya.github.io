@@ -103,10 +103,11 @@ if __name__ == "__main__":
 
 `LiteLlm` translates ADK requests to the format `litellm` expects and converts `litellm`'s responses back to ADK's `LlmResponse`.
 
-> ## Best Practice: Consistent Model Naming with LiteLLM
+> **Best Practice: Consistent Model Naming with LiteLLM**
+> {:.title}
 > 
 > Refer to the litellm documentation for the correct model name strings for various providers (e.g., "openai/gpt-4", "azure/my-deployment", "huggingface/meta-llama/Llama-2-7b-chat-hf"). Ensure the necessary API keys are set as environment variables as per litellm's requirements.
-> {: .prompt-tip }
+{: .prompt-tip }
 
 ### Using Local Models with Ollama via `LiteLlm`
 
@@ -178,18 +179,20 @@ if __name__ == "__main__":
         print("Ollama agent not run due to setup issues.")
 ```
 
-> ## Local Development and Experimentation with Ollama
+> **Local Development and Experimentation with Ollama**
+> {:.title}
 > 
 > - **Cost-effective development:** No API costs for local model inference.
 > - **Offline capabilities:** Run agents without internet access (once models are downloaded).
 > - **Privacy:** Data doesn't leave your machine for inference.
 > - **Rapid experimentation:** Quickly test different open-source models.
-> {: .prompt-tip }
+{: .prompt-tip }
 
-> ## Ollama Model Performance
+> **Ollama Model Performance**
+> {:.title}
 > 
 > Not all models pulled via Ollama might support all features LiteLLM or ADK expect (e.g., complex tool calling might be less reliable with some smaller local models).
-> {: .prompt-danger }
+{: .prompt-danger }
 
 ### Using Self-Hosted Endpoints via `LiteLlm`
 
@@ -303,10 +306,11 @@ gemini_agent_explicit = Agent(
 
 The `Gemini` class handles the specifics of communicating with the Gemini API, including authentication (via API key or Application Default Credentials if using Vertex AI through environment settings) and request/response formatting.
 
-> ## Automatic Vertex AI Detection when using Gemini models
+> **Automatic Vertex AI Detection when using Gemini models**
+> {:.title}
 > 
 > The `google.adk.models.Gemini` class (and the underlying `google-generativeai` SDK) can often automatically detect if it should use Vertex AI endpoints if your environment is configured for it (e.g., `gcloud auth application-default login` and `GOOGLE_CLOUD_PROJECT` set). If `os.environ.get('GOOGLE_GENAI_USE_VERTEXAI', '0').lower()` in `['true', '1']`, it will prioritize Vertex AI. Otherwise, it will look for `GOOGLE_API_KEY` and prioritize Google AI Studio endpoint. This simplifies switching between direct Gemini API and Vertex AI managed models.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Integrating models from Vertex AI Model Garden
 
@@ -374,10 +378,11 @@ Claude Agent:")
         print()
 ```
 
-> ## Model Naming for Claude on Vertex AI
+> **Model Naming for Claude on Vertex AI**
+> {:.title}
 > 
 > When using Claude models via Vertex AI, the model name string needs to be the specific identifier Vertex AI uses (e.g., "claude-sonnet-4@20250514"). Check the Vertex AI documentation for the correct model IDs.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Configuring LLM Requests (`LlmRequest`)
 
@@ -389,7 +394,7 @@ Key components of `LlmRequest`:
 - **`contents: list[types.Content]`**: This is the conversation history. It's a list of `google.genai.types.Content` objects. Each `Content` object has a `role` (`"user"` or `"model"`) and `parts` (a list of `Part` objects, which can be text, function calls, function responses, or inline data).
     - The history is ordered chronologically.
     - For models that support alternating user/model turns, ADK ensures this structure.
-- **`config: Optional[types.GenerateContentConfig]`**: As discussed in @sec-first-agent, this holds:
+- **`config: Optional[types.GenerateContentConfig]`**: As discussed in the chapter about the first agent, this holds:
     - `system_instruction: Optional[str]`: The compiled system prompt (agent instruction + global instruction + tool-provided instructions like from `PreloadMemoryTool`).
     - `tools: Optional[list[types.Tool]]`: A list of `types.Tool` objects, where each `Tool` contains `FunctionDeclaration`s for the tools available to the LLM.
     - Generation parameters like `temperature`, `max_output_tokens`, `safety_settings`.
@@ -397,7 +402,7 @@ Key components of `LlmRequest`:
 - **`live_connect_config: types.LiveConnectConfig`**: Configuration specific to live, bidirectional streaming (speech config, response modalities, etc.).
 - **`tools_dict: dict[str, BaseTool]`**: (Internal to ADK) A mapping of tool names to their actual `BaseTool` instances, used by the LLM Flow to execute the correct tool when the LLM requests a function call.
 
-The LLM Flow (@sec-flows-planners) and various request processors (like `instructions.py`, `contents.py`, `functions.py`) work together to populate these fields based on the agent's definition, the session history, and available tools.
+The LLM Flow and various request processors (like `instructions.py`, `contents.py`, `functions.py`) work together to populate these fields based on the agent's definition, the session history, and available tools.
 
 ## Interpreting LLM Responses (`LlmResponse`)
 
@@ -423,11 +428,12 @@ Key components of `LlmResponse`:
 
 The LLM Flow converts these `LlmResponse` objects into ADK `Event` objects, which are then yielded by the `Runner`.
 
-> ## Inspecting LlmResponse in Callbacks and Traces
+> **Inspecting LlmResponse in Callbacks and Traces**
+> {:.title}
 > 
 > - The `after_model_callback` in an `LlmAgent` receives the raw `LlmResponse`. This is an excellent place to log detailed information like `usage_metadata`, inspect `grounding_metadata`, or modify the response before ADK processes it further.
 > - The Dev UI's Trace view will show the details of `LlmRequest`s and `LlmResponse`s for each LLM interaction, which is invaluable for debugging.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Streaming Responses
 
@@ -484,10 +490,11 @@ if __name__ == "__main__":
 
 When you run this, you'll see the story appear word by word or sentence by sentence, rather than all at once.
 
-> ## Best Practice: Use Streaming for Better UX
+> **Best Practice: Use Streaming for Better UX**
+> {:.title}
 > 
 > For conversational agents, streaming responses significantly improves the user experience by providing immediate feedback instead of making the user wait for the entire response to be generated. Enable it via RunConfig when calling runner.run_async.
-> {: .prompt-tip }
+{: .prompt-tip }
 
 **What's Next?**
 

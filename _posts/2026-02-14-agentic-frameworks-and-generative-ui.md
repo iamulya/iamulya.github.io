@@ -9,7 +9,7 @@ image:
   alt: "Generative AI Handbook by Amulya Bhatia"
 ---
 
-> This article is part of my web book series. All of the chapters can be found [here](https://iamulya.one/tags/generative-ai-handbook//). For any issues around this book or if you'd like the pdf/epub version, contact me on [LinkedIn](https://www.linkedin.com/in/amulya-bhatia-01627a42/)
+> This article is part of my book [Generative AI Handbook](https://iamulya.one/tags/generative-ai-handbook). For any issues around this book or if you'd like the pdf/epub version, contact me on [LinkedIn](https://www.linkedin.com/in/amulya-bhatia-01627a42/)
 {: .prompt-info }
 
 The era of the "Chatbot"—a simple text-in, text-out interface—has largely ended for professional tooling. We have moved toward **Agentic Interfaces** and **Generative UI (also called Agentic UI)**.
@@ -59,11 +59,12 @@ flowchart TD
 ```
 
 
-> ## Persistence & Time Travel
+> **Persistence & Time Travel**
+> {:.title}
 > Modern frameworks implement **Checkpointers**.
 > Every time the state changes (at every node), the snapshot is saved to a database (Postgres/Redis).
 > This enables **Time Travel**: If an agent goes down a rabbit hole, a human user can "rewind" the state to 5 steps ago, modify a variable, and fork the execution path.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Connectivity: MCP and Skills
 
@@ -152,10 +153,11 @@ sequenceDiagram
 ```
 
 
-> ## A2A vs. Multi-Agent Frameworks
+> **A2A vs. Multi-Agent Frameworks**
+> {:.title}
 > Frameworks like AutoGen or CrewAI run agents in a single process.
 > A2A refers to distributed agents. Your "Personal Shopper Agent" (running on your phone) talking to Amazon's "Sales Agent" (running in AWS) is an A2A interaction. This requires strict authentication and economic layers (token payments) often handled by the protocol.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Generative UI (Agentic UI)
 

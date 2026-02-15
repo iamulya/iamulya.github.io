@@ -32,7 +32,7 @@ ADK's telemetry, accessible via `google.adk.telemetry.tracer` (an OpenTelemetry 
 
 **How to Use/View This Telemetry:**
 
-1. **ADK Development UI (Trace View):** This is the **primary and easiest way** to visualize ADK's telemetry for local development. The hierarchical trace view shown in @sec-setup-env is a direct visual representation of these OpenTelemetry spans and their relationships. Each collapsible item in that trace corresponds to a span.
+1. **ADK Development UI (Trace View):** This is the **primary and easiest way** to visualize ADK's telemetry for local development. The hierarchical trace view shown in the earlier chapter is a direct visual representation of these OpenTelemetry spans and their relationships. Each collapsible item in that trace corresponds to a span.
 2. **Cloud Trace:** If you have set `--trace_to_cloud` during your deployment using `adk deploy` or `adk api_server` command, your tracing data will be available in Cloud Trace in Google Cloud. Viewing Traces in Google Cloud Console:
 - Navigate to the Google Cloud Console.
 - In the navigation menu, go to Operations > Trace > Trace list.
@@ -41,10 +41,11 @@ ADK's telemetry, accessible via `google.adk.telemetry.tracer` (an OpenTelemetry 
 2. **Configuring an OpenTelemetry Exporter (Advanced/Production):**
 For production monitoring or more advanced analysis, you can configure an OpenTelemetry SDK with an exporter to send this trace data to an observability backend (e.g., Google Cloud Trace, Jaeger, Zipkin, Prometheus).
     
-> ## Dev UI Trace View IS OpenTelemetry
+> **Dev UI Trace View IS OpenTelemetry**
+> {:.title}
 > 
-> The hierarchical trace view you see in the ADK Dev UI (@sec-setup-env) is powered by ADK's internal OpenTelemetry instrumentation. The Dev UI sets up an in-memory OTel exporter and a custom processor to render these spans visually. This means you're already benefiting from OTel when using the Dev UI.
-> {: .prompt-info }
+> The hierarchical trace view you see in the ADK Dev UI is powered by ADK's internal OpenTelemetry instrumentation. The Dev UI sets up an in-memory OTel exporter and a custom processor to render these spans visually. This means you're already benefiting from OTel when using the Dev UI.
+{: .prompt-info }
 
 ## Effective Logging Strategies for ADK Agents
 
@@ -62,18 +63,20 @@ While OpenTelemetry provides structured traces, traditional logging remains esse
 - **`MemoryService` and `ArtifactService` Custom Implementations:** Log interactions with your backend storage.
 - **`Runner` Customizations (if any):** Log high-level lifecycle events.
 
-> ## Best Practice: Use Specific Loggers and Levels
+> **Best Practice: Use Specific Loggers and Levels**
+> {:.title}
 > 
 > - Get specific loggers for your modules (e.g., `logging.getLogger(__name__)` or `logging.getLogger("my_app.my_module")`). This allows fine-grained control over log output from different parts of your application.
 > - Use appropriate log levels: `DEBUG` for detailed diagnostic information, `INFO` for general operational messages, `WARNING` for potential issues, `ERROR` for failures, `CRITICAL` for severe errors.
 > - Control ADK's internal logging verbosity: 
 > `logging.getLogger('google_adk').setLevel(logging.INFO)` (or `DEBUG`).
-> {: .prompt-tip }
+{: .prompt-tip }
 
-> ## Logging Sensitive Data
+> **Logging Sensitive Data**
+> {:.title}
 > 
 > Be extremely careful about what you log, especially at INFO or DEBUG levels. Avoid logging Personally Identifiable Information (PII), API keys, full prompts/responses if they might contain sensitive user data, or any other confidential information, particularly if logs are sent to a centralized logging system. Implement redaction or selective logging if necessary.
-> {: .prompt-danger }
+{: .prompt-danger }
 
 ## Debugging Techniques
 
@@ -164,11 +167,12 @@ Effective debugging is key to efficient agent development.
     - **Scopes/Permissions:** Ensure the credentials used have the necessary permissions/scopes for the API operation the tool is trying to perform.
     - **OAuth Flow (Dev UI):** If using OAuth, ensure you're completing the consent flow correctly when prompted by the Dev UI.
 
-> ## Best Practice: Isolate and Test Components
+> **Best Practice: Isolate and Test Components**
+> {:.title}
 > 
 > - **Test Tools Independently:** Before integrating a complex tool into an agent, test its Python function directly with various inputs.
 > - **Test Agent Logic with Mocked Tools/LLMs:** For unit testing an agent's orchestration logic, you can mock the LLM responses or tool outputs to simulate different scenarios without actual external calls. (This is an advanced topic, but `before_model_callback` and `before_tool_callback` can help here).
-> {: .prompt-tip }
+{: .prompt-tip }
 
 **What's Next?**
 

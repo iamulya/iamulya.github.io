@@ -160,7 +160,8 @@ YOU: {prompt2}")
     asyncio.run(main())
 ```
 
-> ## types.Part for Artifact Content
+> **types.Part for Artifact Content**
+> {:.title}
 > 
 > Artifacts are saved and loaded as google.genai.types.Part objects. This allows you to store various types of content:
 > 
@@ -169,7 +170,7 @@ YOU: {prompt2}")
 > - `Part(inline_data=Blob(mime_type="application/pdf", data=pdf_bytes))` for other file types.
 > 
 > The `mime_type` is important for correct interpretation when loaded.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## `GcsArtifactService`: Storing Artifacts in Google Cloud Storage
 
@@ -247,16 +248,18 @@ The agent code itself (like `artifact_agent` in the `InMemoryArtifactService` ex
 
 ```
 
-> ## Best Practice: GcsArtifactService for Production
+> **Best Practice: GcsArtifactService for Production**
+> {:.title}
 > 
 > For any application requiring persistent artifact storage, scalability, and integration with other Google Cloud services, GcsArtifactService is the recommended choice. GCS offers durability, versioning (though ADK handles its own version numbers in the path), and fine-grained access control.
-> {: .prompt-tip }
+{: .prompt-tip }
 
-> ## GCS Permissions and Costs
+> **GCS Permissions and Costs**
+> {:.title}
 > 
 > - Ensure the service account or user credentials used by your ADK application have the necessary IAM permissions on the GCS bucket (e.g., `roles/storage.objectAdmin` for full control, or more restricted roles like `roles/storage.objectCreator` and `roles/storage.objectViewer`).
 > - Storing large or numerous artifacts in GCS will incur costs. Monitor your usage.
-> {: .prompt-danger }
+{: .prompt-danger }
 
 ## Using the `LoadArtifactsTool`
 
@@ -370,10 +373,11 @@ YOU: {prompt2}")
     asyncio.run(main())
 ```
 
-> ## Two-Step Artifact Access with LoadArtifactsTool
+> **Two-Step Artifact Access with LoadArtifactsTool**
+> {:.title}
 > 
 > The two-step nature of LoadArtifactsTool (awareness then content loading on demand) is efficient. It prevents large artifact contents from being added to the prompt history unnecessarily on every turn, only loading them when the LLM explicitly requests them after being made aware of their existence.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Saving User-Uploaded Files as Artifacts 
 
@@ -451,10 +455,11 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-> ## Best Practice: save_input_blobs_as_artifacts for User Files
+> **Best Practice: save_input_blobs_as_artifacts for User Files**
+> {:.title}
 > 
 > This RunConfig option is the standard way to handle file uploads from users in ADK. It cleanly separates the act of receiving and storing the file from the agent's logic for processing it, promoting modularity.
-> {: .prompt-tip }
+{: .prompt-tip }
 
 **What's Next?**
 

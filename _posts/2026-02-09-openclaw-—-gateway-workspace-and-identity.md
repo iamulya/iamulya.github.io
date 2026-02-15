@@ -10,6 +10,7 @@ image:
 ---
 
 > This article is part of a series of articles around OpenClaw. All of the articles can be found [here](https://iamulya.one/tags/openclaw/)
+{: .prompt-info }
 
 OpenClaw is not a chatbot script. It is an operating system for agency.
 
@@ -43,9 +44,10 @@ OpenClaw enforces a strict **Singleton Pattern**. Only one Gateway process is al
 If you attempt to start a second gateway, it will fail immediately with `EADDRINUSE`. This is a feature, not a bug. It prevents "Split Brain" scenarios where two instances of an agent try to manage the same WhatsApp session, which would cause the provider to ban your number due to rapid socket flapping.
 
 
-> ## Dangerous Binds
+> **Dangerous Binds**
+> {:.title}
 > By default, the Gateway binds to `loopback` (localhost). Do not bind to `0.0.0.0` or `lan` unless you have configured **Gateway Authentication** with a strong token. Exposing the Gateway to the public internet without auth allows anyone to execute shell commands on your machine via the API.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## The Workspace Contract
 
@@ -68,9 +70,10 @@ The Workspace Contract relies on specific files that are injected into the conte
 When a session starts, OpenClaw reads these files, truncates them if they exceed token limits (`agents.defaults.bootstrapMaxChars`), and injects them directly into the System Prompt. This ensures that even if you wipe the session history, the agent wakes up with its core identity intact.
 
 
-> ## Git-Backed Brains
+> **Git-Backed Brains**
+> {:.title}
 > Treat your `~/.openclaw/workspace` as code. Initialize a private git repository inside it. This allows you to roll back changes if the agent hallucinates a bad update to `USER.md`, and provides a history of how your agent's instructions have evolved.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## The Bootstrap Ritual
 
@@ -101,8 +104,9 @@ The agent writes a running log of its activities to `memory/YYYY-MM-DD.md`. This
 For facts that must persist across sessions (e.g., "The user is allergic to peanuts" or "The WiFi password is..."), the agent is instructed to write to `MEMORY.md` (or `memory.md`). This file is read at the start of every session alongside the Sacred Texts.
 
 
-> ## The Memory Flush
+> **The Memory Flush**
+> {:.title}
 > OpenClaw implements a "Pre-Compaction Memory Flush." Before the context window fills up and the system triggers summarization (compaction), the Gateway injects a silent turn instructing the model: *"Session nearing compaction. Write any durable notes to memory now."* This ensures that important context isn't lost when the raw transcript is compressed.
-> {: .prompt-info }
+{: .prompt-info }
 
 By grounding the AI's state in the filesystem, OpenClaw achieves persistence without vendor lock-in. Your agent's brain is just a folder of text files. You can copy it, back it up, or sync it via Dropbox, and the ghost will follow the files.

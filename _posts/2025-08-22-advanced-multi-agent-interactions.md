@@ -237,26 +237,29 @@ sequenceDiagram
 ```
 
 
-> ## Stateful and Cyclical Logic with LangGraph
+> **Stateful and Cyclical Logic with LangGraph**
+> {:.title}
 > 
 > LangGraphAgent shines when you need to model agent interactions that are not strictly hierarchical or sequential but involve cycles, complex conditional logic, or require robust state persistence across many turns. LangGraph's checkpointer mechanism is particularly useful for long-running, resumable agent processes.
-> {: .prompt-info }
+{: .prompt-info }
 
-> ## Experimental Integration and Complexity
+> **Experimental Integration and Complexity**
+> {:.title}
 > 
 > - The `LangGraphAgent` integration is marked as somewhat experimental in ADK. Its API or behavior might evolve.
 > - Building and debugging LangGraph applications themselves can be complex. You'll need a good understanding of LangGraph's concepts (state, nodes, edges, checkpointers etc.).
 > - Ensure that the state schema used in your LangGraph graph and the message formats are compatible with how `LangGraphAgent` converts ADK history and expects output.
-> {: .prompt-danger }
+{: .prompt-danger }
 
-> ## Best Practice: Use LangGraph for "Inner Loop" Complexity
+> **Best Practice: Use LangGraph for "Inner Loop" Complexity**
+> {:.title}
 > 
 > Consider using LangGraphAgent to encapsulate a particularly complex part of your overall agent system. An ADK orchestrator agent could delegate to a LangGraphAgent for a sub-task that benefits from LangGraph's cyclical graph capabilities, while the broader multi-agent system is still managed using ADK's hierarchical patterns.
-> {: .prompt-tip }
+{: .prompt-tip }
 
 ## Agent-to-Agent (A2A) Communication Protocol
 
-In @sec-mas-design, we introduced the concept of multi-agent systems where ADK agents can transfer control to one another within the same application. However, the vision for AI agent collaboration extends far beyond a single process or framework. The **Agent-to-Agent (A2A) Communication Protocol** is an open standard, initiated by Google, designed to enable seamless communication and interoperability between independent AI agent systems, even if they are built on different frameworks, by different companies, and running on separate servers.
+Previously we introduced the concept of multi-agent systems where ADK agents can transfer control to one another within the same application. However, the vision for AI agent collaboration extends far beyond a single process or framework. The **Agent-to-Agent (A2A) Communication Protocol** is an open standard, initiated by Google, designed to enable seamless communication and interoperability between independent AI agent systems, even if they are built on different frameworks, by different companies, and running on separate servers.
 
 This section provides a detailed overview of the A2A protocol, its core concepts, and how it facilitates inter-agent collaboration. While ADK doesn't provide a full A2A client or server implementation out-of-the-box for *remote* communication, understanding A2A is crucial if you plan to:
 
@@ -349,10 +352,11 @@ graph TD
 
 
 
-> ## Agent Cards for Capability Discovery
+> **Agent Cards for Capability Discovery**
+> {:.title}
 > 
 > The AgentCard is central to A2A. It allows an A2A Client to dynamically understand what a remote agent can do (skills), what kind of data it expects (inputModes), what it produces (outputModes), and how to securely connect to it (url, securitySchemes). Well-defined Agent Cards are crucial for effective agent discovery and interoperability.
-> {: .prompt-info }
+{: .prompt-info }
 
 ### Key A2A RPC Methods (High-Level)
 
@@ -423,12 +427,13 @@ title: Simplified A2A Streaming with SSE.
     - When task state changes significantly (e.g., completion), A2A Server POSTs a notification to the client's webhook.
     - Client's webhook service receives notification, then typically calls `tasks/get` to fetch full task details.
 
-> ## Choosing the Right Interaction Pattern
+> **Choosing the Right Interaction Pattern**
+> {:.title}
 > 
 > - Use `message/send` with polling (`tasks/get`) for tasks that are somewhat long but where the client can afford to check periodically.
 > - Prefer `message/stream` for interactive experiences requiring real-time updates or incremental results display.
 > - Use push notifications for very long-running tasks (minutes/hours/days) or when clients (like mobile apps or serverless functions) cannot maintain persistent connections.
-> {: .prompt-tip }
+{: .prompt-tip }
 
 ### Authentication, Authorization, and Security
 
@@ -440,10 +445,11 @@ A2A emphasizes leveraging standard web security:
 - **Push Notification Security:** Requires careful validation of webhook URLs by the server (to prevent SSRF) and strong authentication of notifications by the client's webhook receiver. The spec suggests mechanisms for the server to authenticate to the client's webhook.
 - **Input Validation:** Servers must validate all RPC parameters and message/artifact content.
 
-> ## Security is a Shared Responsibility in A2A
+> **Security is a Shared Responsibility in A2A**
+> {:.title}
 > 
 > While the A2A protocol provides fields in the Agent Card to declare security requirements (e.g., "this API requires OAuth2 with 'read:pets' scope"), the actual implementation of acquiring tokens, validating them, and enforcing authorization policies rests with the A2A Client and A2A Server implementers, using standard web security libraries and practices.
-> {: .prompt-info }
+{: .prompt-info }
 
 ### Relationship to MCP (Model Context Protocol)
 
@@ -536,15 +542,17 @@ class RemoteA2AAgentTool(BaseTool):
 
 ```
 
-> ## A2A for True Inter-Framework Collaboration
+> **A2A for True Inter-Framework Collaboration**
+> {:.title}
 > 
 > If your goal is to have an ADK agent interact with an agent built in LangGraph, CrewAI, Semantic Kernel, or any other framework that can expose or consume an A2A interface, then understanding and implementing A2A (either as a server wrapper for your ADK agent or a client tool within ADK) is the path forward.
-> {: .prompt-tip }
+{: .prompt-tip }
 
-> ## A2A is an Evolving Specification
+> **A2A is an Evolving Specification**
+> {:.title}
 > 
 > The A2A protocol is still under development and evolving. Its adoption and tooling are growing but may not be as mature as some intra-framework communication methods. Implementing a full A2A server around your ADK agent requires careful consideration of the A2A spec and robust error handling, serialization, and network communication logic.
-> {: .prompt-warning }
+{: .prompt-warning }
 
 **What's Next?**
 

@@ -31,8 +31,6 @@ Let's create an agent with specific model settings to make its creative writing 
 #
 
 from agents import Agent, Runner, ModelSettings
-from tinib00k.utils import DEFAULT_LLM, load_and_check_keys
-load_and_check_keys()
 
 def main():
 
@@ -40,7 +38,7 @@ def main():
     storyteller_agent = Agent(
         name="Creative Storyteller",
         instructions="You are a master storyteller who writes compelling, short opening paragraphs for fantasy novels.",
-        model=DEFAULT_LLM,
+        model="litellm/gemini/gemini-2.0-flash",
         model_settings=ModelSettings(
             temperature=0.8, # Increase creativity
             max_tokens=250   # Limit the length of the response
@@ -59,8 +57,8 @@ if __name__ == "__main__":
     main()
 ```
 
-
->  Crafting Effective Instructions
+> **Crafting Effective Instructions**
+> {:.title}
 > 
 > The `instructions` parameter is your primary tool for prompt engineering. A good system prompt should be clear, specific, and provide context. Consider including:
 > 
@@ -68,7 +66,7 @@ if __name__ == "__main__":
 > *   **Goal:** "Your goal is to provide a concise summary of the provided text."
 > *   **Constraints:** "You must not use technical jargon. Always respond in under 100 words."
 > *   **Formatting:** "The output must be a markdown-formatted list."
-{: .prompt-info }
+{: .prompt-tip }
 
 ## Advanced Model Control
 
@@ -89,9 +87,6 @@ Let's build a workflow orchestrator that uses all three of these settings to eff
 ```python
 import asyncio
 from agents import Agent, Runner, function_tool, ModelSettings
-
-from tinib00k.utils import DEFAULT_LLM, load_and_check_keys
-load_and_check_keys()
 
 # --- Tool Definitions ---
 @function_tool
@@ -116,7 +111,7 @@ async def main():
     orchestrator_agent = Agent(
         name="Workflow Orchestrator",
         instructions="You are a system orchestrator. Your job is to prepare the system for the user by calling all necessary setup tools.",
-        model=DEFAULT_LLM, # A model that supports parallel calls
+        model="litellm/gemini/gemini-2.0-flash", # A model that supports parallel calls
         tools=[setup_database, authenticate_user],
         model_settings=ModelSettings(
             tool_choice="required",            # Must call tools on the first turn
@@ -140,18 +135,42 @@ if __name__ == "__main__":
 
 When you run this, you'll see the print statements from both tools interleave, confirming they were executed concurrently. You'll also see the model's reasoning printed before the final output.
 
-
->  `parallel_tool_calls` is Provider-Dependent
+> **`parallel_tool_calls` is Provider-Dependent**
+> {:.title}
 > 
 > The ability to request multiple tools in one turn is an advanced feature. While newer OpenAI models (`gpt-4o`, etc.) excel at this, support among other providers varies. 
 > 
 > However, if you use a model that does not support it, the SDK will not fail. Instead, the model will likely fall back to calling the tools sequentially, one per turn, which will be less efficient. Always test this behavior with your chosen model.
-{: .prompt-info }
+{: .prompt-warning }
 
-![*Sequence diagram for parallel tool calls.*](/assets/img/2025-06-23-anatomy-of-an-agent/figure-1.png)
+```mermaid
+---
+title: Sequence diagram for parallel tool calls.
+---
+sequenceDiagram
+    participant Runner
+    participant LLM
+    participant ToolA as setup_database
+    participant ToolB as authenticate_user
+
+    Runner->>+LLM: Prompt + Tools + parallel_tool_calls=True
+    LLM-->>-Runner: Return [ToolCall(A), ToolCall(B)] in one response
+
+    par
+        Runner->>+ToolA: Execute setup_database()
+        ToolA-->>-Runner: Return result
+    and
+        Runner->>+ToolB: Execute authenticate_user()
+        ToolB-->>-Runner: Return result
+    end
+
+    Runner->>+LLM: Send both tool results in next turn
+    LLM-->>-Runner: Generate final answer
+```
 
 
-
+> **Preventing Infinite Loops with `tool_choice`**
+> {:.title}
 > Forcing tool use with `tool_choice="required"` is powerful but dangerous. If you don't manage it carefully, you can create an infinite loop where the agent calls a tool, gets the result, and is then forced to call a tool again.
 > 
 > To prevent this, the SDK has a built-in safety feature: the `Agent`'s `reset_tool_choice` parameter, which defaults to `True`. After an agent turn in which a tool is used, the `Runner` will automatically reset the `tool_choice` setting to `"auto"` for the next turn, allowing the LLM to generate a final response instead of being forced to call another tool. You can disable this by setting `agent.reset_tool_choice = False` if you have a specific use case that requires continuous forced tool use.
@@ -167,9 +186,6 @@ The function receives a `RunContextWrapper` object, which gives it access to the
 from dataclasses import dataclass
 from typing import Literal
 from agents import Agent, Runner, RunContextWrapper
-
-from tinib00k.utils import DEFAULT_LLM, load_and_check_keys
-load_and_check_keys()
 
 # 1. Define a context class to hold our state
 @dataclass
@@ -194,7 +210,7 @@ def get_moody_instructions(
 moody_agent = Agent[AgentContext](
     name="Moody Assistant",
     instructions=get_moody_instructions, # Pass the function, not its result
-    model=DEFAULT_LLM
+    model="litellm/gemini/gemini-2.0-flash"
 )
 
 def main():
@@ -230,9 +246,6 @@ The context is passed to tools and hooks inside a `RunContextWrapper`. This wrap
 from dataclasses import dataclass, field
 from agents import Agent, Runner, RunContextWrapper, function_tool
 
-from tinib00k.utils import DEFAULT_LLM, load_and_check_keys
-load_and_check_keys()
-
 # 1. Define a context class to hold session data
 @dataclass
 class UserSession:
@@ -253,7 +266,7 @@ def add_to_cart(
 shopping_agent = Agent[UserSession](
     name="Shopping Assistant",
     instructions="Help the user with their shopping. Use your tools to manage the cart.",
-    model=DEFAULT_LLM,
+    model="litellm/gemini/gemini-2.0-flash",
     tools=[add_to_cart]
 )
 
@@ -269,8 +282,8 @@ def main():
 if __name__ == "__main__":
     main()
 ```
-
->  Context is Local, Not Sent to the LLM
+> **Context is Local, Not Sent to the LLM**
+> {:.title}
 > 
 > It's critical to understand that the `context` object itself is **never** sent to the LLM. It is a local Python object for your code's use only. If you need the LLM to be aware of information from the context (like a user's name), you must explicitly include it in the `instructions` or have a tool return that information into the conversation history.
 {: .prompt-info }
@@ -280,7 +293,6 @@ if __name__ == "__main__":
 Often, you don't want a free-form text response from an agent; you want structured data that your application can easily work with. The `output_type` parameter on the `Agent` class lets you specify a Pydantic `BaseModel` or `dataclass` that the agent's final output must conform to.
 
 The SDK will automatically:
-
 1.  Generate a JSON schema from your Pydantic model.
 2.  Instruct the LLM to respond with JSON matching that schema.
 3.  Parse and validate the LLM's JSON output, returning a Python object of your specified type.
@@ -304,9 +316,10 @@ event_extractor_agent = Agent(
 # ...
 ```
 
-
+> **Strict Mode for JSON Schemas**
+> {:.title}
 > By default, the SDK generates JSON schemas in **"strict mode"**. This enforces a subset of the JSON Schema standard that guarantees the LLM's output will be valid JSON. This means some Pydantic features, like `Union` types or dictionaries with non-string keys, are not supported in `output_type`. If you must use a non-strict schema, you can configure it by wrapping your type in `AgentOutputSchema(MyType, strict_json_schema=False)`.
-{: .prompt-info }
+{: .prompt-danger }
 
 ## Observing the Agent with Lifecycle Hooks
 

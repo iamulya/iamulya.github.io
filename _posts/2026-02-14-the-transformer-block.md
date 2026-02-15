@@ -9,7 +9,7 @@ image:
   alt: "Generative AI Handbook by Amulya Bhatia"
 ---
 
-> This article is part of my web book series. All of the chapters can be found [here](https://iamulya.one/tags/generative-ai-handbook//). For any issues around this book or if you'd like the pdf/epub version, contact me on [LinkedIn](https://www.linkedin.com/in/amulya-bhatia-01627a42/)
+> This article is part of my book [Generative AI Handbook](https://iamulya.one/tags/generative-ai-handbook). For any issues around this book or if you'd like the pdf/epub version, contact me on [LinkedIn](https://www.linkedin.com/in/amulya-bhatia-01627a42/)
 {: .prompt-info }
 
 In the previous chapter, we learned about **Attention**—the mechanism that allows words to "talk" to each other.
@@ -70,7 +70,8 @@ graph TD
 ```
 
 
-> ## Size of Q, K, V Vectors
+> **Size of Q, K, V Vectors**
+> {:.title}
 > For a transformer:
 > 
 > * Q size per token per head = Size of Embedding / Number of Heads
@@ -84,7 +85,7 @@ graph TD
 > * 32 different V vectors of size 96
 > 
 > Add to that billions, sometimes trillions of parameters (weights) and you have the reason why these models need a lot of memory (Cache + VRAM)!
-> {: .prompt-info }
+{: .prompt-info }
 
 ## The Feed-Forward Network (The Brain)
 

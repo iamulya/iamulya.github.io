@@ -141,14 +141,15 @@ When you run `calculator.py`:
 - ADK will execute `simple_calculator(operand1=5.0, operand2=3.0, operation='add')`.
 - The result (`8.0`) will be sent back to the LLM, which will then formulate the final natural language response.
 
-> ## Best Practice: Clear Docstrings for FunctionTools
+> **Best Practice: Clear Docstrings for FunctionTools**
+> {:.title}
 > 
 > The quality of your Python function's docstring directly impacts how well the LLM can use your tool.
 > 
 > - **Overall Description:** The main docstring of the function becomes the tool's `description`. Make it clear what the tool does and when it should be used.
 > - **Argument Descriptions:** Describe each argument clearly in the `Args:` section of your docstring (Google Style Python Docstrings are recommended). ADK attempts to parse these to provide richer parameter descriptions to the LLM.
 > - **Return Description:** Describe what the function returns in the `Returns:` section.
-> {: .prompt-tip }
+{: .prompt-tip }
 
 ## Designing Tool Inputs and Outputs: Type Hinting and Pydantic
 
@@ -355,7 +356,8 @@ class UpdateUserProfileTool(BaseTool):
 user_profile_updater_tool = UpdateUserProfileTool()
 ```
     
-> ## Pydantic for Robust Tool Inputs
+> **Pydantic for Robust Tool Inputs**
+> {:.title}
 > 
 > Using Pydantic models for complex tool inputs is highly recommended. It provides:
 >  
@@ -364,7 +366,7 @@ user_profile_updater_tool = UpdateUserProfileTool()
 > - Easy serialization/deserialization.
 > 
 > This makes your tools more robust and easier for the LLM to use correctly.
-> {: .prompt-info }
+{: .prompt-info }
 
 **Return Types:**
 The return type of your Python function will also be hinted to the LLM if possible (though LLMs primarily focus on input schemas for tool selection). Simple types (`str`, `int`, `float`, `bool`, `list`, `dict`) are generally fine. Complex return objects are usually serialized to JSON (or a string representation) by ADK before being sent back to the LLM as the tool's output. The LLM then typically processes this string output.
@@ -411,14 +413,15 @@ This JSON-like structure is what the LLM uses to understand:
 - Any descriptions for those parameters (parsed from the docstring's `Args:` section).
 - Which parameters are `required`.
 
-> ## LLM Schema Interpretation
+> **LLM Schema Interpretation**
+> {:.title}
 > 
 > While ADK does its best to generate an accurate schema, LLMs can sometimes misinterpret complex schemas or have subtle preferences for how parameters are described. If a tool isn't being called correctly:
 >  
 > 1. **Simplify:** Try simplifying your function signature or Pydantic model.
 > 2. **Clarify Descriptions:** Make your function and parameter docstrings extremely clear and explicit.
 > 3. **Inspect the Trace:** Use the ADK Dev UI's Trace view to see the exact `FunctionDeclaration` being sent to the LLM and how the LLM attempts to fill in the arguments. This is invaluable for debugging tool usage.
-> {: .prompt-warning }
+{: .prompt-warning }
 
 
 ## Tool Context (`ToolContext`): Accessing Session, State, and Artifacts
@@ -476,14 +479,15 @@ The `ToolContext` object provides:
 - `user_content: Optional[Content]`: The initial user message that started the current invocation.
 - `actions: EventActions`: Allows the tool to signal actions like `skip_summarization` or `transfer_to_agent` (though direct transfer from tools is less common than from agent logic).
 
-> ## ToolContext for Stateful and Contextual Tools
+> **ToolContext for Stateful and Contextual Tools**
+> {:.title}
 > 
 > ToolContext is essential for building tools that:
 > 
 > - Need to remember information across their own invocations within the same session (using `tool_context.state`).
 > - Need to read or write files related to the session (using `tool_context.save/load_artifact`).
 > - Need to consult long-term memory (using `tool_context.search_memory`).
-> {: .prompt-info }
+{: .prompt-info }
 
 
 ## Tool Callbacks: `before_tool_callback`, `after_tool_callback` 

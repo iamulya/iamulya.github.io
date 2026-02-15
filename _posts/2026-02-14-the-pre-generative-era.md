@@ -9,7 +9,7 @@ image:
   alt: "Generative AI Handbook by Amulya Bhatia"
 ---
 
-> This article is part of my web book series. All of the chapters can be found [here](https://iamulya.one/tags/generative-ai-handbook//). For any issues around this book or if you'd like the pdf/epub version, contact me on [LinkedIn](https://www.linkedin.com/in/amulya-bhatia-01627a42/)
+> This article is part of my book [Generative AI Handbook](https://iamulya.one/tags/generative-ai-handbook). For any issues around this book or if you'd like the pdf/epub version, contact me on [LinkedIn](https://www.linkedin.com/in/amulya-bhatia-01627a42/)
 {: .prompt-info }
 
 Before the rise of the Transformer and the Large Language Models (LLMs) that define the current era of AI, the field of Natural Language Processing (NLP) struggled with a fundamental problem: **Memory**.
@@ -55,10 +55,11 @@ You might ask: *"Why not just make 'N' bigger? Let's make a 50-Gram model so it 
 
 The problem is the **Curse of Dimensionality**. Language is incredibly creative. If you look for a specific sequence of 50 words, you will likely find zero examples of it in human history. 
 
-> ## The Curse of Dimensionality
+> **The Curse of Dimensionality**
+> {:.title}
 > **Sparsity is the killer of N-Grams.**
-> If you increase $N$ to capture more context, the number of possible word combinations explodes. Most of these combinations will never appear in your training data. If the model encounters a sequence it has never seen before, its probability calculation hits zero, and it has no idea what to write next.
-> {: .prompt-warning }
+> If you increase N to capture more context, the number of possible word combinations explodes. Most of these combinations will never appear in your training data. If the model encounters a sequence it has never seen before, its probability calculation hits zero, and it has no idea what to write next.
+{: .prompt-warning }
 
 ## Recurrent Neural Networks (RNNs)
 
@@ -73,9 +74,6 @@ Unlike standard AI networks that process data in a straight line, an RNN loops b
 3.  It passes that updated memory to help it understand Word B.
 
 ```mermaid
----
-title: RNN Unrolled Through Time. Notice how the Hidden State (h) acts as a conveyor belt, carrying context from the past (left) to the present (right).
----
 sequenceDiagram
     participant Input as Inputs (x)
     participant Hidden as Hidden State (h)
@@ -191,9 +189,10 @@ flowchart LR
 ```
 
 
-> ## Why LSTMs worked
+> **Why LSTMs worked**
+> {:.title}
 > The key innovation of the LSTM was that it allowed gradients (learning signals) to flow backwards through the network without vanishing. This "superhighway" allowed models to finally remember context over long paragraphs, powering a few generations of Google Translate and Siri.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## The Encoder-Decoder Bottleneck
 

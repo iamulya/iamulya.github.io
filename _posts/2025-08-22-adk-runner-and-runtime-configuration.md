@@ -96,10 +96,11 @@ else:
     print("Skipping persistent Runner setup due to missing env vars (GOOGLE_CLOUD_PROJECT, ADK_ARTIFACT_GCS_BUCKET, ADK_DATABASE_URL).")
 ```
 
-> ## Decoupling Agent Logic from Persistence
+> **Decoupling Agent Logic from Persistence**
+> {:.title}
 > 
 > The Runner's design, requiring explicit service instances, promotes loose coupling. Your core agent logic (LlmAgent definitions, tools) remains independent of how sessions, artifacts, or memory are stored. This makes it easy to switch from local in-memory development to production-grade persistent backends.
-> {: .prompt-info }
+{: .prompt-info }
 
 **Core Execution Methods:**
 
@@ -200,10 +201,11 @@ It's perfect for:
 - Running examples from this book.
 - Unit tests where you don't need persistent state across test runs.
 
-> ## Best Practice: Start with InMemoryRunner
+> **Best Practice: Start with InMemoryRunner**
+> {:.title}
 > 
 > For new projects or when learning ADK, InMemoryRunner is the easiest way to get started. You can focus on defining your agent's logic and tools without worrying about database or cloud storage setup. Transition to a Runner with persistent services when you need to save conversation history or state beyond a single execution of your script.
-> {: .prompt-tip }
+{: .prompt-tip }
 
 ## Understanding `InvocationContext` and its Lifecycle
 
@@ -352,15 +354,17 @@ if __name__ == "__main__":
 - **`input_audio_transcription: Optional[types.AudioTranscriptionConfig]`**: (For BIDI streaming with audio input) If set, instructs the LLM (or ADK's internal transcriber if model doesn't support it directly on input) to provide a text transcription of the user's spoken audio.
 - **`max_llm_calls: int`**: (Default: 500) A safeguard to prevent runaway loops or excessive LLM interactions within a single `runner.run_async()` invocation. If the number of calls to `llm.generate_content_async()` exceeds this limit, an `LlmCallsLimitExceededError` is raised. Set to `0` or negative to disable the limit.
 
-> ## Best Practice: Use RunConfig for Runtime Flexibility
+> **Best Practice: Use RunConfig for Runtime Flexibility**
+> {:.title}
 > 
 > RunConfig allows you to change how an agent executes (e.g., streaming vs. non-streaming) without modifying the agent's core definition. This is useful for adapting the same agent logic to different interaction modalities or performance requirements.
-> {: .prompt-tip }
+{: .prompt-tip }
 
-> ## Experimental Features in RunConfig
+> **Experimental Features in RunConfig**
+> {:.title}
 > 
 > Features like StreamingMode.BIDI and support_cfc are often experimental and their behavior or API might change in future ADK versions. Always check the latest ADK documentation for the status of these features. BIDI streaming, in particular, requires significant application-side logic to handle actual audio input/output.
-> {: .prompt-danger }
+{: .prompt-danger }
 
 **What's Next?**
 

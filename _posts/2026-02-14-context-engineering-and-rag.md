@@ -9,7 +9,7 @@ image:
   alt: "Generative AI Handbook by Amulya Bhatia"
 ---
 
-> This article is part of my web book series. All of the chapters can be found [here](https://iamulya.one/tags/generative-ai-handbook//). For any issues around this book or if you'd like the pdf/epub version, contact me on [LinkedIn](https://www.linkedin.com/in/amulya-bhatia-01627a42/)
+> This article is part of my book [Generative AI Handbook](https://iamulya.one/tags/generative-ai-handbook). For any issues around this book or if you'd like the pdf/epub version, contact me on [LinkedIn](https://www.linkedin.com/in/amulya-bhatia-01627a42/)
 {: .prompt-info }
 
 A modern LLM doesn’t run on “the prompt.” It runs on a **context stack**—a structured bundle of inputs that may include:
@@ -108,10 +108,11 @@ The most critical hyperparameter in RAG is **Chunk Size**.
 #### Semantic Chunking
 Instead of arbitrarily splitting by character count (e.g., every 500 chars), **Semantic Chunking** uses a sliding window to measure similarity between sentences. If the topic shifts (similarity drops), a cut is made. This ensures that each chunk represents a distinct, self-contained idea.
 
-> ## The Overlap Rule
+> **The Overlap Rule**
+> {:.title}
 > Always include **Overlap** (e.g., 10-20%) between chunks.
 > If you split strictly at token 500, you might cut a sentence in half. Overlap ensures that the semantic meaning at the boundaries is preserved in at least one of the chunks.
-> {: .prompt-tip }
+{: .prompt-tip }
 
 There are many other strategies for chunking as well, for e.g. 
 
@@ -177,9 +178,10 @@ Models tend to follow a position bias:
 - Use clear headings and delimiters
 - Summarize and compress aggressively
 
-> ## Token Budgeting
+> **Token Budgeting**
+> {:.title}
 > Context is a scarce resource. Use structure, distillation, and retrieval to keep it high-signal.
-> {: .prompt-danger }
+{: .prompt-danger }
 
 ## Connecting to Reality (ReAct)
 

@@ -9,7 +9,7 @@ image:
   alt: "Generative AI Handbook by Amulya Bhatia"
 ---
 
-> This article is part of my web book series. All of the chapters can be found [here](https://iamulya.one/tags/generative-ai-handbook//). For any issues around this book or if you'd like the pdf/epub version, contact me on [LinkedIn](https://www.linkedin.com/in/amulya-bhatia-01627a42/)
+> This article is part of my book [Generative AI Handbook](https://iamulya.one/tags/generative-ai-handbook). For any issues around this book or if you'd like the pdf/epub version, contact me on [LinkedIn](https://www.linkedin.com/in/amulya-bhatia-01627a42/)
 {: .prompt-info }
 
 A raw "Base Model" (like Llama 4 Base) is like a brilliant but feral child.
@@ -150,11 +150,12 @@ graph TD
 ```
 
 
-> ## The 'Aha!' Moment
+> **The 'Aha!' Moment**
+> {:.title}
 > Why use GRPO over DPO?
 > DPO prevents the model from exploring. You are telling it exactly what to say.
 > GRPO allows **exploration**. The model might try a weird, long chain of thought. If that weird path leads to the correct answer more often, GRPO reinforces it. This is how models learn to "think" and self-correct, creating the "Aha!" moments seen in reasoning models.
-> {: .prompt-danger }
+{: .prompt-danger }
 
 ## Synthetic Data: The Smart Teacher
 

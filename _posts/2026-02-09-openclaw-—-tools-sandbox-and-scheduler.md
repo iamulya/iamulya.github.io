@@ -10,6 +10,7 @@ image:
 ---
 
 > This article is part of a series of articles around OpenClaw. All of the articles can be found [here](https://iamulya.one/tags/openclaw/)
+{: .prompt-info }
 
 OpenClaw differentiates itself from standard chatbots by granting the model direct, structured access to your machine. It can execute shell commands, read files, and trigger scripts. This power is the engine of automation, but it is also the primary vector of risk.
 
@@ -49,9 +50,10 @@ The Sandbox is an ephemeral Docker container. When enabled (`agents.defaults.san
 
 
 
-> ## Elevated Mode
+> **Elevated Mode**
+> {:.title}
 > Sometimes you *need* the agent to configure your actual machine (e.g., installing a Homebrew package). **Elevated Mode** is the escape hatch. If `tools.elevated` is allowed for your user ID, you can explicitly request an unsafe execution, bypassing the sandbox for that specific command.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## The Scheduler (Cron & Heartbeat)
 
@@ -77,6 +79,7 @@ While Heartbeats are for general awareness, **Cron Jobs** are for specific tasks
 *   **Delivery:** Results can be "Announced" (sent to your chat) or kept internal (updating a file in the workspace).
 
 
-> ## Cron vs. Heartbeat
+> **Cron vs. Heartbeat**
+> {:.title}
 > Use **Heartbeat** for "ambient monitoring" where the agent needs to know your context (e.g., "Remind me to call Mom if I haven't mentioned it today"). Use **Cron** for "rigid automation" (e.g., "Scrape this website every morning at 8 AM and summarize it").
-> {: .prompt-info }
+{: .prompt-info }

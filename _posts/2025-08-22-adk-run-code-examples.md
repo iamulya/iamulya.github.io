@@ -60,9 +60,10 @@ This method uses VS Code and Docker on your local machine to create the same con
 5.  Proceed to the **[Environment Variable Configuration](#environment-variable-configuration)** section below.
 
 
-> ## For Option 1 and Option 2 users
+> **For Option 1 and Option 2 users**
+> {:.title}
 > When the setup is done for the *first time*, it might not have the Python virtual environment activated in the terminal open by default. Simply open a new terminal - there you should have the virtual environment automatically activated, verifiable by the presence of `(adk-book-code)` in your prompt. 
-> {: .prompt-info }
+{: .prompt-info }
 
 #### Option 3: Manual Local Setup
 

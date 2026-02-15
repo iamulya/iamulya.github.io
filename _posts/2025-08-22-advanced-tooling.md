@@ -135,19 +135,22 @@ sequenceDiagram
 ```
 
 
-> ## Interoperability with MCP
+> **Interoperability with MCP**
+> {:.title}
 > 
 > MCPToolset allows ADK agents to tap into the growing ecosystem of MCP-compliant tools and servers. This promotes interoperability and allows you to leverage tools developed independently of ADK.
-> {: .prompt-info }
+{: .prompt-info }
 
-> ## MCP Server Management and Lifecycle
+> **MCP Server Management and Lifecycle**
+> {:.title}
 > 
 > - When using `StdioServerParameters` (local MCP servers like the `npx` example), the `MCPToolset` attempts to manage the lifecycle of the server process. It's crucial to call `await mcp_fs_toolset.close()` when your application shuts down to ensure these external processes are terminated properly. Failure to do so can leave orphaned processes.
 > - The `MCPToolset` uses an `AsyncExitStack` internally to manage resources. Proper cleanup via `close()` is vital.
 > - For `SseServerParams` (connecting to a remote, already running MCP server), `close()` will primarily close the SSE connection.
-> {: .prompt-danger }
+{: .prompt-danger }
 
-> ## Best Practice: Specific Tool Filtering with MCPToolset
+> **Best Practice: Specific Tool Filtering with MCPToolset**
+> {:.title}
 > 
 > MCP servers can expose many tools. If your agent only needs a subset, use the `tool_filter` argument in the `MCPToolset` constructor. This can be a list of tool names or a ToolPredicate function to selectively expose tools to the LLM, reducing prompt clutter and potential misuse.
 > 
@@ -170,7 +173,7 @@ sequenceDiagram
 > # tool_filter=["listFiles", "readFile"] # Exact MCP tool names
 > # ) 
 > ```
-> {: .prompt-tip }
+{: .prompt-tip }
 
 
 ## `ApplicationIntegrationToolset`: Connecting to Enterprise Systems
@@ -263,19 +266,21 @@ if __name__ == "__main__":
         print("ApplicationIntegration agent not created.")
 ```
 
-> ## Connecting Agents to Enterprise Application
+> **Connecting Agents to Enterprise Application**
+> {:.title}
 > 
 > IntegrationToolset is a powerful way to bridge ADK agents with existing enterprise applications and workflows managed by Google Cloud Application Integration. This enables agents to perform meaningful business actions.
-> {: .prompt-info }
+{: .prompt-info }
 
-> ## Permissions and Configuration
+> **Permissions and Configuration**
+> {:.title}
 > 
 > Setting up ApplicationIntegrationToolset requires:
 >  
 > - Correct GCP project, location, and resource names.
 > - The service account (or default credentials) used by ADK must have appropriate IAM roles to execute Application Integrations and/or access Integration Connectors (e.g., "Application Integration Invoker", "Connectors Admin/User").
 > - The integrations themselves must be correctly configured with API triggers or the connectors must be properly set up.
-> {: .prompt-danger }
+{: .prompt-danger }
 
 ## `ToolboxToolset`: Utilizing the Generic MCP Toolbox
 
@@ -438,15 +443,17 @@ YOU: {prompt}")
         print()
 ```
 
-> ## Best Practice: Leverage Existing Tool Investments
+> **Best Practice: Leverage Existing Tool Investments**
+> {:.title}
 > 
 > If you have existing tools built for Langchain or CrewAI, the LangchainTool and CrewaiTool adapters provide an easy migration path or way to use them within ADK without rewriting them. This promotes code reuse and allows you to benefit from the specific strengths of different frameworks.
-> {: .prompt-tip }
+{: .prompt-tip }
 
-> ## Dependency Management for Adapters
+> **Dependency Management for Adapters**
+> {:.title}
 > 
 > Using LangchainTool or CrewaiTool means your ADK project will also depend on langchain or crewai (and their dependencies) respectively. Manage these using your pyproject.toml or requirements.txt. ADK's extensions optional dependency group (pip install "google-adk[extensions]") includes many of these. Also, ensure any API keys or environment variables required by the original Langchain/CrewAI tools are properly set.
-> {: .prompt-danger }
+{: .prompt-danger }
 
 **What's Next?**
 

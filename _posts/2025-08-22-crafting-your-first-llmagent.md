@@ -48,10 +48,11 @@ polite_translator_agent = Agent(
 )
 ```
 
-> ## Best Practice: Meaningful Agent Names and Descriptions
+> **Best Practice: Meaningful Agent Names and Descriptions**
+> {:.title}
 > 
 > Choose a name that is a good programmatic identifier. The description is crucial for the LLM (and potentially other agents or developers) to understand the agent's purpose. Make it concise but comprehensive. For example, instead of "Agent that does translations," use "Translates user input from English to French, handling polite phrasings."
-> {: .prompt-tip }
+{: .prompt-tip }
 
 ## Working with Instructions: Static vs. Dynamic
 
@@ -67,15 +68,17 @@ Sometimes, you need the agent's guiding instructions to change based on the curr
 
 An `InstructionProvider` is a function that takes a `ReadonlyContext` object as input and returns a string (the instruction) or an awaitable that resolves to a string. The `ReadonlyContext` gives you access to the current invocation ID, agent name, and session state (read-only).
 
-> ## Dynamic Instructions for Adaptive Behavior
+> **Dynamic Instructions for Adaptive Behavior**
+> {:.title}
 > 
 > InstructionProvider functions are powerful for making agents adapt to changing contexts (e.g., user roles, time of day, specific data in the session state). Use them when an agent's core directive needs to be flexible rather than static.
-> {: .prompt-info }
+{: .prompt-info }
 
-> ## Complexity in Dynamic Instructions
+> **Complexity in Dynamic Instructions**
+> {:.title}
 > 
 > While powerful, overly complex logic within an `InstructionProvider` can make the agent's behavior harder to predict and debug. Aim for clarity and test these functions thoroughly. Remember, the instruction ultimately guides the LLM, so ensure it's coherent and unambiguous.
-> {: .prompt-warning }
+{: .prompt-warning }
 
 Following is an example code where the agent greets you depending on the time of day by using an `InstructionProvider`. 
 
@@ -118,10 +121,11 @@ if __name__ == "__main__":
 
 In this example, `get_time_based_greeting_instruction` accesses the session state (e.g., `user:user_name`) via the `ReadonlyContext` to personalize the instruction. The instruction sent to the LLM will change depending on when the agent is run and what's in the session state.
 
-> ## A Note on State Injection in Instructions
+> **A Note on State Injection in Instructions**
+> {:.title}
 > 
 > By default, ADK attempts to inject values from the session state into your static string instructions if they contain placeholders like `{my_variable}` or `{user:user_name}`. However, when you use an `InstructionProvider` function, this automatic state injection is **bypassed** for the instruction string returned by your provider. This is because your provider function already has access to the `ReadonlyContext` and can explicitly fetch and format any state variables it needs, offering more control.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Understanding LLM Flows: The Default `SingleFlow`
 
@@ -169,10 +173,11 @@ graph TD
 
 We will explore more complex flows like `AutoFlow` (which enables agent-to-agent transfers) in the multi-agent systems part of the book. For now, understanding that `SingleFlow` handles the turn-by-turn conversation and tool use is sufficient.
 
-> ## Flows Abstract LLM Interaction Patterns
+> **Flows Abstract LLM Interaction Patterns**
+> {:.title}
 > 
 > LLM Flows like SingleFlow (and AutoFlow later) encapsulate common patterns of interacting with an LLM, including preparing requests, handling tool calls, and processing responses. Understanding that a flow manages this loop helps you focus on the agent's specific instructions and tools.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## LLM Interaction: `LlmRequest` and `LlmResponse`
 
@@ -254,16 +259,18 @@ Key fields in `GenerateContentConfig`:
 - `safety_settings: list[SafetySetting]`: Configure content safety filters (e.g., for harassment, hate speech).
 - `response_mime_type` & `response_schema`: Used when you expect structured JSON output from the LLM (covered in detail later).
 
-> ## `GenerateContentConfig` within ADK
+> **`GenerateContentConfig` within ADK**
+> {:.title}
 > 
 > - **Don't set `system_instruction` here directly.** Use the `LlmAgent.instruction` parameter.
 > - **Don't set `tools` here directly.** Use the `LlmAgent.tools` parameter.
 > - **Don't set `thinking_config` here directly.** Use the `LlmAgent.planner` parameter with a `BuiltInPlanner`.
 > 
 > ADK manages these specific fields through its own dedicated agent parameters to ensure proper integration with its flows and tool handling mechanisms.
-> {: .prompt-info }
+{: .prompt-info }
 
-> ## Best Practice: Tune temperature for Desired Output
+> **Best Practice: Tune temperature for Desired Output**
+> {:.title}
 > 
 > The temperature setting in GenerateContentConfig is one of the most impactful for controlling LLM output.
 > 
@@ -271,7 +278,7 @@ Key fields in `GenerateContentConfig`:
 > - High temperature (e.g., 0.7-1.0): More creative, diverse, good for brainstorming or story generation.
 >     
 > Experiment to find the right balance for your agent's task.
-> {: .prompt-tip }
+{: .prompt-tip }
     
 
 ## Callbacks for Fine-Grained Control
@@ -296,14 +303,15 @@ ADK provides several callback points within the `LlmAgent` lifecycle, allowing y
     - Can return: `Optional[LlmResponse]`. If an `LlmResponse` is returned, it replaces the original LLM response. Useful for response modification, validation, or logging.
     
 
-> ## Callbacks for Monitoring and Modification
+> **Callbacks for Monitoring and Modification**
+> {:.title}
 > 
 > - Use before_model_callback to inspect or modify the exact prompt being sent to the LLM, or to implement caching.
 > - Use after_model_callback to inspect or modify the raw LLM response before ADK processes it further (e.g., for tool calls). This is also a good place to log token usage from response.usage_metadata.
 > - before_agent_callback is great for input validation or pre-emptive responses based on session state.
 > 
 > All callback types can be a single callable or a list of callables. If a list, they are executed in order until one returns a non-None value (which then short-circuits further callbacks in that list).
-> {: .prompt-info }
+{: .prompt-info }
 
 The following agent uses callbacks for logging and even to block certain users using a custom `before_agent_callback`.
 
@@ -479,16 +487,18 @@ sequenceDiagram
 ```
 
 
-> ## Best Practice: Keep Callbacks Focused
+> **Best Practice: Keep Callbacks Focused**
+> {:.title}
 > 
 > Callbacks should ideally perform a single, well-defined task (e.g., logging, a specific modification, a validation check). This keeps them maintainable and easier to understand within the overall agent flow. Avoid putting overly complex business logic directly into callbacks if it can be part of the agent's primary logic or a tool.
-> {: .prompt-tip }
+{: .prompt-tip }
 
-> ## Mutable Objects in Callbacks
+> **Mutable Objects in Callbacks**
+> {:.title}
 > 
 > Be mindful when modifying objects like LlmRequest or LlmResponse within callbacks. Changes made will affect the subsequent processing. This is powerful but requires care to avoid unintended side effects. Always log what you're changing for easier debugging.
-> {: .prompt-warning }
+{: .prompt-warning }
 
 **What's Next?**
 
-We've now covered the essentials of creating and configuring a single `LlmAgent`. While this agent can respond based on its instructions and LLM, its true power is unlocked when it can interact with the outside world. In @sec-equipping-tools, "Equipping Agents with Tools: The `FunctionTool`," we'll learn how to give our agents the ability to perform actions by defining and using custom Python tools.
+We've now covered the essentials of creating and configuring a single `LlmAgent`. While this agent can respond based on its instructions and LLM, its true power is unlocked when it can interact with the outside world. In "Equipping Agents with Tools: The `FunctionTool`," we'll learn how to give our agents the ability to perform actions by defining and using custom Python tools.

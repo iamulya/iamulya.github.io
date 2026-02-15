@@ -10,6 +10,7 @@ image:
 ---
 
 > This article is part of a series of articles around OpenClaw. All of the articles can be found [here](https://iamulya.one/tags/openclaw/)
+{: .prompt-info }
 
 OpenClaw does not use a simple "Call LLM → Get Text" architecture. It employs a **recursive agentic loop**. When a message arrives, the system does not just ask for a reply; it asks for a *plan*. It grants the model permission to wake up, look around, use tools, and think—repeatedly—until the task is complete.
 
@@ -32,9 +33,10 @@ When a message enters the queue, it triggers a **Run**. A Run is not a single AP
 
 
 
-> ## Silent Turns
+> **Silent Turns**
+> {:.title}
 > The loop supports a `NO_REPLY` token. If a heartbeat or background cron job runs and finds nothing noteworthy, the model outputs `NO_REPLY`. The Gateway detects this and suppresses any outbound message to the user, keeping the chat log clean while still allowing the agent to "think" and update its internal memory.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Context Engineering
 
@@ -67,9 +69,10 @@ The agent reads the oldest chunk of history and summarizes it into a single `com
 
 
 
-> ## The Memory Flush
+> **The Memory Flush**
+> {:.title}
 > Before compaction destroys the raw transcript, OpenClaw injects a "Memory Flush" turn. The agent is told: *"Context is full. Write any critical facts to `MEMORY.md` now."* This is the last chance to save specific details (like a phone number or a code snippet) to durable storage before they are compressed into a vague summary.
-> {: .prompt-info }
+{: .prompt-info }
 
 ## Auth & Failover
 
@@ -88,6 +91,7 @@ Models fail. Rate limits are hit. APIs go down. OpenClaw implements a determinis
 
 
 
-> ## Pinning Profiles
+> **Pinning Profiles**
+> {:.title}
 > By default, the Gateway pins a specific Auth Profile to a session to maximize cache hits. It will only rotate if forced by an error. You can manually override this in chat with `/model model_name@profile_id` (e.g., `/model claude-3-opus@work-account`) to force a specific billing account for a heavy task.
-> {: .prompt-info }
+{: .prompt-info }

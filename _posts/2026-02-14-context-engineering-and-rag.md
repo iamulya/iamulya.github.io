@@ -9,6 +9,9 @@ image:
   alt: "Generative AI Handbook by Amulya Bhatia"
 ---
 
+> This article is part of my web book series. All of the chapters can be found [here](https://iamulya.one/tags/generative-ai-handbook//). For any issues around this book or if you'd like the pdf/epub version, contact me on [LinkedIn](https://www.linkedin.com/in/amulya-bhatia-01627a42/)
+{: .prompt-info }
+
 A modern LLM doesn’t run on “the prompt.” It runs on a **context stack**—a structured bundle of inputs that may include:
 
 - **System instructions** (identity, rules, safety constraints)

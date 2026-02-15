@@ -9,6 +9,9 @@ image:
   alt: "Generative AI Handbook by Amulya Bhatia"
 ---
 
+> This article is part of my web book series. All of the chapters can be found [here](https://iamulya.one/tags/generative-ai-handbook//). For any issues around this book or if you'd like the pdf/epub version, contact me on [LinkedIn](https://www.linkedin.com/in/amulya-bhatia-01627a42/)
+{: .prompt-info }
+
 Before the rise of the Transformer and the Large Language Models (LLMs) that define the current era of AI, the field of Natural Language Processing (NLP) struggled with a fundamental problem: **Memory**.
 
 To generate coherent text, a system must understand context. It needs to remember that a sentence starting with *"The heavy rain..."* might end with *"...caused a flood,"* even if those words are separated by a dozen adjectives. 

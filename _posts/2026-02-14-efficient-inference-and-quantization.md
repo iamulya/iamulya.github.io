@@ -9,6 +9,9 @@ image:
   alt: "Generative AI Handbook by Amulya Bhatia"
 ---
 
+> This article is part of my web book series. All of the chapters can be found [here](https://iamulya.one/tags/generative-ai-handbook//). For any issues around this book or if you'd like the pdf/epub version, contact me on [LinkedIn](https://www.linkedin.com/in/amulya-bhatia-01627a42/)
+{: .prompt-info }
+
 In the world of  training a model is like building a skyscraper: it’s a massive, one-time expense (CapEx).
 But **Inference** (actually using the model) is like paying the electricity bill for that skyscraper: it’s a perpetual, daily cost (OpEx).
 

@@ -9,6 +9,9 @@ image:
   alt: "Generative AI Handbook by Amulya Bhatia"
 ---
 
+> This article is part of my web book series. All of the chapters can be found [here](https://iamulya.one/tags/generative-ai-handbook//). For any issues around this book or if you'd like the pdf/epub version, contact me on [LinkedIn](https://www.linkedin.com/in/amulya-bhatia-01627a42/)
+{: .prompt-info }
+
 A raw "Base Model" (like Llama 4 Base) is like a brilliant but feral child.
 It has read the entire internet. It knows quantum physics, Python code, and French poetry. But if you ask it a question, it might just stare at you, or continue your sentence instead of answering it.
 

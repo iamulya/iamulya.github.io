@@ -9,6 +9,9 @@ image:
   alt: "Generative AI Handbook by Amulya Bhatia"
 ---
 
+> This article is part of my web book series. All of the chapters can be found [here](https://iamulya.one/tags/generative-ai-handbook//). For any issues around this book or if you'd like the pdf/epub version, contact me on [LinkedIn](https://www.linkedin.com/in/amulya-bhatia-01627a42/)
+{: .prompt-info }
+
 In the early days (2023), most people primarily just used GPT-4. However, the era of "One Model to Rule Them All" has long ended. Today, the landscape is a sprawling ecosystem defined by specialization. We have models that are small enough to run on a phone but smart enough to write code; models that are massive "Omni" brains; and models that don't just speak, but *think*.
 
 ## The Geopolitical Axis: Scale vs. Efficiency

@@ -9,6 +9,9 @@ image:
   alt: "Generative AI Handbook by Amulya Bhatia"
 ---
 
+> This article is part of my web book series. All of the chapters can be found [here](https://iamulya.one/tags/generative-ai-handbook//). For any issues around this book or if you'd like the pdf/epub version, contact me on [LinkedIn](https://www.linkedin.com/in/amulya-bhatia-01627a42/)
+{: .prompt-info }
+
 The Transformer revolution began with text, but it didn't stay there.
 
 It turns out that the architecture we built in Chapters 3 and 4 is not a "Language Model"; it is a **Pattern Processing Machine**. It doesn't care if the input is a word, a pixel, a sound wave, or a strand of DNA. As long as you can chop the data into a sequence of pieces, the Transformer can learn to predict what comes next.

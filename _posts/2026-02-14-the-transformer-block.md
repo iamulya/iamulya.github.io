@@ -9,6 +9,9 @@ image:
   alt: "Generative AI Handbook by Amulya Bhatia"
 ---
 
+> This article is part of my web book series. All of the chapters can be found [here](https://iamulya.one/tags/generative-ai-handbook//). For any issues around this book or if you'd like the pdf/epub version, contact me on [LinkedIn](https://www.linkedin.com/in/amulya-bhatia-01627a42/)
+{: .prompt-info }
+
 In the previous chapter, we learned about **Attention**—the mechanism that allows words to "talk" to each other.
 
 But Attention alone is not enough. A single conversation between words cannot capture the complexity of human language. To build a brain that can reason, write code, and understand humor, we need to wrap the Attention mechanism into a modular unit called the **Transformer Block**.

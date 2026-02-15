@@ -9,6 +9,9 @@ image:
   alt: "Generative AI Handbook by Amulya Bhatia"
 ---
 
+> This article is part of my web book series. All of the chapters can be found [here](https://iamulya.one/tags/generative-ai-handbook//). For any issues around this book or if you'd like the pdf/epub version, contact me on [LinkedIn](https://www.linkedin.com/in/amulya-bhatia-01627a42/)
+{: .prompt-info }
+
 The era of the "Chatbot"—a simple text-in, text-out interface—has largely ended for professional tooling. We have moved toward **Agentic Interfaces** and **Generative UI (also called Agentic UI)**.
 
 Users no longer want to just talk to an LLM; they want the LLM to show them information, do work, and negotiate outcomes with other software. This requires a fundamental shift in architecture: from stateless request/response loops to stateful graph orchestrators (Agents), networked via A2A (Agent-to-Agent) protocols, and rendering dynamic interfaces via AG-UI.

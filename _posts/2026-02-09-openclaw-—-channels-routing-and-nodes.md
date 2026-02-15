@@ -2,7 +2,8 @@
 title: 3. OpenClaw — Channels, Routing, and Nodes
 date: "2026-02-09 13:20:00 +0100"
 categories: [Gen AI, Personal AI Assistants, OpenClaw]
-tags: [Generative AI, Agentic AI, Gen AI, OpenClaw, Personal AI Assistants, AI Assistants]
+tags: [ Agentic AI, Gen AI, OpenClaw, Personal AI Assistants, AI Assistants]
+mermaid: true
 image:
   path: /assets/img/openclaw.png
   alt: "OpenClaw: a personal AI assistant"

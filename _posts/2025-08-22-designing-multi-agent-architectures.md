@@ -2,7 +2,8 @@
 title: Chapter 12 - Designing Multi-Agent Architectures 
 date: "2025-08-22 13:30:00 +0200"
 categories: [Gen AI, Agentic SDKs, Agent Development Kit]
-tags: [Generative AI, Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+tags: [ Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+mermaid: true
 image:
   path: /assets/img/adk-book-cover.jpg
   alt: "Building Intelligent Agents with Google ADK"
@@ -83,7 +84,6 @@ report_orchestrator_agent = Agent(
 - The parent agent can then be instructed to delegate tasks to its sub-agents.
 - Each sub-agent can have its own model, instructions, tools, and even its own sub-agents, allowing for nested hierarchies.
 
-
 > ## Description is Key for Delegation
 > 
 > When a parent agent (or its LLM) decides whether to delegate a task to a sub-agent, it heavily relies on the description of the sub-agents. Write clear, concise, and accurate descriptions that highlight each sub-agent's unique capabilities and when it should be invoked.
@@ -142,8 +142,39 @@ How does control return to the parent/orchestrator?
 - **Explicit Transfer Back:** The sub-agent could also be instructed to call `transfer_to_agent(agent_name="report_orchestrator")` when its task is done.
 - **Orchestrator's Plan:** The orchestrator's initial instructions might explicitly state the sequence: "1. Call researcher. 2. *Then, I (orchestrator) will take the output and call writer*." In this case, after the researcher finishes, the orchestrator's LLM is prompted again with the researcher's output in the history.
 
-![*Diagram: Agent transfer sequence from an Orchestrator to a Researcher sub-agent.*](/assets/img/2025-08-22-designing-multi-agent-architectures/figure-1.png)
+```mermaid
+---
+title: Agent transfer sequence from an Orchestrator to a Researcher sub-agent.
+---
+sequenceDiagram
+    participant User
+    participant Runner
+    participant OrchestratorAgent as "Orchestrator (AutoFlow)"
+    participant OrchestratorLLM as "Orchestrator's LLM"
+    participant ResearcherAgent as "Researcher (SingleFlow/AutoFlow)"
+    participant ResearcherLLM as "Researcher's LLM"
 
+    User->>Runner: "Research AI in healthcare"
+    Runner->>OrchestratorAgent: run_async(context_with_query)
+    OrchestratorAgent->>OrchestratorLLM: Prompt (sees Researcher sub-agent)
+    OrchestratorLLM-->>OrchestratorAgent: Request transfer_to_agent(agent_name="researcher")
+    OrchestratorAgent-->>Runner: Event (action: transfer_to_agent="researcher")
+
+    Note over Runner: Runner changes active agent to Researcher
+    Runner->>ResearcherAgent: run_async(context_with_query)
+    ResearcherAgent->>ResearcherLLM: Prompt (uses own instructions/tools)
+    ResearcherLLM-->>ResearcherAgent: Generates research findings / calls search tools
+    ResearcherAgent-->>Runner: Event(s) with research findings (final text from Researcher)
+
+    Note over Runner: Researcher's run_async completes. Runner determines next agent.
+    Note over Runner: Orchestrator's LLM might be re-prompted with Researcher's output.
+    Runner->>OrchestratorAgent: run_async(context_with_researcher_output_in_history)
+    OrchestratorAgent->>OrchestratorLLM: Prompt (now has research, might call Writer next)
+    OrchestratorLLM-->>OrchestratorAgent: (e.g., Request transfer_to_agent(agent_name="writer")) or (Final summary)
+    OrchestratorAgent-->>Runner: Further Events
+    Runner-->>User: Final Report / Response
+
+```
 
 
 > ## Transfer Loops and Deadlocks
@@ -154,7 +185,7 @@ How does control return to the parent/orchestrator?
 > - Transfer conditions are well-defined in the orchestrator's instructions.
 > - Sub-agents have a clear way to signal task completion (either by providing a final answer or by explicitly transferring back if designed to do so).
 > - ADK's `max_llm_calls` in `RunConfig` can act as a failsafe against runaway loops.
-> {: .prompt-info }
+> {: .prompt-danger }
 
 ## Common Multi-Agent Patterns
 
@@ -176,9 +207,25 @@ ADK's flexible agent definition and transfer mechanism support various common MA
     4. `ReportGenerationAgent`: Formats the analysis into a report.
 - **ADK Implementation:**
     - Can be implemented with a master orchestrator agent that calls sub-agents in sequence.
-    - Alternatively, ADK provides `google.adk.agents.SequentialAgent` (a `BaseAgent` subclass, not an `LlmAgent`) which explicitly runs its `sub_agents` one after the other.
+    - Alternatively, ADK provides `google.adk.agents.SequentialAgent` (a `BaseAgent` subclass, not an `LlmAgent`) which explicitly runs its `sub_agents` one after the other. This will be covered in @sec-shell-agents.
 
-![*Diagram: Sequential/Pipeline multi-agent pattern.*](/assets/img/2025-08-22-designing-multi-agent-architectures/figure-2.png)
+```mermaid
+---
+title: Sequential/Pipeline multi-agent pattern.
+---
+graph TD
+    Input --> A[Agent A: Ingest Data];
+    A --> B[Agent B: Clean Data];
+    B --> C[Agent C: Analyze Data];
+    C --> D[Agent D: Generate Report];
+    D --> Output;
+
+    style A fill:#cfc
+    style B fill:#cfc
+    style C fill:#cfc
+    style D fill:#cfc
+
+```
 
 
 **3. Parallel (Ensemble / Competing Experts):**
@@ -190,16 +237,38 @@ ADK's flexible agent definition and transfer mechanism support various common MA
 - **Example:** Three different `SummarizationAgent`s using slightly different instructions or models process the same document. An `EvaluationAgent` then picks the best summary.
 - **ADK Implementation:**
     - An orchestrator can be programmed to invoke multiple sub-agents conceptually in parallel (though true parallelism depends on how `asyncio` schedules their `run_async` calls).
-    - ADK provides `google.adk.agents.ParallelAgent` (a `BaseAgent` subclass) for explicitly running sub-agents in parallel and gathering their distinct outputs.
+    - ADK provides `google.adk.agents.ParallelAgent` (a `BaseAgent` subclass) for explicitly running sub-agents in parallel and gathering their distinct outputs. This will be covered in @sec-shell-agents.
 
-![*Diagram: Parallel/Ensemble multi-agent pattern.*](/assets/img/2025-08-22-designing-multi-agent-architectures/figure-3.png)
+```mermaid
+---
+title: Parallel/Ensemble multi-agent pattern.
+---
+graph TD
+    Input --> Orchestrator;
+    Orchestrator --> PA1["Parallel Agent 1 (e.g., Summarizer A)"];
+    Orchestrator --> PA2["Parallel Agent 2 (e.g., Summarizer B)"];
+    Orchestrator --> PA3["Parallel Agent 3 (e.g., Summarizer C)"];
+    PA1 --> ResultA;
+    PA2 --> ResultB;
+    PA3 --> ResultC;
+    ResultA --> EvaluatorAgent["Evaluator/Synthesizer Agent"];
+    ResultB --> EvaluatorAgent;
+    ResultC --> EvaluatorAgent;
+    EvaluatorAgent --> FinalOutput;
 
+    style Orchestrator fill:#ccf
+    style PA1 fill:#cfc
+    style PA2 fill:#cfc
+    style PA3 fill:#cfc
+    style EvaluatorAgent fill:#fcf
+
+```
 
 
 > ## Best Practice: Start with Simple Patterns
 > 
 > When designing your first MAS, start with simpler patterns like a clear hierarchy or a short pipeline. As you gain experience, you can explore more complex coordination strategies. Clearly defining each agent's API (its description and how it expects input/provides output) is crucial.
-> {: .prompt-info }
+> {: .prompt-tip }
 
 ## Case Study: Designing a Research Assistant MAS
 
@@ -229,17 +298,19 @@ Let's outline the design for a multi-agent research assistant that takes a user'
     - **Description:** "Manages the end-to-end research process for a user's topic."
     - **Instruction:**
         
-    You are the main orchestrator for a research task.
-    1. Receive the user's research topic.
-    2. Delegate to 'QueryUnderstandingAgent' to refine/clarify the topic into specific questions.
-    3. Take the questions from 'QueryUnderstandingAgent' and delegate to 'WebSearchAgent' to gather information.
-    4. Take the findings from 'WebSearchAgent' and delegate to 'InformationSynthesizerAgent' to compile the final report.
-    5. Present the final report to the user. Manage the flow and data transfer between agents.
-    
+        ```
+        You are the main orchestrator for a research task.
+        1. Receive the user's research topic.
+        2. Delegate to 'QueryUnderstandingAgent' to refine/clarify the topic into specific questions.
+        3. Take the questions from 'QueryUnderstandingAgent' and delegate to 'WebSearchAgent' to gather information.
+        4. Take the findings from 'WebSearchAgent' and delegate to 'InformationSynthesizerAgent' to compile the final report.
+        5. Present the final report to the user. Manage the flow and data transfer between agents.
+        
+        ```
+        
     - **Sub-Agents:** `[QueryUnderstandingAgent, WebSearchAgent, InformationSynthesizerAgent]`
 
 This case study illustrates how breaking down a complex task (research) into specialized agent roles can lead to a more structured and potentially more effective system. The orchestrator manages the high-level flow, while sub-agents handle their expert tasks. Communication happens via the orchestrator transferring control and context (implicitly through session history/state, or explicitly by instructing agents to output data for the next agent).
-
 
 > ## State Management for Inter-Agent Communication
 > 
@@ -249,9 +320,7 @@ This case study illustrates how breaking down a complex task (research) into spe
 > - `MainResearchOrchestrator`, in its next turn, reads `state['refined_questions']` and uses it as input for `WebSearchAgent`.
 > 
 > Use clear, agreed-upon state keys.
-> {: .prompt-info }
-
-
+> {: .prompt-tip }
 
 **What's Next?**
 

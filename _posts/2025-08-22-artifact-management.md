@@ -2,7 +2,8 @@
 title: Chapter 18 - Artifact Management 
 date: "2025-08-22 16:30:00 +0200"
 categories: [Gen AI, Agentic SDKs, Agent Development Kit]
-tags: [Generative AI, Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+tags: [en AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+mermaid: true
 image:
   path: /assets/img/adk-book-cover.jpg
   alt: "Building Intelligent Agents with Google ADK"
@@ -29,7 +30,27 @@ Similar to the `BaseSessionService`, the `google.adk.artifacts.BaseArtifactServi
 
 The `Runner` is typically configured with an `ArtifactService` instance, which then becomes accessible to agents and tools via their respective contexts (`CallbackContext`, `ToolContext`).
 
-![*Diagram: `BaseArtifactService` interface and its concrete implementations.*](/assets/img/2025-08-22-artifact-management/figure-1.png)
+```mermaid
+---
+title: BaseArtifactService interface and its concrete implementations.
+---
+classDiagram
+    class BaseArtifactService {
+        <<Abstract>>
+        +save_artifact(app, user, session, filename, artifact_part) int
+        +load_artifact(app, user, session, filename, version) Optional~Part~
+        +list_artifact_keys(app, user, session) List~str~
+        +delete_artifact(app, user, session, filename)
+        +list_versions(app, user, session, filename) List~int~
+    }
+    BaseArtifactService <|-- InMemoryArtifactService
+    BaseArtifactService <|-- GcsArtifactService
+
+    Runner ..> BaseArtifactService : Uses
+    CallbackContext ..> BaseArtifactService : Accesses via (e.g., save_artifact())
+    note for BaseArtifactService "Defines the contract for artifact storage."
+
+```
 
 
 ## Use Cases for Artifacts
@@ -108,7 +129,9 @@ if __name__ == "__main__":
     async def main():
         # Turn 1: Create an artifact
         prompt1 = "Please create a file named 'notes.txt' with the content 'ADK is great for building agents.'"
-        print(f"\n--- Turn 1 --- \nYOU: {prompt1}")
+        print(f"
+--- Turn 1 --- 
+YOU: {prompt1}")
         user_message1 = Content(parts=[Part(text=prompt1)], role="user")  # User message to the agent
         print("AGENT: ", end="", flush=True)
         async for event in runner.run_async(user_id="mem_artifact_user", session_id=session_id, new_message=user_message1):
@@ -125,7 +148,9 @@ if __name__ == "__main__":
 
         # Turn 2: Load the artifact
         prompt2 = "Now, please read the content of 'notes.txt'."
-        print(f"\n--- Turn 2 --- \nYOU: {prompt2}")
+        print(f"
+--- Turn 2 --- 
+YOU: {prompt2}")
         user_message2 = Content(parts=[Part(text=prompt2)], role="user")  # User message to the agent
         print("AGENT: ", end="", flush=True)
         async for event in runner.run_async(user_id="mem_artifact_user", session_id=session_id, new_message=user_message2):
@@ -135,8 +160,7 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-
-> ## `types.Part` for Artifact Content
+> ## types.Part for Artifact Content
 > 
 > Artifacts are saved and loaded as google.genai.types.Part objects. This allows you to store various types of content:
 > 
@@ -223,24 +247,22 @@ The agent code itself (like `artifact_agent` in the `InMemoryArtifactService` ex
 
 ```
 
-
 > ## Best Practice: GcsArtifactService for Production
 > 
 > For any application requiring persistent artifact storage, scalability, and integration with other Google Cloud services, GcsArtifactService is the recommended choice. GCS offers durability, versioning (though ADK handles its own version numbers in the path), and fine-grained access control.
-> {: .prompt-info }
-
+> {: .prompt-tip }
 
 > ## GCS Permissions and Costs
 > 
 > - Ensure the service account or user credentials used by your ADK application have the necessary IAM permissions on the GCS bucket (e.g., `roles/storage.objectAdmin` for full control, or more restricted roles like `roles/storage.objectCreator` and `roles/storage.objectViewer`).
 > - Storing large or numerous artifacts in GCS will incur costs. Monitor your usage.
-> {: .prompt-info }
+> {: .prompt-danger }
 
 ## Using the `LoadArtifactsTool`
 
 The `google.adk.tools.load_artifacts_tool` (an instance of `LoadArtifactsTool`) provides a way for the LLM to become aware of and request the content of existing artifacts within the current session.
 
-**How it Works:**
+**How it Works (Recap from @sec-prebuilt-tools):**
 
 1. **Awareness Phase (Request Processor):**
     - Before an `LlmRequest` is sent, `LoadArtifactsTool.process_llm_request()` checks the `ArtifactService` (via `tool_context.list_artifacts()`) for available artifact filenames.
@@ -281,7 +303,12 @@ async def create_image_artifact(filename: str, tool_context: ToolContext) -> dic
     """Creates a dummy PNG image artifact."""
     print(f"  [Tool] Creating dummy image artifact '{filename}'")
     # Dummy PNG (1x1 transparent pixel)
-    dummy_png_data = b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4\x00\x00\x00\x00IEND\xaeB`\x82'
+    dummy_png_data = b'�PNG
+
+   
+IHDR         ĉ   
+IDATx�c    
+-�    IEND�B`�'
     artifact_part = Part(inline_data=Blob(mime_type="image/png", data=dummy_png_data))
     version = await tool_context.save_artifact(filename=filename, artifact=artifact_part)
     return {"filename_saved": filename, "version": version, "status": "success"}
@@ -307,7 +334,9 @@ if __name__ == "__main__":
     async def main():
         # Turn 1: Create an image artifact
         prompt1 = "Please create a dummy image named 'logo.png'."
-        print(f"\n--- Turn 1: Create Artifact --- \nYOU: {prompt1}")
+        print(f"
+--- Turn 1: Create Artifact --- 
+YOU: {prompt1}")
         user_message1 = Content(parts=[Part(text=prompt1)], role="user")  # User message to the agent
         print("AGENT: ", end="", flush=True)
         async for event in runner.run_async(user_id=user_id, session_id=session_id, new_message=user_message1):
@@ -317,7 +346,9 @@ if __name__ == "__main__":
         # Turn 2: Ask about the artifact. `load_artifacts_tool` will inform the LLM it exists.
         # LLM should then call `load_artifacts`.
         prompt2 = "Describe the 'logo.png' artifact you created."
-        print(f"\n--- Turn 2: Ask to Describe Artifact --- \nYOU: {prompt2}")
+        print(f"
+--- Turn 2: Ask to Describe Artifact --- 
+YOU: {prompt2}")
         user_message2 = Content(parts=[Part(text=prompt2)], role="user")  # User message to the agent
         print("AGENT: ", end="", flush=True)
         async for event in runner.run_async(user_id=user_id, session_id=session_id, new_message=user_message2):
@@ -339,7 +370,6 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-
 > ## Two-Step Artifact Access with LoadArtifactsTool
 > 
 > The two-step nature of LoadArtifactsTool (awareness then content loading on demand) is efficient. It prevents large artifact contents from being added to the prompt history unnecessarily on every turn, only loading them when the LLM explicitly requests them after being made aware of their existence.
@@ -347,7 +377,7 @@ if __name__ == "__main__":
 
 ## Saving User-Uploaded Files as Artifacts 
 
-Previously we introduced `RunConfig`. One of its options, `save_input_blobs_as_artifacts: bool`, directly ties into artifact management.
+In @sec-runner-config, we introduced `RunConfig`. One of its options, `save_input_blobs_as_artifacts: bool`, directly ties into artifact management.
 
 If you initialize your `Runner.run_async()` call with `RunConfig(save_input_blobs_as_artifacts=True)`, and the `new_message: types.Content` contains any `Part` with `inline_data` (e.g., user uploads an image or a PDF), the `Runner` will:
 
@@ -391,7 +421,8 @@ if __name__ == "__main__":
     config_save_blobs = RunConfig(save_input_blobs_as_artifacts=True)
 
     async def main():
-        print(f"\n--- Running with save_input_blobs_as_artifacts=True ---")
+        print(f"
+--- Running with save_input_blobs_as_artifacts=True ---")
         print(f"Original user message parts: {len(message_with_upload.parts)}")
         print(f"YOU (conceptually with upload): {user_query_part.text}")
 
@@ -420,11 +451,10 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-
 > ## Best Practice: save_input_blobs_as_artifacts for User Files
 > 
 > This RunConfig option is the standard way to handle file uploads from users in ADK. It cleanly separates the act of receiving and storing the file from the agent's logic for processing it, promoting modularity.
-> {: .prompt-info }
+> {: .prompt-tip }
 
 **What's Next?**
 

@@ -2,7 +2,8 @@
 title: Chapter 8 - Advanced MCP Tooling and Framework Integrations 
 date: "2025-08-22 11:30:00 +0200"
 categories: [Gen AI, Agentic SDKs, Agent Development Kit]
-tags: [Generative AI, Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+tags: [ Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+mermaid: true
 image:
   path: /assets/img/adk-book-cover.jpg
   alt: "Building Intelligent Agents with Google ADK"
@@ -13,7 +14,7 @@ image:
 
 In the preceding chapters, we've explored how to build custom tools with `FunctionTool` and integrate with standard REST APIs using OpenAPI and API Hub. ADK's flexibility extends further, allowing integration with specialized toolsets and even other agent development frameworks. This chapter delves into these advanced tooling capabilities, including the Model Context Protocol (MCP) based tools, Google Application Integration, and adaptors for Langchain and CrewAI tools.
 
-## Integrating with Model Context Protocol (MCP) Based Tools
+## `MCPToolset`: Integrating with Model Context Protocol (MCP) Based Tools
 
 The **Model Context Protocol (MCP)** is a specification designed to enable interoperability between AI models/agents and external tools or services. Tools that adhere to the MCP standard can be discovered and invoked by MCP-compatible clients. ADK provides the `google.adk.tools.mcp_tool.MCPToolset` to connect to an MCP server and make its tools available to your ADK agents.
 
@@ -97,8 +98,41 @@ Closing MCP toolset...")
     asyncio.run(main())
 ```
 
-![*Diagram: Sequence of an `LlmAgent` using an `MCPTool` from an `MCPToolset`.*](/assets/img/2025-08-22-advanced-tooling/figure-1.png)
+```mermaid
+---
+title: Sequence of an `LlmAgent` using an `MCPTool` from an `MCPToolset`.
+---
+sequenceDiagram
+    participant User
+    participant LlmAgent as "filesystem_navigator"
+    participant LLM
+    participant MCPToolset
+    participant MCPTool_listFiles as "MCPTool (listFiles)"
+    participant MCPSession as "MCP ClientSession"
+    participant MCPServer_FS as "MCP Filesystem Server (npx process)"
 
+    User->>LlmAgent: "List files"
+    LlmAgent->>MCPToolset: get_tools() (on first use, initializes session)
+    Note over MCPToolset,MCPServer_FS: MCPToolset starts MCPServer_FS process & establishes MCPSession
+    MCPToolset-->>LlmAgent: Returns [MCPTool_listFiles, MCPTool_readFile, ...]
+    LlmAgent->>LLM: Prompt (incl. tool decl. for listFiles)
+    LLM-->>LlmAgent: Request to call listFiles(path=".")
+    LlmAgent->>MCPTool_listFiles: run_async(args={"path":"."}, context)
+    MCPTool_listFiles->>MCPSession: call_tool("listFiles", arguments={"path":"."})
+    MCPSession->>MCPServer_FS: Sends 'listFiles' request
+    MCPServer_FS-->>MCPSession: Returns list of files (JSON)
+    MCPSession-->>MCPTool_listFiles: Returns file list
+    MCPTool_listFiles-->>LlmAgent: Returns file list
+    LlmAgent->>LLM: Tool Response (file list)
+    LLM-->>LlmAgent: Final Answer (e.g., "The files are: main.py, mcp_test_file.txt...")
+    LlmAgent-->>User: "The files are: main.py, mcp_test_file.txt..."
+
+    Note over LlmAgent,MCPServer_FS: When app/agent shuts down:
+    LlmAgent->>MCPToolset: close()
+    MCPToolset->>MCPSession: shutdown()
+    MCPToolset->>MCPServer_FS: Terminates process
+
+```
 
 
 > ## Interoperability with MCP
@@ -106,14 +140,12 @@ Closing MCP toolset...")
 > MCPToolset allows ADK agents to tap into the growing ecosystem of MCP-compliant tools and servers. This promotes interoperability and allows you to leverage tools developed independently of ADK.
 > {: .prompt-info }
 
-
 > ## MCP Server Management and Lifecycle
 > 
 > - When using `StdioServerParameters` (local MCP servers like the `npx` example), the `MCPToolset` attempts to manage the lifecycle of the server process. It's crucial to call `await mcp_fs_toolset.close()` when your application shuts down to ensure these external processes are terminated properly. Failure to do so can leave orphaned processes.
 > - The `MCPToolset` uses an `AsyncExitStack` internally to manage resources. Proper cleanup via `close()` is vital.
 > - For `SseServerParams` (connecting to a remote, already running MCP server), `close()` will primarily close the SSE connection.
-> {: .prompt-info }
-
+> {: .prompt-danger }
 
 > ## Best Practice: Specific Tool Filtering with MCPToolset
 > 
@@ -138,7 +170,7 @@ Closing MCP toolset...")
 > # tool_filter=["listFiles", "readFile"] # Exact MCP tool names
 > # ) 
 > ```
-> {: .prompt-info }
+> {: .prompt-tip }
 
 
 ## `ApplicationIntegrationToolset`: Connecting to Enterprise Systems
@@ -231,12 +263,10 @@ if __name__ == "__main__":
         print("ApplicationIntegration agent not created.")
 ```
 
-
 > ## Connecting Agents to Enterprise Application
 > 
 > IntegrationToolset is a powerful way to bridge ADK agents with existing enterprise applications and workflows managed by Google Cloud Application Integration. This enables agents to perform meaningful business actions.
 > {: .prompt-info }
-
 
 > ## Permissions and Configuration
 > 
@@ -245,7 +275,7 @@ if __name__ == "__main__":
 > - Correct GCP project, location, and resource names.
 > - The service account (or default credentials) used by ADK must have appropriate IAM roles to execute Application Integrations and/or access Integration Connectors (e.g., "Application Integration Invoker", "Connectors Admin/User").
 > - The integrations themselves must be correctly configured with API triggers or the connectors must be properly set up.
-> {: .prompt-info }
+> {: .prompt-danger }
 
 ## `ToolboxToolset`: Utilizing the Generic MCP Toolbox
 
@@ -408,17 +438,15 @@ YOU: {prompt}")
         print()
 ```
 
-
 > ## Best Practice: Leverage Existing Tool Investments
 > 
 > If you have existing tools built for Langchain or CrewAI, the LangchainTool and CrewaiTool adapters provide an easy migration path or way to use them within ADK without rewriting them. This promotes code reuse and allows you to benefit from the specific strengths of different frameworks.
-> {: .prompt-info }
-
+> {: .prompt-tip }
 
 > ## Dependency Management for Adapters
 > 
 > Using LangchainTool or CrewaiTool means your ADK project will also depend on langchain or crewai (and their dependencies) respectively. Manage these using your pyproject.toml or requirements.txt. ADK's extensions optional dependency group (pip install "google-adk[extensions]") includes many of these. Also, ensure any API keys or environment variables required by the original Langchain/CrewAI tools are properly set.
-> {: .prompt-info }
+> {: .prompt-danger }
 
 **What's Next?**
 

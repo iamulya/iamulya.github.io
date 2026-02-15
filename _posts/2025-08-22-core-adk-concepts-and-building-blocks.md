@@ -2,7 +2,8 @@
 title: Chapter 3 - Core ADK Concepts and Building Blocks 
 date: "2025-08-22 09:00:00 +0200"
 categories: [Gen AI, Agentic SDKs, Agent Development Kit]
-tags: [Generative AI, Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+tags: [ Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+mermaid: true
 image:
   path: /assets/img/adk-book-cover.jpg
   alt: "Building Intelligent Agents with Google ADK"
@@ -46,15 +47,42 @@ At the very core of ADK are **Agents**. An agent is an entity capable of perceiv
     ```
     
 
-
 > ## Best Practice: Clear Agent Descriptions
 > 
 > For LlmAgent, the name should be a concise identifier, while the description should be a clear, natural language explanation of *what the agent does and when it should be used*. This description is often used by an orchestrating LLM (in multi-agent systems) to decide if this agent is the right one for a task. Make it informative!
-> {: .prompt-info }
+> {: .prompt-tip }
 
 Agents are the fundamental actors in an ADK system. They can be simple, single-purpose entities or complex orchestrators managing other sub-agents.
 
-![*Diagram: Class relationship between `BaseAgent` and `LlmAgent`.*](/assets/img/2025-08-22-core-adk-concepts-and-building-blocks/figure-1.png)
+```mermaid
+---
+title: Class relationship between BaseAgent and LlmAgent
+---
+classDiagram
+    direction LR
+    class BaseAgent {
+        +str name
+        +str description
+        +List~BaseAgent~ sub_agents
+        +BaseAgent parent_agent
+        +run_async() coro
+        +run_live() coro
+    }
+    class LlmAgent {
+        +Union~str, BaseLlm~ model
+        +Union~str, InstructionProvider~ instruction
+        +List~ToolUnion~ tools
+        +Optional~BasePlanner~ planner
+    }
+
+    BaseAgent <|-- LlmAgent
+    LlmAgent "1" --o "0..*" BaseAgent : "has sub_agents"
+    BaseAgent "0..1" --o "1" LlmAgent : "can be parent_agent of"
+
+    note for BaseAgent "Abstract Base Class"
+    note for LlmAgent "Primary agent for LLM interaction"
+
+```
 
 
 ## Runners: Executing Your Agents (`Runner`, `InMemoryRunner`)
@@ -89,8 +117,30 @@ A **Runner** is responsible for the actual execution of an agent. It takes user 
 
 The Runner orchestrates the entire lifecycle of an agent interaction for a given user session.
 
-![*Diagram: High-level sequence of a Runner processing user input and invoking an agent.*](/assets/img/2025-08-22-core-adk-concepts-and-building-blocks/figure-2.png)
+```mermaid
+---
+title: High-level sequence of a Runner processing user input and invoking an agent.
+---
+sequenceDiagram
+    participant UserInput
+    participant AppCode as "Application Code (e.g., your script / web server)"
+    participant Runner
+    participant RootAgent as "root_agent"
+    participant SessionService
+    participant LLM
 
+    AppCode->>Runner: run_async(user_id, session_id, new_message)
+    Runner->>SessionService: get_session(session_id)
+    SessionService-->>Runner: Returns Session object (or creates new)
+    Runner->>RootAgent: run_async(invocation_context)
+    RootAgent->>LLM: generate_content_async(request_with_history_and_prompt)
+    LLM-->>RootAgent: Yields LlmResponse (can be partial/streaming)
+    RootAgent-->>Runner: Yields Event (based on LlmResponse)
+    Runner->>SessionService: append_event(session, event) (if not partial)
+    Runner-->>AppCode: Yields Event
+    AppCode-->>UserInput: Displays agent's response from Event
+
+```
 
 
 > ## InMemoryRunner vs. Runner
@@ -142,21 +192,47 @@ LLMs are powerful, but their knowledge is limited to their training data and the
     ```
     
 
-
 > ## Best Practice: Docstrings are Tool Descriptions
 > 
 > For FunctionTool, the Python function's docstring becomes the description provided to the LLM. Write clear, comprehensive docstrings explaining what the function does, its parameters (including their types if not obvious from type hints), and what it returns. This directly impacts how well the LLM can understand and use your tool.
-> {: .prompt-info }
-
+> {: .prompt-tip }
 
 > ## Tool Name Uniqueness and LLM Interpretation
 > 
 > Ensure tool names are unique within the set of tools an agent can access. Also, be mindful that LLMs interpret tool names and descriptions literally. A poorly named or described tool can lead to the LLM misusing it or failing to use it when appropriate.
-> {: .prompt-info }
+> {: .prompt-warning }
 
 - **`google.adk.tools.BaseToolset`**: An abstract class for grouping related tools. Toolsets can dynamically provide a list of tools based on context. Examples include `OpenAPIToolset` (from OpenAPI specs) and `GoogleApiToolset` (for Google APIs).
 
-![*Diagram: Relationship between Agent, Tools, and Toolsets.*](/assets/img/2025-08-22-core-adk-concepts-and-building-blocks/figure-3.png)
+```mermaid
+---
+title: Relationship between Agent, Tools, and Toolsets.
+---
+graph TD
+    A[LlmAgent]
+    B{BaseTool}
+    FT[FunctionTool]
+    GST[GoogleSearchTool]
+    OAT[OpenApiTool]
+    PF[Python Function]
+    BT[BaseToolset]
+    OATS[OpenAPIToolset]
+    GATS[GoogleApiToolset]
+
+    A -- Uses --> B
+
+    FT -- is a --> B
+    GST -- is a --> B
+    OAT -- is a --> B
+    
+    PF -->|Wrapped by| FT
+
+    BT -- Contains --> B
+
+    OATS -- is a --> BT
+    GATS -- is a --> BT
+
+```
 
 
 ## Models: The Brains of Your Agents (`BaseLlm`, Model Registry)
@@ -203,7 +279,6 @@ Agents often need to remember past parts of a conversation or maintain informati
     - **App State:** `state['app:global_config'] = value` (persists across all users and sessions for that app).
     - **Temp State:** `state['temp:transient_info'] = value` (not persisted by `DatabaseSessionService`). Temp state changes are available only for one user-turn.
 
-
 > ## Scoped State for Clarity
 > 
 > Using state scopes (user:, app:) helps organize your session data and clarify its intended lifecycle and persistence. For example, user:theme_preference is clearly tied to a specific user across sessions, while app:api_version could be a global setting. temp: is useful for data that should not be persisted by DatabaseSessionService but is needed during a single Runner.run() invocation.
@@ -218,7 +293,22 @@ Agents often need to remember past parts of a conversation or maintain informati
         - `DatabaseSessionService`: Persists sessions to a SQL database (e.g., MySQL, PostgreSQL) using SQLAlchemy.
         - `VertexAiSessionService`: Leverages Google Cloud for managed session storage.
 
-![*Diagram: Relationship between Runner, Session, State, and SessionService.*](/assets/img/2025-08-22-core-adk-concepts-and-building-blocks/figure-4.png)
+```mermaid
+---
+title: Relationship between Runner, Session, State, and SessionService.
+---
+graph LR
+    Runner -- Manages --> Session;
+    Session -- Contains --> EventsList["List of Events"];
+    Session -- Contains --> SessionState["State (dict)"];
+    SessionService -- CRUD Operations --> SessionStore["Session Storage (Memory/DB/Cloud)"];
+    Runner -- Uses --> SessionService;
+    AgentLogic["Agent Logic (via Context)"] -- Reads/Writes --> SessionState;
+
+    style Session fill:#lightblue
+    style SessionService fill:#lightgreen
+
+```
 
 
 ## Events: The Communication Protocol (`Event`, `EventActions`)
@@ -244,20 +334,46 @@ Agents often need to remember past parts of a conversation or maintain informati
 
 When a `Runner` executes `run_async`, it yields a stream of these `Event` objects.
 
-![*Diagram: Simplified flow of events during an agent interaction involving a tool call.*](/assets/img/2025-08-22-core-adk-concepts-and-building-blocks/figure-5.png)
+```mermaid
+---
+title: Simplified flow of events during an agent interaction involving a tool call.
+---
+sequenceDiagram
+    participant User
+    participant Runner
+    participant Agent
+    participant LLM
+    participant Tool
 
+    User->>Runner: new_message
+    Runner->>Agent: run_async()
+    Agent->>LLM: generate_content_async()
+    LLM-->>Agent: LlmResponse (text part)
+    Agent-->>Runner: yield Event (author=agent, content=text, partial=true)
+    LLM-->>Agent: LlmResponse (text part, final)
+    Agent-->>Runner: yield Event (author=agent, content=text, partial=false) # Agent might decide it needs a tool
+    Agent->>LLM: generate_content_async()
+    LLM-->>Agent: LlmResponse (function_call)
+    Agent-->>Runner: yield Event (author=agent, content=function_call)
+    Agent->>Tool: tool.run_async(args)
+    Tool-->>Agent: Tool Result
+    Agent-->>Runner: yield Event (author=agent, content=function_response, actions={state_delta, ...})
+    Agent->>LLM: generate_content_async(with_tool_response)
+    LLM-->>Agent: LlmResponse (final text answer)
+    Agent-->>Runner: yield Event (author=agent, content=final_answer_text)
+
+```
 
 
 > ## Best Practice: Leverage Event Granularity for Debugging
 > 
 > The stream of Event objects provides a fine-grained log of the agent's activity. When debugging, inspect the sequence of events (especially in the Dev UI's Trace view) to understand the exact flow of text, tool calls, tool responses, and state changes. This is much more powerful than simple print debugging.
-> {: .prompt-info }
-
+> {: .prompt-tip }
 
 > ## Partial Events in Streaming
 > 
 > When streaming responses from an LLM, you'll receive multiple Event objects where event.partial is True, followed by a final event where event.partial is False (or None). Your application code consuming these events needs to handle this by accumulating partial text if a continuous stream is desired for the UI.
-> {: .prompt-info }
+> {: .prompt-warning }
 
 ## Contexts
 
@@ -276,7 +392,6 @@ ADK uses context objects to pass around necessary information during agent execu
     - Allows tools to access session state, save artifacts, and request credentials.
 
 These context objects ensure that different parts of the ADK framework have the necessary information to perform their tasks without tightly coupling them.
-
 
 > ## Context Objects for Decoupling
 > 

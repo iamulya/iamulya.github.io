@@ -3,6 +3,7 @@ title: "Gemini CLI Series: From First Prompt to Personalized Powerhouse"
 date: 2025-06-30 11:00:00 +0100
 categories: [Gen AI, AI Coding Agents, Gemini CLI]
 tags: [Gen AI, Gemini, Gemini CLI, AI Coding Agents, Gemini CLI Series]
+mermaid: true
 image:
   path: /assets/img/gemini-cli.png
   alt: "Gemini CLI"

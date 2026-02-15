@@ -2,7 +2,8 @@
 title: "Chapter 7 - Integrating with External APIs: OpenAPI and API Hub"
 date: "2025-08-22 11:00:00 +0200"
 categories: [Gen AI, Agentic SDKs, Agent Development Kit]
-tags: [Generative AI, Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+tags: [ Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+mermaid: true
 image:
   path: /assets/img/adk-book-cover.jpg
   alt: "Building Intelligent Agents with Google ADK"
@@ -281,15 +282,38 @@ YOU: {prompt_text}")
 6. The `RestApiTool` for `find_pets_by_status` receives these arguments, constructs an HTTP GET request to `https://petstore.swagger.io/v2/pet/findByStatus?status=available`, executes it, and returns the JSON response to the LLM.
 7. The LLM then formulates a natural language answer based on the API response.
 
-![*Diagram: Sequence of an `LlmAgent` using a tool from an `OpenAPIToolset`.*](/assets/img/2025-08-22-integrating-with-external-apis-openapi-&-api-hub/figure-1.png)
+```mermaid
+---
+title: Sequence of an `LlmAgent` using a tool from an `OpenAPIToolset`.
+---
+sequenceDiagram
+    participant User
+    participant LlmAgent as "petstore_agent"
+    participant LLM
+    participant OpenAPIToolset
+    participant RestApiTool_findPets as "RestApiTool (find_pets_by_status)"
+    participant PetstoreAPI as "External Petstore API"
 
+    User->>LlmAgent: "Find available pets"
+    LlmAgent->>LLM: Prompt (incl. tool decl. for find_pets_by_status)
+    LLM-->>LlmAgent: Request to call find_pets_by_status(status="available")
+    LlmAgent->>OpenAPIToolset: get_tool("find_pets_by_status")
+    OpenAPIToolset-->>LlmAgent: Returns RestApiTool_findPets
+    LlmAgent->>RestApiTool_findPets: run_async(args={"status":"available"}, context)
+    RestApiTool_findPets->>PetstoreAPI: HTTP GET /pet/findByStatus?status=available
+    PetstoreAPI-->>RestApiTool_findPets: JSON Response (list of pets)
+    RestApiTool_findPets-->>LlmAgent: Returns JSON Response
+    LlmAgent->>LLM: Tool Response (JSON)
+    LLM-->>LlmAgent: Final Answer (e.g., "I found these available pets: Fluffy, Max...")
+    LlmAgent-->>User: "I found these available pets: Fluffy, Max..."
+
+```
 
 
 > ## Best Practice: Well-Defined operationId and summary/description
 > 
 > The operationId in your OpenAPI spec is typically used to generate the tool name (converted to snake_case). Make it descriptive. The summary and description fields for paths and operations are crucial for the LLM to understand what each tool does and when to use it. Invest time in writing clear and concise OpenAPI documentation.
-> {: .prompt-info }
-
+> {: .prompt-tip }
 
 > ## Reusability and Standardization
 > 
@@ -561,11 +585,10 @@ YOU: {prompt_text}")
     asyncio.run(main_loop())
 ```
 
-
 > ## Declarative Auth in OpenAPI
 > 
 > Defining security schemes directly in your OpenAPI spec is the best practice. RestApiTool will automatically pick these up. You then only need to provide the corresponding AuthCredential (e.g., the actual API key, OAuth client secrets) to the tool or toolset.
-> {: .prompt-info }
+> {: .prompt-tip }
 
 ## The `APIHubToolset`: Connecting to Google's API Hub
 
@@ -730,7 +753,6 @@ The `APIHubToolset` handles:
 4. Downloading the OpenAPI spec content.
 5. Instantiating an `OpenAPIToolset` with the fetched spec.
 
-
 > ## Centralized API Management with API Hub
 > 
 > If your organization uses API Hub, APIHubToolset is the preferred way to integrate those APIs into ADK. It ensures your agents are always using the centrally managed and governed API definitions.
@@ -746,7 +768,6 @@ ADK provides pre-packaged toolsets for common Google APIs (like BigQuery, Calend
 2. Converts this Discovery document into an OpenAPI specification.
 3. Initializes an `OpenAPIToolset` with this generated spec.
 4. Wraps the resulting `RestApiTool`s into `GoogleApiTool` instances, which are pre-configured to use Google's OAuth2 (OpenID Connect) for authentication.
-
 
 > ## OAuth2/OpenID Connect User Interaction Flow
 > 
@@ -766,9 +787,8 @@ You typically need to provide `client_id` and `client_secret` for your OAuth 2.0
 
 Following is a Calendar agent which uses `CalendarToolset` from Google API Toolsets and filters in only the tools related to Events. You can use it to answer queries like "What are the next 3 events on my primary calendar?"
 
-
 > This example should be run using the `adk web .` command, since OAuth Flow is triggered to authorize the reading of the calendar data.
-> {: .prompt-info }
+> {: .prompt-danger }
 
 ```python
 from google.adk.agents import Agent
@@ -829,11 +849,10 @@ YOU: {prompt}")
         print("  The Dev UI will guide you through authorizing access to your Google Calendar.")
 ```
 
-
 > ## Use adk web for Google API Tools Requiring OAuth
 > 
 > Tools for Google APIs (Calendar, Gmail, Docs, etc.) usually require OAuth 2.0. The ADK Development UI (adk web) has built-in support to facilitate the OAuth consent and authorization code flow during local development, making it much easier to test these tools. Running them purely from a command-line script that doesn't handle web redirects for OAuth is challenging.
-> {: .prompt-info }
+> {: .prompt-tip }
 
 When you send your query for the first time, it will kickoff the OAuth Flow. Upon successful authorization, the LLM will be in a position to provide the correct answer.
 

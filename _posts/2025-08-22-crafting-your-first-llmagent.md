@@ -2,7 +2,8 @@
 title: Chapter 4 - Crafting Your First LlmAgent 
 date: "2025-08-22 09:30:00 +0200"
 categories: [Gen AI, Agentic SDKs, Agent Development Kit]
-tags: [Generative AI, Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+tags: [ Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+mermaid: true
 image:
   path: /assets/img/adk-book-cover.jpg
   alt: "Building Intelligent Agents with Google ADK"
@@ -47,11 +48,10 @@ polite_translator_agent = Agent(
 )
 ```
 
-
 > ## Best Practice: Meaningful Agent Names and Descriptions
 > 
 > Choose a name that is a good programmatic identifier. The description is crucial for the LLM (and potentially other agents or developers) to understand the agent's purpose. Make it concise but comprehensive. For example, instead of "Agent that does translations," use "Translates user input from English to French, handling polite phrasings."
-> {: .prompt-info }
+> {: .prompt-tip }
 
 ## Working with Instructions: Static vs. Dynamic
 
@@ -67,17 +67,15 @@ Sometimes, you need the agent's guiding instructions to change based on the curr
 
 An `InstructionProvider` is a function that takes a `ReadonlyContext` object as input and returns a string (the instruction) or an awaitable that resolves to a string. The `ReadonlyContext` gives you access to the current invocation ID, agent name, and session state (read-only).
 
-
 > ## Dynamic Instructions for Adaptive Behavior
 > 
 > InstructionProvider functions are powerful for making agents adapt to changing contexts (e.g., user roles, time of day, specific data in the session state). Use them when an agent's core directive needs to be flexible rather than static.
 > {: .prompt-info }
 
-
 > ## Complexity in Dynamic Instructions
 > 
 > While powerful, overly complex logic within an `InstructionProvider` can make the agent's behavior harder to predict and debug. Aim for clarity and test these functions thoroughly. Remember, the instruction ultimately guides the LLM, so ensure it's coherent and unambiguous.
-> {: .prompt-info }
+> {: .prompt-warning }
 
 Following is an example code where the agent greets you depending on the time of day by using an `InstructionProvider`. 
 
@@ -120,7 +118,6 @@ if __name__ == "__main__":
 
 In this example, `get_time_based_greeting_instruction` accesses the session state (e.g., `user:user_name`) via the `ReadonlyContext` to personalize the instruction. The instruction sent to the LLM will change depending on when the agent is run and what's in the session state.
 
-
 > ## A Note on State Injection in Instructions
 > 
 > By default, ADK attempts to inject values from the session state into your static string instructions if they contain placeholders like `{my_variable}` or `{user:user_name}`. However, when you use an `InstructionProvider` function, this automatic state injection is **bypassed** for the instruction string returned by your provider. This is because your provider function already has access to the `ReadonlyContext` and can explicitly fetch and format any state variables it needs, offering more control.
@@ -140,11 +137,37 @@ The `SingleFlow` essentially does the following in a loop:
     - The tool's response is then packaged and sent back to the LLM in the next iteration of the loop (often for summarization or to inform the next step).
 4. This loop continues until the LLM provides a final text response without requesting further tool calls, or an error occurs, or a callback/tool signals to end the invocation.
 
-![*Diagram: Simplified conceptual loop of the `SingleFlow`.*](/assets/img/2025-08-22-crafting-your-first-llmagent/figure-1.png)
+```mermaid
+---
+title: Simplified conceptual loop of the `SingleFlow`.
+---
+graph TD
+    Start[User Input Received by Agent] --> A{Prepare LlmRequest};
+    A -- Includes history, instruction, tools --> B(Call LLM);
+    B --> C{Process LlmResponse};
+    C -- LLM returns text --> D[Yield Text Event];
+    D --> IsFinal{Final Answer?};
+    IsFinal -- Yes --> End[End Invocation];
+    IsFinal -- No (e.g. streaming) --> B;
+    C -- LLM requests Tool Call --> E{Execute Tool};
+    E --> F[Get Tool Response];
+    F --> A; subgraph "SingleFlow Loop"
+        A
+        B
+        C
+        D
+        IsFinal
+        E
+        F
+    end
+
+    style Start fill:#lightgreen
+    style End fill:#lightcoral
+
+```
 
 
 We will explore more complex flows like `AutoFlow` (which enables agent-to-agent transfers) in the multi-agent systems part of the book. For now, understanding that `SingleFlow` handles the turn-by-turn conversation and tool use is sufficient.
-
 
 > ## Flows Abstract LLM Interaction Patterns
 > 
@@ -231,7 +254,6 @@ Key fields in `GenerateContentConfig`:
 - `safety_settings: list[SafetySetting]`: Configure content safety filters (e.g., for harassment, hate speech).
 - `response_mime_type` & `response_schema`: Used when you expect structured JSON output from the LLM (covered in detail later).
 
-
 > ## `GenerateContentConfig` within ADK
 > 
 > - **Don't set `system_instruction` here directly.** Use the `LlmAgent.instruction` parameter.
@@ -241,7 +263,6 @@ Key fields in `GenerateContentConfig`:
 > ADK manages these specific fields through its own dedicated agent parameters to ensure proper integration with its flows and tool handling mechanisms.
 > {: .prompt-info }
 
-
 > ## Best Practice: Tune temperature for Desired Output
 > 
 > The temperature setting in GenerateContentConfig is one of the most impactful for controlling LLM output.
@@ -250,7 +271,7 @@ Key fields in `GenerateContentConfig`:
 > - High temperature (e.g., 0.7-1.0): More creative, diverse, good for brainstorming or story generation.
 >     
 > Experiment to find the right balance for your agent's task.
-> {: .prompt-info }
+> {: .prompt-tip }
     
 
 ## Callbacks for Fine-Grained Control
@@ -274,7 +295,6 @@ ADK provides several callback points within the `LlmAgent` lifecycle, allowing y
     - Receives: `CallbackContext`, `LlmResponse` (mutable).
     - Can return: `Optional[LlmResponse]`. If an `LlmResponse` is returned, it replaces the original LLM response. Useful for response modification, validation, or logging.
     
-
 
 > ## Callbacks for Monitoring and Modification
 > 
@@ -422,21 +442,53 @@ I'm sorry, I cannot process your request at this time.
 
 Here is a sequence diagram for how the request/response flow is modified.
 
-![*Diagram: Flow of execution with agent and model callbacks.*](/assets/img/2025-08-22-crafting-your-first-llmagent/figure-2.png)
+```mermaid
+---
+title: Flow of execution with agent and model callbacks.
+---
+sequenceDiagram
+    participant Runner
+    participant CallbackAgent as "callback_demo_agent"
+    participant BeforeAgentCB as "my_before_agent_cb"
+    participant LLMFlow as "Agent's LLM Flow (SingleFlow)"
+    participant BeforeModelCB as "my_before_model_cb"
+    participant LLM
+    participant AfterModelCB as "my_after_model_cb"
+    participant AfterAgentCB as "my_after_agent_cb (if defined)"
 
+    Runner->>CallbackAgent: run_async(context)
+    CallbackAgent->>BeforeAgentCB: execute(callback_context)
+    alt User is Blocked
+        BeforeAgentCB-->>CallbackAgent: Return Content("Cannot process...")
+        CallbackAgent-->>Runner: yield Event("Cannot process...")
+    else Normal User
+        BeforeAgentCB-->>CallbackAgent: Return None
+        CallbackAgent->>LLMFlow: _run_one_step_async(context)
+        LLMFlow->>BeforeModelCB: execute(callback_context, llm_request)
+        BeforeModelCB->>LLMFlow: Modify llm_request (or return LlmResponse to skip LLM)
+        LLMFlow->>LLM: generate_content_async(modified_llm_request)
+        LLM-->>LLMFlow: LlmResponse_original
+        LLMFlow->>AfterModelCB: execute(callback_context, LlmResponse_original)
+        AfterModelCB-->>LLMFlow: Return LlmResponse_modified
+        LLMFlow-->>CallbackAgent: Yields Event (from LlmResponse_modified)
+        CallbackAgent->>AfterAgentCB: execute(callback_context)
+        AfterAgentCB-->>CallbackAgent: Return Optional[Content] (to override)
+        CallbackAgent-->>Runner: yield Final Event
+    end
+
+```
 
 
 > ## Best Practice: Keep Callbacks Focused
 > 
 > Callbacks should ideally perform a single, well-defined task (e.g., logging, a specific modification, a validation check). This keeps them maintainable and easier to understand within the overall agent flow. Avoid putting overly complex business logic directly into callbacks if it can be part of the agent's primary logic or a tool.
-> {: .prompt-info }
-
+> {: .prompt-tip }
 
 > ## Mutable Objects in Callbacks
 > 
 > Be mindful when modifying objects like LlmRequest or LlmResponse within callbacks. Changes made will affect the subsequent processing. This is powerful but requires care to avoid unintended side effects. Always log what you're changing for easier debugging.
-> {: .prompt-info }
+> {: .prompt-warning }
 
 **What's Next?**
 
-We've now covered the essentials of creating and configuring a single `LlmAgent`. While this agent can respond based on its instructions and LLM, its true power is unlocked when it can interact with the outside world. Next, we'll learn how to give our agents the ability to perform actions by defining and using custom Python tools.
+We've now covered the essentials of creating and configuring a single `LlmAgent`. While this agent can respond based on its instructions and LLM, its true power is unlocked when it can interact with the outside world. In @sec-equipping-tools, "Equipping Agents with Tools: The `FunctionTool`," we'll learn how to give our agents the ability to perform actions by defining and using custom Python tools.

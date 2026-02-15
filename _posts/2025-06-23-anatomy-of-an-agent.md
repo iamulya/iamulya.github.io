@@ -2,7 +2,8 @@
 title: "Chapter 4 - Anatomy of an Agent"
 date: "2025-06-23 10:00:00 +0200"
 categories: [Gen AI, Agentic SDKs, OpenAI Agents SDK]
-tags: [Generative AI, Agentic AI, Gen AI, Agentic SDKs, OpenAI Agents SDK, Tinib00k]
+tags: [Agentic AI, Gen AI, Agentic SDKs, OpenAI Agents SDK, Tinib00k]
+mermaid: true
 image:
   path: /assets/img/tinibook-openai-agents-sdk-final.jpg
   alt: "Tinib00k: OpenAI Agents SDK"

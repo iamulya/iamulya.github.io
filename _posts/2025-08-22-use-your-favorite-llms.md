@@ -2,7 +2,8 @@
 title: Chapter 10 - Use your favorite LLMs 
 date: "2025-08-22 12:30:00 +0200"
 categories: [Gen AI, Agentic SDKs, Agent Development Kit]
-tags: [Generative AI, Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+tags: [en AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+mermaid: true
 image:
   path: /assets/img/adk-book-cover.jpg
   alt: "Building Intelligent Agents with Google ADK"
@@ -102,11 +103,10 @@ if __name__ == "__main__":
 
 `LiteLlm` translates ADK requests to the format `litellm` expects and converts `litellm`'s responses back to ADK's `LlmResponse`.
 
-
 > ## Best Practice: Consistent Model Naming with LiteLLM
 > 
 > Refer to the litellm documentation for the correct model name strings for various providers (e.g., "openai/gpt-4", "azure/my-deployment", "huggingface/meta-llama/Llama-2-7b-chat-hf"). Ensure the necessary API keys are set as environment variables as per litellm's requirements.
-> {: .prompt-info }
+> {: .prompt-tip }
 
 ### Using Local Models with Ollama via `LiteLlm`
 
@@ -178,20 +178,18 @@ if __name__ == "__main__":
         print("Ollama agent not run due to setup issues.")
 ```
 
-
 > ## Local Development and Experimentation with Ollama
 > 
 > - **Cost-effective development:** No API costs for local model inference.
 > - **Offline capabilities:** Run agents without internet access (once models are downloaded).
 > - **Privacy:** Data doesn't leave your machine for inference.
 > - **Rapid experimentation:** Quickly test different open-source models.
-> {: .prompt-info }
-
+> {: .prompt-tip }
 
 > ## Ollama Model Performance
 > 
 > Not all models pulled via Ollama might support all features LiteLLM or ADK expect (e.g., complex tool calling might be less reliable with some smaller local models).
-> {: .prompt-info }
+> {: .prompt-danger }
 
 ### Using Self-Hosted Endpoints via `LiteLlm`
 
@@ -305,7 +303,6 @@ gemini_agent_explicit = Agent(
 
 The `Gemini` class handles the specifics of communicating with the Gemini API, including authentication (via API key or Application Default Credentials if using Vertex AI through environment settings) and request/response formatting.
 
-
 > ## Automatic Vertex AI Detection when using Gemini models
 > 
 > The `google.adk.models.Gemini` class (and the underlying `google-generativeai` SDK) can often automatically detect if it should use Vertex AI endpoints if your environment is configured for it (e.g., `gcloud auth application-default login` and `GOOGLE_CLOUD_PROJECT` set). If `os.environ.get('GOOGLE_GENAI_USE_VERTEXAI', '0').lower()` in `['true', '1']`, it will prioritize Vertex AI. Otherwise, it will look for `GOOGLE_API_KEY` and prioritize Google AI Studio endpoint. This simplifies switching between direct Gemini API and Vertex AI managed models.
@@ -377,7 +374,6 @@ Claude Agent:")
         print()
 ```
 
-
 > ## Model Naming for Claude on Vertex AI
 > 
 > When using Claude models via Vertex AI, the model name string needs to be the specific identifier Vertex AI uses (e.g., "claude-sonnet-4@20250514"). Check the Vertex AI documentation for the correct model IDs.
@@ -393,7 +389,7 @@ Key components of `LlmRequest`:
 - **`contents: list[types.Content]`**: This is the conversation history. It's a list of `google.genai.types.Content` objects. Each `Content` object has a `role` (`"user"` or `"model"`) and `parts` (a list of `Part` objects, which can be text, function calls, function responses, or inline data).
     - The history is ordered chronologically.
     - For models that support alternating user/model turns, ADK ensures this structure.
-- **`config: Optional[types.GenerateContentConfig]`**: As discussed previously, this holds:
+- **`config: Optional[types.GenerateContentConfig]`**: As discussed in @sec-first-agent, this holds:
     - `system_instruction: Optional[str]`: The compiled system prompt (agent instruction + global instruction + tool-provided instructions like from `PreloadMemoryTool`).
     - `tools: Optional[list[types.Tool]]`: A list of `types.Tool` objects, where each `Tool` contains `FunctionDeclaration`s for the tools available to the LLM.
     - Generation parameters like `temperature`, `max_output_tokens`, `safety_settings`.
@@ -401,7 +397,7 @@ Key components of `LlmRequest`:
 - **`live_connect_config: types.LiveConnectConfig`**: Configuration specific to live, bidirectional streaming (speech config, response modalities, etc.).
 - **`tools_dict: dict[str, BaseTool]`**: (Internal to ADK) A mapping of tool names to their actual `BaseTool` instances, used by the LLM Flow to execute the correct tool when the LLM requests a function call.
 
-The LLM Flow and various request processors (like `instructions.py`, `contents.py`, `functions.py`) work together to populate these fields based on the agent's definition, the session history, and available tools.
+The LLM Flow (@sec-flows-planners) and various request processors (like `instructions.py`, `contents.py`, `functions.py`) work together to populate these fields based on the agent's definition, the session history, and available tools.
 
 ## Interpreting LLM Responses (`LlmResponse`)
 
@@ -426,7 +422,6 @@ Key components of `LlmResponse`:
 - **`custom_metadata: Optional[dict[str, Any]]`**: A field you can use (e.g., in an `after_model_callback`) to attach your own arbitrary, JSON-serializable data to an `LlmResponse`.
 
 The LLM Flow converts these `LlmResponse` objects into ADK `Event` objects, which are then yielded by the `Runner`.
-
 
 > ## Inspecting LlmResponse in Callbacks and Traces
 > 
@@ -489,11 +484,10 @@ if __name__ == "__main__":
 
 When you run this, you'll see the story appear word by word or sentence by sentence, rather than all at once.
 
-
 > ## Best Practice: Use Streaming for Better UX
 > 
 > For conversational agents, streaming responses significantly improves the user experience by providing immediate feedback instead of making the user wait for the entire response to be generated. Enable it via RunConfig when calling runner.run_async.
-> {: .prompt-info }
+> {: .prompt-tip }
 
 **What's Next?**
 

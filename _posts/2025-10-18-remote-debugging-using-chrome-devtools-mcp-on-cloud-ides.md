@@ -3,6 +3,7 @@ title: Remote Debugging your AI Agents Using Chrome DevTool MCP on Cloud IDEs
 date: 2025-10-18 12:00:00 +0100
 categories: [Gen AI, MCP]
 tags: [Gen AI, Frontend, Debugging, Chrome DevTools, Cloud IDEs]
+mermaid: true
 image:
   path: /assets/img/chrome-debug.png
   alt: "Remote Debugging your AI Agents Using Chrome DevTool MCP on Cloud IDEs"

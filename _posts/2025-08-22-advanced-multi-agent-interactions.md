@@ -2,7 +2,8 @@
 title: Chapter 14 - Advanced Multi-Agent Interactions: LangGraphAgent and A2A 
 date: "2025-08-22 14:30:00 +0200"
 categories: [Gen AI, Agentic SDKs, Agent Development Kit]
-tags: [Generative AI, Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+tags: [ Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+mermaid: true
 image:
   path: /assets/img/adk-book-cover.jpg
   alt: "Building Intelligent Agents with Google ADK"
@@ -20,7 +21,7 @@ This chapter offers a glimpse into two such advanced areas:
 
 It's important to note that a deep dive into LangGraph itself or the full A2A protocol specification is beyond the scope of this book. Instead, this chapter aims to show how ADK can interface with these concepts, enabling you to leverage their strengths within your ADK projects.
 
-## `LangGraphAgent`: Building Stateful Agent Applications as Graphs
+## LangGraphAgent: Building Stateful Agent Applications as Graphs
 
 [LangGraph](https://langchain-ai.github.io/langgraph/) (from the creators of Langchain) is a library for building robust and stateful multi-agent applications by defining them as cyclical graphs. In LangGraph, agents (or more generally, any callable function or runnable) are represented as "nodes," and the "edges" define how state transitions from one node to another. This allows for complex loops, conditional branching, and human-in-the-loop interactions.
 
@@ -199,8 +200,41 @@ if __name__ == "__main__":
 5. The LangGraph graph executes its defined flow of nodes and edges.
 6. The final state of the LangGraph execution (usually the last message(s) in its state) is then converted back into an ADK `Event` (with text content) and yielded.
 
-![*Diagram: Conceptual flow of ADK interacting with a `LangGraphAgent`*](/assets/img/2025-08-22-advanced-multi-agent-interactions/figure-1.png)
+```mermaid
+---
+title: Conceptual flow of ADK interacting with a `LangGraphAgent`
+---
+sequenceDiagram
+    participant User
+    participant ADKRunner
+    participant ADKOrchestratorAgent as "ADK Orchestrator (Optional)"
+    participant LangGraphAgent_ADK as "LangGraphAgent (ADK Wrapper)"
+    participant LangGraphCompiledGraph as "Compiled LangGraph Graph"
+    participant LangGraphNodes as "LangGraph Nodes (LLMs, Tools)"
+    participant LangGraphCheckpointer as "LangGraph Checkpointer"
 
+    User->>ADKRunner: User Input
+    ADKRunner->>ADKOrchestratorAgent: run_async(context)
+    ADKOrchestratorAgent-->>ADKRunner: Request transfer_to_agent(name="my_langgraph_powered_agent")
+
+    Note over ADKRunner: Runner sets LangGraphAgent_ADK as active
+    ADKRunner->>LangGraphAgent_ADK: run_async(context with history)
+    LangGraphAgent_ADK->>LangGraphAgent_ADK: Convert ADK history to LangGraph messages
+    LangGraphAgent_ADK->>LangGraphCompiledGraph: graph.invoke({messages: [...]}, config={thread_id: adk_session_id})
+
+    LangGraphCompiledGraph->>LangGraphCheckpointer: Load state for thread_id (if exists)
+    loop Graph Execution Cycle
+        LangGraphCompiledGraph->>LangGraphNodes: Execute current node(s) with state
+        LangGraphNodes-->>LangGraphCompiledGraph: Update state (e.g., new messages, tool calls)
+        LangGraphCompiledGraph->>LangGraphCheckpointer: Save updated state for thread_id
+        LangGraphCompiledGraph->>LangGraphCompiledGraph: Determine next node(s) based on edges
+    end
+    LangGraphCompiledGraph-->>LangGraphAgent_ADK: Final graph state (e.g., last AIMessage)
+    LangGraphAgent_ADK->>LangGraphAgent_ADK: Convert LangGraph output to ADK Event
+    LangGraphAgent_ADK-->>ADKRunner: Yield ADK Event
+    ADKRunner-->>User: Agent Response
+
+```
 
 
 > ## Stateful and Cyclical Logic with LangGraph
@@ -208,34 +242,26 @@ if __name__ == "__main__":
 > LangGraphAgent shines when you need to model agent interactions that are not strictly hierarchical or sequential but involve cycles, complex conditional logic, or require robust state persistence across many turns. LangGraph's checkpointer mechanism is particularly useful for long-running, resumable agent processes.
 > {: .prompt-info }
 
-
 > ## Experimental Integration and Complexity
 > 
 > - The `LangGraphAgent` integration is marked as somewhat experimental in ADK. Its API or behavior might evolve.
 > - Building and debugging LangGraph applications themselves can be complex. You'll need a good understanding of LangGraph's concepts (state, nodes, edges, checkpointers etc.).
 > - Ensure that the state schema used in your LangGraph graph and the message formats are compatible with how `LangGraphAgent` converts ADK history and expects output.
-> {: .prompt-info }
-
+> {: .prompt-danger }
 
 > ## Best Practice: Use LangGraph for "Inner Loop" Complexity
 > 
 > Consider using LangGraphAgent to encapsulate a particularly complex part of your overall agent system. An ADK orchestrator agent could delegate to a LangGraphAgent for a sub-task that benefits from LangGraph's cyclical graph capabilities, while the broader multi-agent system is still managed using ADK's hierarchical patterns.
-> {: .prompt-info }
+> {: .prompt-tip }
 
 ## Agent-to-Agent (A2A) Communication Protocol
 
-Previously we introduced the concept of multi-agent systems where ADK agents can transfer control to one another within the same application. However, the vision for AI agent collaboration extends far beyond a single process or framework. The **Agent-to-Agent (A2A) Communication Protocol** is an open standard, initiated by Google, designed to enable seamless communication and interoperability between independent AI agent systems, even if they are built on different frameworks, by different companies, and running on separate servers.
+In @sec-mas-design, we introduced the concept of multi-agent systems where ADK agents can transfer control to one another within the same application. However, the vision for AI agent collaboration extends far beyond a single process or framework. The **Agent-to-Agent (A2A) Communication Protocol** is an open standard, initiated by Google, designed to enable seamless communication and interoperability between independent AI agent systems, even if they are built on different frameworks, by different companies, and running on separate servers.
 
 This section provides a detailed overview of the A2A protocol, its core concepts, and how it facilitates inter-agent collaboration. While ADK doesn't provide a full A2A client or server implementation out-of-the-box for *remote* communication, understanding A2A is crucial if you plan to:
 
 - Have your ADK agents interact with external agents that are A2A-compliant.
 - Expose your ADK agent system as an A2A-compliant service for other agents to consume.
-
-
-> ## A2A is an Evolving Specification
-> 
-> The A2A protocol is still under development and evolving and this chapter depicts its status in May / June 2025. Its adoption and tooling are growing but may not be as mature as some intra-framework communication methods. Implementing a full A2A server around your ADK agent requires careful consideration of the A2A spec and robust error handling, serialization, and network communication logic.
-> {: .prompt-info }
 
 ### Why A2A? The Need for Agent Interoperability
 
@@ -287,8 +313,39 @@ The A2A protocol is built around several key concepts, detailed in its [official
     - Payloads use **JSON-RPC 2.0**.
     - `Content-Type` for JSON-RPC is `application/json`.
 
-![*Diagram: Interactions in A2A*](/assets/img/2025-08-22-advanced-multi-agent-interactions/figure-2.png)
+```mermaid
+---
+title: Interactions in A2A
+---
+graph TD
+    A2A_Client["A2A Client (e.g., Your ADK Agent System)"]
+    A2A_Server["A2A Server (Remote Agent)"]
+    WellKnown["/.well-known/agent.json"]
 
+    subgraph "A2A Protocol Objects"
+        AgentCard["AgentCard (JSON)"]
+        TaskObj["Task Object"]
+        MessageObj["Message Object"]
+        PartObj["Part (Text, File, Data)"]
+        ArtifactObj["Artifact Object"]
+        TaskStatusObj["TaskStatus (with TaskState)"]
+    end
+
+    A2A_Client -- "i. GET (Discovery)" --> WellKnown;
+    WellKnown -- "ii. Returns" --> AgentCard;
+    A2A_Client -- "iii. Parses" --> AgentCard;
+    A2A_Client -- "iv. HTTP POST (JSON-RPC Request e.g., message/send with MessageObj)" --> A2A_Server_Endpoint["A2A Server URL (from AgentCard)"];
+    A2A_Server_Endpoint -- "v. Processes, Creates/Updates" --> TaskObj;
+    TaskObj -- Contains --> TaskStatusObj;
+    TaskObj -- Can produce --> ArtifactObj;
+    MessageObj -- Contains --> PartObj;
+    ArtifactObj -- Contains --> PartObj;
+    A2A_Server_Endpoint -- "vi. HTTP Response (JSON-RPC Response with TaskObj or MessageObj)" --> A2A_Client;
+
+    style AgentCard fill:#lightyellow
+    style TaskObj fill:#lightblue
+    style MessageObj fill:#lightgreen
+```
 
 
 
@@ -341,9 +398,10 @@ A2A supports several interaction patterns:
     - Server keeps HTTP connection open and pushes updates (status, messages, artifact chunks) as SSE events.
     - Provides real-time feedback.
     
-    ```{mermaid}
-%%| fig-width: 50%
-%%| fig-cap: "*Diagram: Simplified A2A Streaming with SSE.*"
+```mermaid
+---
+title: Simplified A2A Streaming with SSE.
+---
     sequenceDiagram
         participant Client
         participant Server
@@ -356,7 +414,8 @@ A2A supports several interaction patterns:
         Server-->>Client: SSE Event (data: {jsonrpc:"2.0", id:123, result:{taskId:"T1", status:{state:"completed"}, kind:"status-update", final:true}})
         Note over Server: Connection Closes
     
-    ```
+```
+
     
 4. **Push Notifications:**
     - Client initiates task and provides a webhook URL.
@@ -364,13 +423,12 @@ A2A supports several interaction patterns:
     - When task state changes significantly (e.g., completion), A2A Server POSTs a notification to the client's webhook.
     - Client's webhook service receives notification, then typically calls `tasks/get` to fetch full task details.
 
-
 > ## Choosing the Right Interaction Pattern
 > 
 > - Use `message/send` with polling (`tasks/get`) for tasks that are somewhat long but where the client can afford to check periodically.
 > - Prefer `message/stream` for interactive experiences requiring real-time updates or incremental results display.
 > - Use push notifications for very long-running tasks (minutes/hours/days) or when clients (like mobile apps or serverless functions) cannot maintain persistent connections.
-> {: .prompt-info }
+> {: .prompt-tip }
 
 ### Authentication, Authorization, and Security
 
@@ -381,7 +439,6 @@ A2A emphasizes leveraging standard web security:
 - **Authorization:** Server-side responsibility based on the authenticated client identity and defined policies.
 - **Push Notification Security:** Requires careful validation of webhook URLs by the server (to prevent SSRF) and strong authentication of notifications by the client's webhook receiver. The spec suggests mechanisms for the server to authenticate to the client's webhook.
 - **Input Validation:** Servers must validate all RPC parameters and message/artifact content.
-
 
 > ## Security is a Shared Responsibility in A2A
 > 
@@ -479,11 +536,15 @@ class RemoteA2AAgentTool(BaseTool):
 
 ```
 
-
 > ## A2A for True Inter-Framework Collaboration
 > 
 > If your goal is to have an ADK agent interact with an agent built in LangGraph, CrewAI, Semantic Kernel, or any other framework that can expose or consume an A2A interface, then understanding and implementing A2A (either as a server wrapper for your ADK agent or a client tool within ADK) is the path forward.
-> {: .prompt-info }
+> {: .prompt-tip }
+
+> ## A2A is an Evolving Specification
+> 
+> The A2A protocol is still under development and evolving. Its adoption and tooling are growing but may not be as mature as some intra-framework communication methods. Implementing a full A2A server around your ADK agent requires careful consideration of the A2A spec and robust error handling, serialization, and network communication logic.
+> {: .prompt-warning }
 
 **What's Next?**
 

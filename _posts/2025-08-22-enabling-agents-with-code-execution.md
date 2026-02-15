@@ -2,7 +2,8 @@
 title: Chapter 9 - Enabling Agents with Code Execution 
 date: "2025-08-22 12:00:00 +0200"
 categories: [Gen AI, Agentic SDKs, Agent Development Kit]
-tags: [Generative AI, Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+tags: [ Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+mermaid: true
 image:
   path: /assets/img/adk-book-cover.jpg
   alt: "Building Intelligent Agents with Google ADK"
@@ -34,7 +35,28 @@ code
 result
 ````).
 
-![*Diagram: Hierarchy of `BaseCodeExecutor` and its implementations.*](/assets/img/2025-08-22-enabling-agents-with-code-execution/figure-1.png)
+```mermaid
+---
+title: Hierarchy of `BaseCodeExecutor` and its implementations.
+---
+classDiagram
+    class BaseCodeExecutor {
+        <<Abstract>>
+        +Boolean stateful
+        +Boolean optimize_data_file
+        +Integer error_retry_attempts
+        +List~Tuple~ code_block_delimiters
+        +Tuple execution_result_delimiters
+        +execute_code(inv_ctx, code_input) CodeExecutionResult
+    }
+    BaseCodeExecutor <|-- BuiltInCodeExecutor
+    BaseCodeExecutor <|-- UnsafeLocalCodeExecutor
+    BaseCodeExecutor <|-- ContainerCodeExecutor
+    BaseCodeExecutor <|-- VertexAiCodeExecutor
+
+    note for BaseCodeExecutor "Defines the contract for code execution."
+
+```
 
 
 ADK provides several concrete implementations of `BaseCodeExecutor`, each suited for different use cases and security considerations. An `LlmAgent` is configured to use a code executor by setting its `code_executor` attribute to an instance of one of these classes.
@@ -108,7 +130,6 @@ if __name__ == "__main__":
 4. The LLM then includes another `Part` in its response containing the `code_execution_result`.
 5. ADK receives these parts within the `LlmResponse` and yields corresponding `Event` objects.
 
-
 > ## Seamless and Secure Code Execution
 > 
 > BuiltInCodeExecutor is the most seamless way to enable code execution if your chosen LLM supports it. The execution happens in a sandboxed environment, offering a high degree of security and abstracting away the complexities of setting up an execution environment.
@@ -178,7 +199,6 @@ if __name__ == "__main__":
 7. This result is formatted (e.g., ````tool_output\nstdout_content\n````) and sent back to the LLM in the next turn.
 8. The LLM uses this execution result to formulate its final response or decide the next step.
 
-
 > ## Extreme Security Risk with UnsafeLocalCodeExecutor
 > 
 > The name "Unsafe" is there for a critical reason. This executor runs LLM-generated code directly in your application's Python environment. A malicious or poorly written piece of code from the LLM could:
@@ -189,7 +209,7 @@ if __name__ == "__main__":
 > - Introduce security vulnerabilities.
 > 
 > **NEVER use `UnsafeLocalCodeExecutor` in production environments or with untrusted models/users.** It is strictly for isolated, trusted local development and experimentation.
-> {: .prompt-info }
+> {: .prompt-danger }
 
 ## `ContainerCodeExecutor`: Secure, Isolated Execution via Docker
 
@@ -316,19 +336,17 @@ if __name__ == "__main__":
 The flow is similar to `UnsafeLocalCodeExecutor`, but step 5 is different:
 `ContainerCodeExecutor.execute_code(...)` starts a Docker container (if not already running for a stateful session, though this example uses non-stateful by default) using the specified image. It then uses `docker exec` (or equivalent Docker SDK call) to run the Python code inside the container. Stdout and stderr are captured from the container's execution.
 
-
 > ## ContainerCodeExecutor for Enhanced Security
 > 
 > For most use cases involving LLM-generated code, ContainerCodeExecutor offers a much better security posture than UnsafeLocalCodeExecutor due to Docker's isolation. Define a minimal Docker image with only the necessary Python libraries your agent needs.
-> {: .prompt-info }
-
+> {: .prompt-tip }
 
 > ## Docker Overhead and Configuration
 > 
 > - Running Docker containers introduces some overhead (image pulling/building, container startup time), which might make initial code executions slower.
 > - Requires Docker to be properly installed and running on the host machine where the ADK application executes.
 > - Managing Docker images and ensuring they have the correct dependencies can add complexity.
-> {: .prompt-info }
+> {: .prompt-danger }
 
 ## `VertexAiCodeExecutor`: Cloud-Native, Managed Code Execution
 
@@ -428,7 +446,6 @@ if __name__ == "__main__":
         asyncio.run(main())
 ```
 
-
 > ## Managed, Scalable, and Feature-Rich Execution with Vertex AI
 > 
 > VertexAiCodeExecutor is the recommended choice for production cloud deployments.
@@ -438,7 +455,7 @@ if __name__ == "__main__":
 > - **Pre-installed Libraries:** Common data science libraries (pandas, numpy, matplotlib, scipy) are typically available.
 > - **File I/O:** Supports generating and returning files (e.g., plots, data files), which ADK can then handle as artifacts.
 > - **Stateful Execution:** The Vertex AI Code Interpreter can be stateful by default (using `session_id` in `execute_code`), meaning variables and imports persist across code blocks within the same agent session. ADK's `VertexAiCodeExecutor` is also marked as `stateful=True` by default.
-> {: .prompt-info }
+> {: .prompt-tip }
 
 ## The Code Execution Cycle
 
@@ -453,7 +470,33 @@ Regardless of the executor used (except `BuiltInCodeExecutor` which is more inte
 7. **Result Fed Back to LLM:** This new `Event` (containing the execution result) is appended to the conversation history. The LLM Flow then constructs a new `LlmRequest` (including this result) and calls the LLM again.
 8. **LLM Interprets Result:** The LLM uses the code's output to formulate a final natural language response, generate more code, or decide on its next action.
 
-![*Diagram: The general code execution cycle in ADK (for non-built-in executors).*](/assets/img/2025-08-22-enabling-agents-with-code-execution/figure-2.png)
+```mermaid
+---
+title: The general code execution cycle in ADK (for non-built-in executors).
+---
+sequenceDiagram
+    participant User
+    participant LlmAgent
+    participant LLM
+    participant CodeExecutionFlowProcessor as "ADK CodeExec Processor"
+    participant CodeExecutor as "Selected CodeExecutor"
+    participant ExecutionEnv as "Execution Env. (Local/Docker/Vertex)"
+
+    User->>LlmAgent: "Calculate X"
+    LlmAgent->>LLM: Prompt
+    LLM-->>LlmAgent: LlmResponse (contains text + ```python code```)
+    LlmAgent->>CodeExecutionFlowProcessor: Process LlmResponse
+    CodeExecutionFlowProcessor-->>LlmAgent: Yield Event (text before code)
+    CodeExecutionFlowProcessor->>CodeExecutor: execute_code(code_string)
+    CodeExecutor->>ExecutionEnv: Run code_string
+    ExecutionEnv-->>CodeExecutor: stdout, stderr, output_files
+    CodeExecutor-->>CodeExecutionFlowProcessor: CodeExecutionResult
+    CodeExecutionFlowProcessor-->>LlmAgent: Yield Event (```tool_output result``` as user content)
+    LlmAgent->>LLM: Prompt (with code execution result in history)
+    LLM-->>LlmAgent: LlmResponse (final answer based on code output)
+    LlmAgent-->>User: Final Answer
+
+```
 
 
 ## Managing Code Execution Context (`CodeExecutorContext`)
@@ -466,7 +509,6 @@ For stateful executors or when optimizing data file inputs, ADK uses `CodeExecut
 
 You generally won't interact with `CodeExecutorContext` directly unless you are building a custom code executor or deeply customizing the code execution flow.
 
-
 > ## Best Practice: Iterative Prompting for Code Generation
 > 
 > Getting an LLM to generate correct and useful code often requires iterative prompting.
@@ -475,7 +517,7 @@ You generally won't interact with `CodeExecutorContext` directly unless you are 
 > - **Provide Examples:** If possible, include examples of desired code snippets in the agent's instruction or few-shot examples.
 > - **Error Handling:** Instruct the agent on how to interpret error messages from code execution and how to attempt to fix its code. ADK's `error_retry_attempts` in code executors helps with this.
 > - **Start Simple:** For complex tasks, ask the LLM to generate code in smaller, verifiable chunks.
-> {: .prompt-info }
+> {: .prompt-tip }
 
 **What's Next?**
 

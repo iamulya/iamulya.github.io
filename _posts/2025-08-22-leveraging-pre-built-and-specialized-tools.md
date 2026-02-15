@@ -2,7 +2,8 @@
 title: Chapter 6 - Leveraging Pre-built and Specialized Tools 
 date: "2025-08-22 10:30:00 +0200"
 categories: [Gen AI, Agentic SDKs, Agent Development Kit]
-tags: [Generative AI, Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+tags: [ Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+mermaid: true
 image:
   path: /assets/img/adk-book-cover.jpg
   alt: "Building Intelligent Agents with Google ADK"
@@ -69,7 +70,6 @@ if __name__ == "__main__":
 ```
 
 When `search_savvy_agent` processes a query like "What is the latest news about the Mars rover Perseverance?", the model, recognizing the need for current information and seeing the `google_search` tool available, can internally trigger a search. The search results are then used by the model to formulate its answer. You might see `grounding_metadata` in the `Event` indicating the queries performed.
-
 
 > ## Model-Integrated Search
 > 
@@ -146,20 +146,10 @@ else:
 
 This tool tells the Gemini model to use the specified Vertex AI Search data store for grounding its responses. The model handles the retrieval and incorporates the information.
 
-
 > ## Configuration and Permissions for Search Tools
 > 
-> `VertexAiSearchTool`: Requires a correctly configured Vertex AI Search data store/engine and appropriate IAM permissions for the credentials ADK is using to access GCP (e.g., your user credentials via `gcloud auth application-default login`, or a service account if deployed). Make sure you are using the Vertex AI setup for this example, i.e. 
-> 
-> GOOGLE_GENAI_USE_VERTEXAI=1 
-> 
-> GOOGLE_CLOUD_PROJECT=your-project-id 
-> 
-> GOOGLE_CLOUD_LOCATION=location 
-> 
-> VERTEX_AI_SEARCH_DATA_STORE_ID=your-data-store-id
-> 
-> {: .prompt-info }
+> `VertexAiSearchTool`: Requires a correctly configured Vertex AI Search data store/engine and appropriate IAM permissions for the credentials ADK is using to access GCP (e.g., your user credentials via `gcloud auth application-default login`, or a service account if deployed). Make sure you are using the Vertex AI setup for this example, i.e. GOOGLE_GENAI_USE_VERTEXAI=1, GOOGLE_CLOUD_PROJECT=your-project-id, GOOGLE_CLOUD_LOCATION=location, VERTEX_AI_SEARCH_DATA_STORE_ID=your-data-store-id
+> {: .prompt-danger }
 
 ## Web Page Loading: `load_web_page` tool
 
@@ -216,7 +206,6 @@ if __name__ == "__main__":
         print()
 ```
 
-
 > ## Combine Search and Page Loading
 > 
 > For robust web information retrieval, agents often benefit from a two-step process:
@@ -225,8 +214,7 @@ if __name__ == "__main__":
 > 2. Use `load_web_page` (via `FunctionTool`) to fetch content from a promising URL identified in step 1.
 > 
 > This requires the agent's instruction to guide it through this multi-step reasoning.
-> {: .prompt-info }
-
+> {: .prompt-tip }
 
 > ## Web Page Complexity and Size
 > 
@@ -234,11 +222,11 @@ if __name__ == "__main__":
 > - Fetched web page content can be very long. This can lead to large prompts when the content is fed back to the LLM, potentially exceeding token limits or increasing costs. Consider strategies like instructing the LLM to request summarization of specific sections, or implementing chunking if you process the content yourself before sending it to the LLM.
 > 
 > You can however also easily more powerful browser automation tools like [browser-use](https://github.com/browser-use/browser-use) as a custom tool with ADK Agent.
-> {: .prompt-info }
+> {: .prompt-warning }
 
 ## Interacting with Agent Memory: `LoadMemoryTool`, `PreloadMemoryTool`
 
-As discussed previously, ADK provides a `MemoryService` for agents to have long-term memory across sessions. Two specialized tools facilitate interaction with this service:
+As discussed in @sec-core-concepts, ADK provides a `MemoryService` for agents to have long-term memory across sessions. Two specialized tools facilitate interaction with this service:
 
 - **`google.adk.tools.load_memory_tool` (LoadMemoryTool)**:
     - Allows the agent to actively query its long-term memory.
@@ -342,17 +330,15 @@ if __name__ == "__main__":
     print()
 ```
 
-
 > ## PreloadMemoryTool for Seamless Context
 > 
 > PreloadMemoryTool is excellent for providing always-on, relevant context from past interactions. It makes the agent seem more naturally aware of history without requiring explicit "search my memory" instructions from the user or the LLM.
-> {: .prompt-info }
-
+> {: .prompt-tip }
 
 > ## PreloadMemoryTool Prompt Length
 > 
 > If the memory search for PreloadMemoryTool returns a lot of text, it can significantly increase the length of the system instruction and thus the overall prompt sent to the LLM. Be mindful of token limits and potential increases in latency or cost. The underlying MemoryService implementation (e.g., similarity_top_k in VertexAiRagMemoryService) can help control how much information is retrieved.
-> {: .prompt-info }
+> {: .prompt-danger }
 
 ## Managing Agent Artifacts: `LoadArtifactsTool`
 
@@ -429,7 +415,6 @@ if __name__ == "__main__":
 
     asyncio.run(main())
 ```
-
 
 > ## LoadArtifactsTool for Contextual File Access
 > 
@@ -536,7 +521,7 @@ async def main():
     )
 
     print(
-        f"[user function_response]: name='get_user_choice', response={'result': '{user_choice}'}\n"
+        f"[user function_response]: name='get_user_choice', response={'result': '{user_choice}'}"
     )
 
     # --- Turn 3: Agent processes the choice and responds ---
@@ -553,7 +538,6 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-
 > ## Best Practice: Clear Instructions for get_user_choice
 > 
 > Since the user's choice comes in a subsequent turn, your agent's main instruction should guide the LLM on:
@@ -562,7 +546,7 @@ if __name__ == "__main__":
 > - How to recognize and process the user's choice from their next message.
 > 
 > This often involves a multi-turn reasoning capability in the LLM.
-> {: .prompt-info }
+> {: .prompt-tip }
 
 ## Controlling Agent Loops: `ExitLoopTool`
 

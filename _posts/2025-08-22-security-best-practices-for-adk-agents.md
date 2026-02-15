@@ -2,7 +2,8 @@
 title: Chapter 23 - Security Best Practices for ADK Agents 
 date: "2025-08-22 19:00:00 +0200"
 categories: [Gen AI, Agentic SDKs, Agent Development Kit]
-tags: [Generative AI, Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+tags: [ Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+mermaid: true
 image:
   path: /assets/img/adk-book-cover.jpg
   alt: "Building Intelligent Agents with Google ADK"
@@ -28,7 +29,44 @@ Understanding where vulnerabilities can arise is the first step to securing your
 - **Session State and Artifacts:** Sensitive information stored in session state or as artifacts needs protection.
 - **Deployment Environment:** The security of the underlying infrastructure (Cloud Run, Kubernetes, VMs) where the agent is deployed.
 
-![*Diagram: Conceptual attack surface of an ADK agent system.*](/assets/img/2025-08-22-security-best-practices-for-adk-agents/figure-1.png)
+```mermaid
+---
+title: Conceptual attack surface of an ADK agent system.
+---
+graph LR
+    User["User (Potential Attacker/Benign)"] -- Input --> Agent["ADK Agent"];
+    Agent -- Interacts with --> LLM["Large Language Model"];
+    Agent -- Uses --> Tools["Tools (Custom/OpenAPI/etc.)"];
+    Tools -- Call --> ExternalAPIs["External APIs / Services"];
+    Agent -- Optionally uses --> CodeExec["Code Execution Environment"];
+    Agent -- Stores/Retrieves --> SessionState["Session State"];
+    Agent -- Stores/Retrieves --> Artifacts["Artifact Storage"];
+    Agent -- Stores/Retrieves --> LongTermMemory["Long-Term Memory"];
+
+    subgraph "Potential Vulnerability Points"
+        direction LR
+        User_Input_Attack["Prompt Injection"]
+        Tool_IO_Attack["Tool Data Manipulation"]
+        API_Vuln["External API Vulnerabilities"]
+        LLM_Output_Risk["Insecure LLM Output (e.g., bad code)"]
+        CodeExec_Env_Attack["Code Execution Exploits"]
+        Credential_Leak["Credential Theft"]
+        Data_Leak_Session["Session/Artifact Data Leak"]
+    end
+
+    User_Input_Attack --> Agent;
+    Tool_IO_Attack --> Tools;
+    ExternalAPIs --> API_Vuln;
+    LLM --> LLM_Output_Risk; LLM_Output_Risk --> Agent;
+    CodeExec --> CodeExec_Env_Attack;
+    Agent -- Needs --> SecureCreds["Secure Credential Handling"]; SecureCreds --> Tools;
+    SessionState --> Data_Leak_Session;
+    Artifacts --> Data_Leak_Session;
+
+    style Agent fill:#ccf,stroke:#333,stroke-width:2px
+    style Tools fill:#cfc,stroke:#333,stroke-width:1px
+    style CodeExec fill:#f99,stroke:#333,stroke-width:1px
+```
 
 
 ## Secure Tool Design and Interaction
@@ -104,11 +142,10 @@ Tools are a primary way agents interact with the outside world, making their des
     - Design tools to perform specific, narrow functions rather than broad, overly powerful actions.
     - Example: Instead of a generic "execute_sql" tool, create more specific tools like "get_customer_order_details(order_id: str)".
 
-
 > ## Best Practice: Parameterize Tools, Don't Let LLMs Construct Code/Queries Directly
 > 
 > Avoid designing tools where the LLM provides a raw SQL query or a full command string to be executed. Instead, have the LLM provide parameters that your tool then uses to safely construct the query or command using parameterized queries or safe shell execution libraries. This significantly reduces the risk of injection attacks.
-> {: .prompt-info }
+> {: .prompt-tip }
 
 ## Input Validation and Sanitization (Agent Level)
 
@@ -179,15 +216,14 @@ This was covered extensively before, but it's worth reiterating key points:
     
 - **ADK's Auth Framework for OpenAPI/GoogleAPI Tools:** Leverage `AuthCredential` (especially for `AuthCredentialTypes.SERVICE_ACCOUNT` with ADC, or OAuth2 where client secrets are passed at toolset configuration) to let ADK manage the token acquisition and injection. This keeps the raw secrets out of individual tool calls.
 
-
 > ## Best Practice: Rotate Credentials Regularly
 > 
 > Implement a policy for regularly rotating API keys and other sensitive credentials, even if stored securely.
-> {: .prompt-info }
+> {: .prompt-tip }
 
 ## Considerations for Code Execution Environments
 
-If your agent uses code execution, the security of the execution environment is paramount.
+If your agent uses code execution (@sec-code-execution), the security of the execution environment is paramount.
 
 - **`BuiltInCodeExecutor` :**
     - **Security:** High. Code runs in a sandbox environment.
@@ -208,11 +244,10 @@ If your agent uses code execution, the security of the execution environment is 
     - **Security:** High. Uses Google's managed Vertex AI Code Interpreter service, which runs code in a sandboxed environment.
     - **Recommendation:** Preferred cloud-native solution for scalable and secure Python code execution.
 
-
 > ## Libraries in Code Execution Environments
 > 
 > Be mindful of the Python libraries available in your code execution environment (especially for `ContainerCodeExecutor` where you define the image). If an LLM generates code that tries to use a library that isn't installed, it will fail. Conversely, avoid installing unnecessary libraries to reduce the attack surface. `VertexAiCodeExecutor` comes with common data science libraries pre-installed.
-> {: .prompt-info }
+> {: .prompt-danger }
 
 ## Mitigating Prompt Injection
 
@@ -247,7 +282,6 @@ Prompt injection is an attack where a user crafts input designed to trick the LL
 7. **Sandboxing Actions:**
     - Ensure that any actions an agent takes (especially tool calls or code execution) are performed in a sandboxed or least-privilege environment.
 
-
 > ## Defense in Depth for Prompt Injection
 > 
 > There's no silver bullet for prompt injection. Employ multiple layers of defense: strong initial instructions, input/output validation where possible, secure tool design, and human oversight for critical operations. Stay updated on research in this area, as techniques evolve.
@@ -266,11 +300,10 @@ Prompt injection is an attack where a user crafts input designed to trick the LL
 - **Cloud Run/Kubernetes/VMs:** Follow general cloud security best practices for your chosen deployment platform (network security groups, minimal IAM permissions for runtime service accounts, OS hardening, regular patching).
 - **Dependency Scanning:** Regularly scan your Python dependencies (in `requirements.txt` or `pyproject.toml`) for known vulnerabilities using tools like `pip-audit` or Snyk.
 
-
 > ## Best Practice: Regular Security Audits and Testing
 > 
 > Periodically review your agent's design, tool interactions, and deployment configuration for potential security weaknesses. Consider penetration testing for critical agent applications.
-> {: .prompt-info }
+> {: .prompt-tip }
 
 **What's Next?**
 

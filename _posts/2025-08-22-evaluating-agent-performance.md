@@ -2,7 +2,8 @@
 title: Chapter 20 - Evaluating Agent Performance 
 date: "2025-08-22 17:30:00 +0200"
 categories: [Gen AI, Agentic SDKs, Agent Development Kit]
-tags: [Generative AI, Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+tags: [ Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+mermaid: true
 image:
   path: /assets/img/adk-book-cover.jpg
   alt: "Building Intelligent Agents with Google ADK"
@@ -46,7 +47,6 @@ ADK offers two primary ways to run evaluations:
         - `evaluate_eval_set(agent_module, eval_set, criteria, num_runs, agent_name)`: Evaluates a single `EvalSet` object.
         - `evaluate(agent_module, eval_dataset_file_path_or_dir, ...)`: Similar to the CLI, handles loading from files/directories.
         - `migrate_eval_data_to_new_schema(...)`: A utility to convert older eval data formats to the current `EvalSet` Pydantic schema.
-
 
 > ## `adk eval` for Standardized Testing
 > 
@@ -142,7 +142,6 @@ This data is typically stored in a JSON file (e.g., `my_agent_tests.evalset.json
 
 ```
 
-
 > ## Best Practice: Craft Comprehensive EvalCases
 > 
 > Good EvalCases are the cornerstone of effective evaluation. For each case:
@@ -152,7 +151,7 @@ This data is typically stored in a JSON file (e.g., `my_agent_tests.evalset.json
 > - Provide a clear `final_response` that represents the ideal agent output.
 > - Use `session_input` to set up any prerequisite state needed for the test.
 > - Give descriptive `eval_id`s.
-> {: .prompt-info }
+> {: .prompt-tip }
 
 ## Understanding Evaluation Metrics and Criteria
 
@@ -194,7 +193,6 @@ You would create a `test_config.json` file in the same directory as your evaluat
 
 When using the new `EvalSet` format and `AgentEvaluator.evaluate_eval_set`, you pass the criteria dictionary programmatically.
 
-
 > ## Choose Metrics Relevant to Your Agent's Task
 > 
 > - If your agent's primary job is accurate tool use (e.g., an API orchestrator), `tool_trajectory_avg_score` is paramount.
@@ -220,7 +218,27 @@ To get actual agent outputs to compare against your `EvalSet`, ADK uses the `Eva
 
 This generated data is then consumed by `AgentEvaluator` and its underlying metric evaluators (`TrajectoryEvaluator`, `ResponseEvaluator`).
 
-![*Diagram: The ADK Evaluation Workflow.*](/assets/img/2025-08-22-evaluating-agent-performance/figure-1.png)
+```mermaid
+---
+title: The ADK Evaluation Workflow.
+---
+graph TD
+    A[EvalSet] -- Loaded into --> B(EvalSet Object);
+    C[Agent Module] --> D(EvaluationGenerator);
+    B -- Input --> D;
+    D -- Runs agent against each EvalCase --> E[List of EvalCaseResponses];
+    B -- Provides Expected Outcomes --> F(AgentEvaluator / Metric Evaluators);
+    E -- Provides Actual Outcomes --> F;
+    F -- Compares Actual vs. Expected --> G[EvaluationResult];
+    G -- Displayed --> H[CLI Output / Dev UI Eval Tab];
+
+    style A fill:#lightyellow
+    style C fill:#lightyellow
+    style D fill:#ccf
+    style F fill:#cfc
+    style G fill:#f9f
+
+```
 
 
 ## Visualizing Evaluation Results in the Dev UI
@@ -235,11 +253,10 @@ The ADK Development UI (`adk web`) typically includes an "Eval" tab. This tab al
     - A side-by-side comparison of expected vs. actual tool calls and responses.
     - Links to the full trace of the agent's execution for that specific eval case run, allowing you to debug failures directly.
 
-
 > ## Best Practice: Use Dev UI for Debugging Eval Failures
 > 
 > When an evaluation fails, the Dev UI's Eval tab is invaluable. It not only shows you what failed (e.g., wrong tool called, response didn't match) but often links directly to the Trace view for that specific failing run. This allows you to immediately inspect the LLM prompts, tool arguments, and agent reasoning that led to the failure.
-> {: .prompt-info }
+> {: .prompt-tip }
 
 **Example: Running an Evaluation via CLI**
 
@@ -393,13 +410,12 @@ eval_sets/tests.evalset.json:
   Tests failed: 0
 ```
 
-
 > ## `AgentEvaluator` and Vertex AI SDK
 > 
 > `AgentEvaluator` (and specifically its `ResponseEvaluator` component) in `google-adk` leverages the `vertexai.preview.evaluation.EvalTask` from the `google-cloud-aiplatform` (Vertex AI) library. This evaluation task, even for metrics that might seem computable locally (like `ROUGE`), often performs an initialization step that expects a valid Google Cloud Project to be configured for Vertex AI.
 > 
 > This is why when running `adk eval` through command-line, you would need to set the GOOGLE_CLOUD_PROJECT environment variable to a valid Google Cloud Project ID, even if you are not using Vertex AI (`GOOGLE_GENAI_USE_VERTEXAI` is set to `false`).
-> {: .prompt-info }
+> {: .prompt-danger }
 
 **What's Next?**
 

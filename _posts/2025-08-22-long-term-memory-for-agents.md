@@ -2,7 +2,8 @@
 title: Chapter 19 - Long-Term Memory for Agents 
 date: "2025-08-22 17:00:00 +0200"
 categories: [Gen AI, Agentic SDKs, Agent Development Kit]
-tags: [Generative AI, Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+tags: [ Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+mermaid: true
 image:
   path: /assets/img/adk-book-cover.jpg
   alt: "Building Intelligent Agents with Google ADK"
@@ -39,7 +40,33 @@ The `google.adk.memory.BaseMemoryService` is an abstract class defining the cont
 
 The `Runner` is typically configured with a `MemoryService` instance, making it accessible to agents and tools via their contexts.
 
-![*Diagram: `BaseMemoryService` interface and its concrete implementations.*](/assets/img/2025-08-22-long-term-memory-for-agents/figure-1.png)
+```mermaid
+---
+title: BaseMemoryService interface and its concrete implementations.
+---
+classDiagram
+    class BaseMemoryService {
+        <<Abstract>>
+        +add_session_to_memory(session)
+        +search_memory(app_name, user_id, query) SearchMemoryResponse
+    }
+    class SearchMemoryResponse {
+        +List~MemoryEntry~ memories
+    }
+    class MemoryEntry {
+        +Content content
+        +Optional~str~ author
+        +Optional~str~ timestamp
+    }
+    BaseMemoryService <|-- InMemoryMemoryService
+    BaseMemoryService <|-- VertexAiRagMemoryService
+    SearchMemoryResponse o-- MemoryEntry
+
+    Runner ..> BaseMemoryService : Uses
+    ToolContext ..> BaseMemoryService : Accesses via (e.g., search_memory())
+    note for BaseMemoryService "Contract for long-term knowledge storage and retrieval."
+
+```
 
 
 ## Strategies for Populating and Retrieving Memory
@@ -183,11 +210,10 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-
 > ## InMemoryMemoryService is for Prototyping Only
 > 
 > Due to its simple keyword matching and lack of persistence, InMemoryMemoryService should not be used for production applications requiring reliable long-term memory. It's primarily for understanding the mechanics and for basic local testing.
-> {: .prompt-info }
+> {: .prompt-danger }
 
 ## `VertexAiRagMemoryService`: Leveraging Vertex AI RAG
 
@@ -261,26 +287,51 @@ else:
         - *(Currently, filtering by `user_id` or `app_name` within the RAG query itself might be limited. The service primarily searches the whole corpus it's pointed to. Post-retrieval filtering based on `context.source_display_name` might be needed if strict user-scoping is critical directly from this tool without LLM re-filtering.)*
     3. The retrieved `Contexts` (chunks of text from the ingested session files) are parsed back into `MemoryEntry` objects. The service attempts to reconstruct event-like structures if the ingested format (JSON lines) is found.
 
-![*Diagram: Interaction flow for `VertexAiRagMemoryService`.*](/assets/img/2025-08-22-long-term-memory-for-agents/figure-2.png)
+```mermaid
+---
+title: Interaction flow for `VertexAiRagMemoryService`.
+---
+sequenceDiagram
+    participant ADKRunner
+    participant VertexAiRagMemoryService as MemService
+    participant VertexRAGAPI as "Vertex AI RAG Service"
+    participant GCS as "Google Cloud Storage (for RAG Corpus)"
 
+    Note over ADKRunner, MemService: Agent uses tool to save session to memory
+    ADKRunner->>MemService: add_session_to_memory(session_object)
+    MemService->>MemService: Format session_object.events to text file (JSON lines)
+    MemService->>VertexRAGAPI: rag.upload_file(corpus_name, temp_file_path, display_name=app.user.session)
+    VertexRAGAPI->>GCS: Stores file
+    VertexRAGAPI->>VertexRAGAPI: Processes file (chunks, embeds, indexes)
+    VertexRAGAPI-->>MemService: Upload complete
+    MemService-->>ADKRunner: Success
+
+    Note over ADKRunner, MemService: Later, agent uses tool to search memory
+    ADKRunner->>MemService: search_memory(app, user, query)
+    MemService->>VertexRAGAPI: rag.retrieval_query(text=query, rag_resources=...)
+    VertexRAGAPI->>VertexRAGAPI: Semantic search over indexed data
+    VertexRAGAPI-->>MemService: Returns rag.Contexts
+    MemService->>MemService: Parse Contexts into List~MemoryEntry~
+    MemService-->>ADKRunner: SearchMemoryResponse
+
+```
 
 
 > ## Best Practice: Semantic Search with VertexAiRagMemoryService
 > 
 > For intelligent recall based on meaning rather than just keywords, VertexAiRagMemoryService is the way to go. It allows your agent to find relevant past conversations even if the exact phrasing isn't used in the current query. This is crucial for building truly knowledgeable and context-aware long-term memory.
-> {: .prompt-info }
-
+> {: .prompt-tip }
 
 > ## RAG Corpus Setup and Costs
 > 
 > - Setting up a Vertex AI RAG Corpus and ensuring your service account has the right permissions (e.g., "Vertex AI User", "Storage Object User" for the underlying GCS bucket of the RAG corpus) is essential.
 > - Vertex AI RAG and its underlying services (like Vector Search, GCS) incur costs. Monitor your usage and understand the pricing model.
 > - Ingestion into RAG is asynchronous. There might be a delay between calling `add_session_to_memory` and the data being fully searchable.
-> {: .prompt-info }
+> {: .prompt-danger }
 
 ## Tools for Memory Interaction: `LoadMemoryTool` and `PreloadMemoryTool`
 
-As briefly introduced previously and demonstrated in the `InMemoryMemoryService` example, ADK provides two key tools for agents to interact with the configured `MemoryService`:
+As briefly introduced in @sec-prebuilt-tools and demonstrated in the `InMemoryMemoryService` example, ADK provides two key tools for agents to interact with the configured `MemoryService`:
 
 - **`google.adk.tools.load_memory_tool` (LoadMemoryTool)**:
     - A standard `FunctionTool` that an LLM can explicitly call.
@@ -375,7 +426,6 @@ YOU: {prompt_text}")
     asyncio.run(main())
 ```
 
-
 > ## Combining PreloadMemoryTool and LoadMemoryTool
 > 
 > For many applications, using both tools provides a good balance:
@@ -385,7 +435,6 @@ YOU: {prompt_text}")
 > 
 > Your agent's instruction should guide it on how and when to use `load_memory` if `preload_memory` is also active.
 > {: .prompt-info }
-
 
 > ## Querying Effectiveness of Memory Search
 > 

@@ -2,7 +2,8 @@
 title: Chapter 21 - Deploying ADK Agents 
 date: "2025-08-22 18:00:00 +0200"
 categories: [Gen AI, Agentic SDKs, Agent Development Kit]
-tags: [Generative AI, Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+tags: [en AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+mermaid: true
 image:
   path: /assets/img/adk-book-cover.jpg
   alt: "Building Intelligent Agents with Google ADK"
@@ -40,11 +41,10 @@ my_adk_app/
 
 ```
 
-
 > ## Best Practice: Minimal requirements.txt/pyproject.toml
 > 
 > Aim for a minimal requirements.txt/pyproject.toml that only includes packages truly needed at runtime. Avoid including development-only dependencies (like pytest, pylint, pyink) in your deployment image to keep it lean and reduce potential vulnerabilities. Use dependency groups in pyproject.toml (if using uv or poetry) to manage dev vs. runtime dependencies.
-> {: .prompt-info }
+> {: .prompt-tip }
 
 ## Deployment Options
 
@@ -68,9 +68,8 @@ Let's start with the deployment to Vertex AI Agent Engine.
 
 ## Deploying to Vertex AI Agent Engine
 
-:::{.callout-important}
-The support for Vertex AI Agent Engine is currently classified as experimental/in preview and thus can sometimes lead to unpredictable behavior  
-:::
+> The support for Vertex AI Agent Engine is currently classified as experimental/in preview and thus can sometimes lead to unpredictable behavior  
+> {: .prompt-danger }
 
 Okay, let's create a simple ADK agent and then outline the steps to deploy it to Vertex AI Agent Engine using the `adk deploy` command.
 
@@ -145,9 +144,9 @@ my_simple_echo_agent/
       enable_tracing=True,
     )
     ```
->     __CALLOUT_NOTE_START__
->     You could also use `adk create my_simple_echo_agent --model="gemini-2.0-flash" --project="your-gcp-project-id" --region="your-gcp-region"` and then modify `agent.py` to add the callback and remove any default tools if you prefer.
->     :::
+    ::: {.callout-note}
+    You could also use `adk create my_simple_echo_agent --model="gemini-2.0-flash" --project="your-gcp-project-id" --region="your-gcp-region"` and then modify `agent.py` to add the callback and remove any default tools if you prefer.
+    :::
 
 **Step 2: Deploy to Vertex AI Agent Engine**
 
@@ -200,7 +199,7 @@ Let's break down the command:
 2.  It creates a temporary directory.
 3.  It copies your agent code into this temp directory.
 4.  It ensures an `agent_engine_app.py` (or the file specified by `--adk_app`) exists and creates one using a template if necessary (in our case, we provided it).
-5.  It may create a default `requirements.txt` if one isn't present.
+5.  It may create a default `requirements.txt` if one isn't present, including `google-cloud-aiplatform[adk,agent_engines]`.
 6.  It uses the Vertex AI SDK's `agent_engines.create()` method to deploy your application. This typically involves:
     -  Building a container image (if not using a pre-built one).
     -  Pushing the image to Artifact Registry.
@@ -340,7 +339,6 @@ $AGENT_PATH
 - It will then build the image, push it to Artifact Registry, and deploy the service.
 - Upon successful deployment, it will output the **Service URL**.
 
-
 > To deploy with the Web UI, include the `--with_ui` flag in your `adk deploy cloud_run` command. Use this option only in development or testing environments, as the Web UI is **not intended for production use**. Ideally you would have your own frontend which will communicate with the ADK agent through the API server (You can use the `adk api_server` command to run the ADK agent backend), which we will discuss in the next secion.
 > {: .prompt-info }
 
@@ -379,7 +377,6 @@ curl -X POST -H "Authorization: Bearer $TOKEN" \
 
 ```
 
-
 > ## Best Practice: Use Secret Manager for Sensitive Data
 > 
 > Do not pass API keys or database passwords directly as environment variables in the deploy command for production. Instead:
@@ -389,7 +386,7 @@ curl -X POST -H "Authorization: Bearer $TOKEN" \
 > 3. In your `agent.py` or initialization code, fetch these secrets at startup using the Secret Manager client libraries.
 > 
 > The `adk deploy cloud_run` command has options (`-set-secrets`) to help integrate with Secret Manager.
-> {: .prompt-info }
+> {: .prompt-tip }
 
 **Using Persistent Services with Cloud Run:**
 If your agent uses `DatabaseSessionService`, `GcsArtifactService`, or `VertexAiRagMemoryService`:
@@ -405,11 +402,10 @@ If your agent uses `DatabaseSessionService`, `GcsArtifactService`, or `VertexAiR
     - The runtime service account needs permissions for Vertex AI and RAG operations.
     - Pass the RAG Corpus ID as an environment variable.
 
-
 > ## `adk_version` in `adk deploy cloud_run`
 > 
 > The adk deploy cloud_run command allows specifying `--adk_version desired_version`. By default, it uses the version of ADK you have installed locally when generating the Dockerfile. If you need to pin the ADK version in your deployed container to a specific release for stability, use this option.
-> {: .prompt-info }
+> {: .prompt-tip }
 
 ## Other Deployment targets
 
@@ -448,11 +444,10 @@ The `adk api_server` command and the underlying FastAPI application provide a me
     - In a production environment, you would replace `http://localhost:3000` with the actual domain of your deployed frontend application (e.g., `https://my-frontend-app.com`).
     - You can specify multiple origins by repeating the option: `--allow_origins http://localhost:3000 --allow_origins https://dev.example.com`.
 
-
 > ## Importance of `--allow_origins`
 > 
 > The `--allow_origins` flag is essential for a decoupled frontend/backend setup. Without correctly configuring it, your frontend application will be unable to communicate with the `adk api_server` due to browser security restrictions (CORS errors).
-> {: .prompt-info }
+> {: .prompt-danger }
 
 **Example Scenario:**
 
@@ -470,7 +465,7 @@ The `adk api_server` command and the underlying FastAPI application provide a me
 
 - **Frontend (e.g., a React app running on `localhost:3000`):**
 
-    Your frontend code would make API calls to `http://localhost:8000` (or `https://your-backend-domain.com` in production). For instance, you can create a session like this:
+    Your frontend code would make API calls to `http://localhost:8000` (or `https://your-backend-domain.com` in production). For instance, to create a session:
 
     ```javascript
     // Example frontend JavaScript
@@ -496,7 +491,6 @@ The `adk api_server` command and the underlying FastAPI application provide a me
 - `--allow_origins`: As discussed, crucial for enabling cross-origin requests from your frontend.
 - `--trace_to_cloud`: Enables exporting traces to Google Cloud Trace.
 - `--reload`: Enables auto-reloading the server on code changes (useful for development, default is `True`).
-
 
 > ## Difference from `adk web`
 > 

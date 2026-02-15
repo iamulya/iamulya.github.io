@@ -2,7 +2,8 @@
 title: Chapter 24 - Extending and Customizing ADK 
 date: "2025-08-22 19:30:00 +0200"
 categories: [Gen AI, Agentic SDKs, Agent Development Kit]
-tags: [Generative AI, Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+tags: [en AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+mermaid: true
 image:
   path: /assets/img/adk-book-cover.jpg
   alt: "Building Intelligent Agents with Google ADK"
@@ -130,7 +131,6 @@ if __name__ == "__main__":
 - **Asynchronous Nature:** The `_run_async_impl` method is a coroutine. Use `await` for any I/O-bound operations.
 - **No LLM by Default:** `BaseAgent` doesn't automatically have an LLM. If you need LLM capabilities, you'd typically use or compose with an `LlmAgent`.
 
-
 > ## Custom Agents for Deterministic Logic
 > 
 > BaseAgent subclasses are perfect for implementing parts of your system that require deterministic, rule-based logic that doesn't need the nuanced understanding (or the cost and latency) of an LLM for every step. They can seamlessly integrate into a larger multi-agent system managed by ADK.
@@ -219,11 +219,10 @@ class MetricsEmittingRunner(Runner):
 
 ```
 
-
 > ## Complexity of Custom Runners
 > 
 > Overriding core Runner logic can be complex and might break expected ADK behaviors if not done carefully. Only do this if you have a strong understanding of ADK's internal execution flow and a compelling reason that cannot be addressed by agent logic, callbacks, or custom services.
-> {: .prompt-info }
+> {: .prompt-danger }
 
 ## Implementing Custom Services (`SessionService`, `ArtifactService`, `MemoryService`)
 
@@ -348,11 +347,10 @@ class FileSystemArtifactService(BaseArtifactService):
 
 ```
 
-
 > ## Best Practice: Ensure Asynchronous Operations in Custom Services
 > 
 > All methods in BaseSessionService, BaseArtifactService, and BaseMemoryService are defined as async def. If your custom implementation involves I/O (network calls, disk access, database queries), ensure you use appropriate asynchronous libraries (e.g., aiohttp for HTTP, asyncpg for PostgreSQL, aiofiles for disk) to avoid blocking ADK's main event loop. For CPU-bound tasks within these methods, consider running them in a separate thread pool using asyncio.to_thread.
-> {: .prompt-info }
+> {: .prompt-tip }
 
 ## Contributing Custom Tools or Toolsets
 
@@ -365,7 +363,7 @@ If you develop a generic, reusable tool or a toolset for a popular API/service t
 3. **Well-Defined `FunctionDeclaration`:** For `BaseTool`s (not `FunctionTool`), implement `_get_declaration()` to provide an accurate schema. For `FunctionTool`s, use precise Python type hints and docstrings.
 4. **Robust Error Handling:** Tools should gracefully handle potential errors (e.g., API failures, invalid input) and return informative error messages or dictionaries.
 5. **Idempotency (if applicable):** If a tool performs an action that has side effects, consider if it can be made idempotent (calling it multiple times with the same input produces the same result without further side effects).
-6. **Security:** Follow security best practices, especially regarding input validation and credential handling if the tool makes external calls.
+6. **Security:** Follow security best practices (@sec-security), especially regarding input validation and credential handling if the tool makes external calls.
 7. **Dependencies:** Clearly list any external Python library dependencies.
 8. **Documentation and Examples:** Provide clear documentation and usage examples.
 9. **Testing:** Include unit tests.

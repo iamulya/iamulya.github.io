@@ -2,7 +2,8 @@
 title: 5. OpenClaw — Security, Logging, and Recovery
 date: "2026-02-09 13:40:00 +0100"
 categories: [Gen AI, Personal AI Assistants, OpenClaw]
-tags: [Generative AI, Agentic AI, Gen AI, OpenClaw, Personal AI Assistants, AI Assistants]
+tags: [ Agentic AI, Gen AI, OpenClaw, Personal AI Assistants, AI Assistants]
+mermaid: true
 image:
   path: /assets/img/openclaw.png
   alt: "OpenClaw: a personal AI assistant"

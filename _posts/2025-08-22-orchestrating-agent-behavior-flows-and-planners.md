@@ -2,7 +2,8 @@
 title: "Chapter 11 - Orchestrating Agent Behavior: Flows and Planners"
 date: "2025-08-22 13:00:00 +0200"
 categories: [Gen AI, Agentic SDKs, Agent Development Kit]
-tags: [Generative AI, Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+tags: [ Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+mermaid: true
 image:
   path: /assets/img/adk-book-cover.jpg
   alt: "Building Intelligent Agents with Google ADK"
@@ -39,6 +40,7 @@ You typically don't instantiate `BaseLlmFlow` directly. Instead, `LlmAgent` inst
 - **`SingleFlow` (`google.adk.flows.llm_flows.single_flow.SingleFlow`):**
     - This is the default flow for an `LlmAgent` that is not configured for complex multi-agent transfers (i.e., an agent that primarily interacts with tools and the user directly).
     - It handles the basic loop of LLM calls and tool executions until a final textual response is generated.
+    - The diagram in @sec-first-agent illustrated a simplified version of this flow.
 - **`AutoFlow` (`google.adk.flows.llm_flows.auto_flow.AutoFlow`):**
     - Inherits from `SingleFlow` and adds capabilities for **agent-to-agent transfer**.
     - It automatically includes the necessary logic and internal tools (like `transfer_to_agent`) to allow the LLM to decide to delegate a task to another registered sub-agent or its parent agent.
@@ -69,7 +71,6 @@ You typically don't instantiate `BaseLlmFlow` directly. Instead, `LlmAgent` inst
 
 The specific flow an agent uses is determined internally by ADK based on the agent's configuration (e.g., presence of sub-agents, transfer disallow flags).
 
-
 > ## Flows Encapsulate Interaction Logic
 > 
 > LLM Flows are a powerful abstraction within ADK. They separate the how of LLM interaction (the loop, tool handling, processor invocation) from the what (the agent's specific instructions, tools, and model). This allows ADK to evolve its interaction patterns without requiring changes to your core agent definitions.
@@ -98,7 +99,51 @@ ADK uses a series of built-in processors to implement core functionalities. Each
 - **`_nl_planning.response_processor`**: If a planner is active, this processes the LLM's response for planning-related artifacts (e.g., extracting thoughts, updating plan state).
 - **`_code_execution.response_processor`**: If a code executor is active, this extracts code from the LLM's response, invokes the executor, and prepares the execution result to be sent back to the LLM.
 
-![*Diagram: Role of LLM Flow Processors in the request-response cycle.*](/assets/img/2025-08-22-orchestrating-agent-behavior-flows-and-planners/figure-1.png)
+```mermaid
+---
+title: Role of LLM Flow Processors in the request-response cycle.
+---
+sequenceDiagram
+    participant Client
+    participant LlmAgent
+    participant RequestProcessor
+    participant LLM
+    participant ResponseProcessor
+    participant ToolExecutor
+
+    Client ->>+ LlmAgent: Initiate Agent Turn (e.g., process_input(user_query))
+    LlmAgent ->> LlmAgent: LLM Flow Begins (Internal State)
+
+    Note over LlmAgent: Prepare initial LlmRequest
+
+    loop For each Request Processor (e.g., basic, instructions, contents, planner, tools)
+        LlmAgent ->>+ RequestProcessor: run_async(context, current_LlmRequest)
+        Note over RequestProcessor: Processor modifies LlmRequest
+        RequestProcessor -->>- LlmAgent: modified_LlmRequest
+        LlmAgent ->> LlmAgent: LlmRequest is Modified (Updates internal state)
+    end
+
+    LlmAgent ->>+ LLM: Call LLM with Final LlmRequest
+    LLM -->>- LlmAgent: LlmResponse Received
+
+    loop For each Response Processor (e.g., planner, code_execution)
+        LlmAgent ->>+ ResponseProcessor: run_async(context, current_LlmResponse)
+        Note over ResponseProcessor: Processor modifies LlmResponse
+        ResponseProcessor -->>- LlmAgent: modified_LlmResponse
+        LlmAgent ->> LlmAgent: LlmResponse is Modified (Updates internal state)
+    end
+
+    alt Tool Calls Required
+        LlmAgent ->>+ ToolExecutor: execute_tool(tool_call_details from LlmResponse)
+        ToolExecutor -->>- LlmAgent: tool_result
+        LlmAgent ->> LlmAgent: Integrate tool_result into Agent Response
+    else No Tool Calls or Tools Handled
+        LlmAgent ->> LlmAgent: Finalize Agent Response directly
+    end
+
+    LlmAgent -->>- Client: End of Agent Turn / Yield Events (final_response, intermediate_events)
+
+```
 
 
 While you typically don't write these processors yourself unless deeply customizing ADK, understanding their existence and order helps in debugging and predicting agent behavior. For example, knowing that `instructions.request_processor` runs before tools add their declarations means your agent's main instruction can refer to tools that will be declared later in the processing chain.
@@ -191,17 +236,15 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-
 > ## `BuiltInPlanner` for Simplicity with Capable Models
 > 
 > If your target LLM offers robust built-in planning or "thinking" capabilities, `BuiltInPlanner` is often the easiest way to leverage them. You configure the desired `ThinkingConfig` and ADK handles passing it to the model. The model then internally structures its intermediate reasoning steps and tool calls.
 > {: .prompt-info }
 
-
 > ## Model Support for `ThinkingConfig`
 > 
 > Not all models support `ThinkingConfig`, or they may support different modes and options. Always consult the documentation for your specific model version to understand its planning capabilities and the correct `ThinkingConfig` parameters. Using unsupported configurations can lead to errors or unexpected behavior.
-> {: .prompt-info }
+> {: .prompt-danger }
 
 ## `PlanReActPlanner`: Implementing the ReAct (Reason+Act) Pattern
 
@@ -382,12 +425,10 @@ if __name__ == "__main__":
 
 The parts tagged with `/*PLANNING*/` and `/*REASONING*/` would be marked as `part.thought = True` by the `PlanReActPlanner`'s `process_planning_response` method and typically not shown directly to the user but logged in the trace.
 
-
 > ## Best Practice: Use PlanReActPlanner for Explicit Step-by-Step Reasoning
 > 
 > PlanReActPlanner is excellent when you want the LLM to explicitly show its work and follow a structured problem-solving approach. It makes the agent's reasoning process more transparent and debuggable by inspecting the tagged thoughts and actions in the trace. It's particularly good for tasks that naturally break down into sequential steps involving tool use and observation.
-> {: .prompt-info }
-
+> {: .prompt-tip }
 
 > ## Prompt Verbosity and LLM Adherence with PlanReActPlanner
 > 
@@ -475,19 +516,16 @@ if __name__ == "__main__":
                          print(f"
   [TOOL RESPONSE to {part.function_response.name}]: (Content might be long, check trace)
   ", end="", flush=True)
-        print("
-
---- Research Assistant's Combined Final Answer ---")
+        print("--- Research Assistant's Combined Final Answer ---")
         print("".join(full_final_answer_parts).strip())
 
     asyncio.run(main())
 ```
 
-
 > ## Using `google_search` along with other tools in the same agent can result in error!
 > 
 > If you try to use `google_search` along with any other tool, you will get the following error: 'Tool use with function calling is unsupported’. That is the reason why a separate agent had to be used just for the search feature instead of just adding `google_search` as a normal tool in the tool list for research_assistant instead of as an `AgentTool` (an agent that acts as a tool)
-> {: .prompt-info }
+> {: .prompt-danger }
 
 Running this example (especially with `adk web .` to see the trace) would demonstrate the agent:
 

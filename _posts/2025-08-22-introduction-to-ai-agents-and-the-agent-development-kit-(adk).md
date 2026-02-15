@@ -2,7 +2,8 @@
 title: Chapter 1 - Introduction to AI Agents and the Agent Development Kit (ADK) 
 date: "2025-08-22 08:00:00 +0200"
 categories: [Gen AI, Agentic SDKs, Agent Development Kit]
-tags: [Generative AI, Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+tags: [ Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+mermaid: true
 image:
   path: /assets/img/adk-book-cover.jpg
   alt: "Building Intelligent Agents with Google ADK"
@@ -24,7 +25,7 @@ Before moving further, there can be some confusion around the terms AI Agents an
 | Feature                 | AI Agent                                     | Agentic AI                                                    |
 | :---------------------- | :------------------------------------------- | :------------------------------------------------------------ |
 | **Definition**          | A broad term for any system that perceives its environment, reasons, and acts to achieve goals. | A more specific term describing AI agents with a high degree of autonomy, proactivity, and sophisticated reasoning, typically LLM-powered. |
-| **Scope**    | General category of AI systems.              | A sophisticated *type* or *quality* of AI agent.              |
+| **Scope/Generality**    | General category of AI systems.              | A sophisticated *type* or *quality* of AI agent.              |
 | **Core Engine/Reasoning** | Can be rule-based, statistical, simple algorithms, machine learning models, or advanced AI. | Typically relies heavily on Large Language Models (LLMs) for core reasoning, planning, and decision-making. |
 | **Level of Autonomy**   | Varies widely from low (reactive) to high.   | Characterized by **high autonomy** and proactivity.           |
 | **Proactivity**         | Can be reactive or proactive to varying degrees. | Designed to be **highly proactive** in pursuing goals.        |
@@ -60,7 +61,6 @@ The evolution of AI agents has been rapid, fueled by advancements in LLMs. Early
 
 Imagine a customer service agent that can understand a user's complex query, look up order details from a database (using a tool), check shipping status via another API (another tool), and then compose a helpful, contextual response. Or consider a research assistant that can browse the web, summarize articles, and compile a report on a given topic. These are the kinds of sophisticated systems ADK helps you build.
 
-
 > The "Perceive, Reason/Plan, Act" cycle is fundamental to understanding how most AI agents operate, including those built with ADK. Visualizing your agent's tasks in terms of this loop can help in designing its logic and tool interactions.
 > {: .prompt-info }
 
@@ -77,11 +77,10 @@ While various frameworks exist for building AI agents, Google's ADK stands out w
 
 ADK is not just about building a single chatbot; it's about engineering robust, maintainable, and scalable AI agent systems.
 
-
 > ## Best Practice: Embrace Code-First for Complex Agents
 > 
 > While visual builders have their place, ADK's code-first approach shines for complex, production-grade agents. It allows for robust testing, version control (e.g., with Git), and easier integration into existing software development lifecycles. Treat your agent code like any other critical software component.
-> {: .prompt-info }
+> {: .prompt-tip }
 
 ## Key Features and Advantages of ADK
 
@@ -109,11 +108,10 @@ Building on its core philosophy, ADK offers several key features:
 - **Developer-Friendly UI:**
     - An integrated web UI for local development, testing, debugging, and showcasing your agents.
     
-
 > ## Avoid Over-Reliance on a Single "Mega-Agent"
 > 
 > While ADK allows for powerful single agents, its modularity encourages breaking down complex problems into smaller, specialized agents. Avoid the temptation to build one monolithic agent that tries to do everything; this often leads to systems that are hard to debug, maintain, and scale.
-> {: .prompt-info }
+> {: .prompt-warning }
 
 ## ADK vs. LangGraph
 
@@ -156,7 +154,40 @@ The `LangGraphAgent` class within ADK suggests that ADK can leverage LangGraph a
 
 Understanding the main components of ADK is key to effectively using it.
 
-![*Diagram: Main components in the ADK Architecture*](/assets/img/intro-to-ai-agents/figure-1.png)
+```mermaid
+graph TD
+    A[User Input] --> B(Runner);
+    B -- Invokes & Manages --> C{Agents};
+    C -- Uses --> D[Tools/Toolsets];
+    C -- Interacts with --> E[LLM Models];
+    B -- Manages --> F(Session Service);
+    F -- Stores/Retrieves --> G[Session Data & State];
+    C -- Reads/Writes --> H(Artifact Service);
+    H -- Stores/Retrieves --> I[Artifacts];
+    C -- Reads/Writes --> J(Memory Service);
+    J -- Stores/Retrieves --> K[Long-term Memory];
+    L(Developer) -- Defines/Configures --> C;
+    L -- Defines/Configures --> D;
+    L -- Defines/Configures --> E;
+    L -- Uses --> M[ADK CLI & Dev UI];
+
+    subgraph "ADK Core Components"
+        B; C; D; E; F; H; J; M;
+    end
+
+    subgraph "Persistent Storage (Optional)"
+        G; I; K;
+    end
+
+    style B fill:#f9f,stroke:#333,stroke-width:2px
+    style C fill:#ccf,stroke:#333,stroke-width:2px
+    style D fill:#cfc,stroke:#333,stroke-width:2px
+    style E fill:#fcf,stroke:#333,stroke-width:2px
+    style F fill:#ff9,stroke:#333,stroke-width:2px
+    style H fill:#ffc,stroke:#333,stroke-width:2px
+    style J fill:#cff,stroke:#333,stroke-width:2px
+    style M fill:#eee,stroke:#333,stroke-width:2px
+```
 
 
 - **Runner (`google.adk.runners.Runner`):** The engine that executes agents. It manages the interaction flow, session state, and communication between the user, agents, and various services.
@@ -167,7 +198,6 @@ Understanding the main components of ADK is key to effectively using it.
 - **Artifact Service (`google.adk.artifacts.BaseArtifactService`):** Manages the storage and retrieval of files (artifacts) generated or used by agents, such as images, documents, or code outputs.
 - **Memory Service (`google.adk.memory.BaseMemoryService`):** Provides agents with the ability to store and retrieve information over the long term, going beyond a single session's context.
 - **ADK CLI & Dev UI:** Command-line tools and a web-based UI to aid in agent creation, local development, testing, and evaluation.
-
 
 > ## Services are Pluggable
 > 
@@ -228,9 +258,8 @@ if __name__ == "__main__":
             print(f"
 An error occurred: {e}")
 ```
-
 > As mentioned in the Preface, check out Appendix A to get started on running the code examples in your local environment.
-> {: .prompt-info }
+> {: .prompt-danger }
 
 Upon running the code in the CLI, you should see:
     
@@ -250,7 +279,6 @@ Assistant: The capital of France is Paris.
 You: exit
 Exiting Simple Assistant. Goodbye!
 ```
-
 
 > All the code that you see in the `if __name__ == "__main__"` condition in **all of the examples in this book** is only there so that you can run the example through CLI simply using `python -m`, without using the `adk` commands. One of the main aims of this book is to show the main ADK components involved in running your agents and how the control flows. However, when you use ADK CLI commands like `adk web`, `adk run` or `adk api_server`, all you need to run is the agent definition from the example. The creation of runner, session, event handling etc. is handled by ADK.
 > 

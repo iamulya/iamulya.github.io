@@ -1,6 +1,6 @@
 ---
 title: "Testing Strategies for Automating Antigravity Workflows"
-date: "2026-06-10 12:00:00 +0100"
+date: "2026-07-10 12:00:00 +0100"
 categories: [Antigravity, Engineering]
 tags: [Antigravity Engineering Series, Testing, Hooks, SDK, CI]
 mermaid: true

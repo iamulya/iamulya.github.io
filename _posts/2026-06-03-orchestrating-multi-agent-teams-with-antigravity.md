@@ -1,6 +1,6 @@
 ---
 title: "Orchestrating Multi-Agent Teams with Subagents and Worktrees in Antigravity 2.0"
-date: "2026-06-03 12:00:00 +0100"
+date: "2026-07-03 12:00:00 +0100"
 categories: [Antigravity, Engineering]
 tags: [Antigravity Engineering Series, Subagents, Worktrees, Multi-Agent]
 mermaid: true

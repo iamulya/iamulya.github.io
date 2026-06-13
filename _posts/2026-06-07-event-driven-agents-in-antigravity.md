@@ -1,6 +1,6 @@
 ---
 title: "Triggers: Event-Driven Agents That React Without Prompting in Antigravity"
-date: "2026-06-07 12:00:00 +0100"
+date: "2026-07-07 12:00:00 +0100"
 categories: [Antigravity, Engineering]
 tags: [Antigravity Engineering Series, Triggers, SDK, Event-Driven]
 mermaid: true

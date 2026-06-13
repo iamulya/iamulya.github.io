@@ -1,6 +1,6 @@
 ---
 title: "Disabling Tools vs. Denying Them in Antigravity"
-date: "2026-06-09 12:00:00 +0100"
+date: "2026-07-08 12:00:00 +0100"
 categories: [Antigravity, Engineering]
 tags: [Antigravity Engineering Series, Capabilities, SDK, Tool Config]
 mermaid: true

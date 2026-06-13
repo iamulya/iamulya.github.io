@@ -1,6 +1,6 @@
 ---
 title: "Understanding the Policy Priority Model in Antigravity"
-date: "2026-06-05 12:00:00 +0100"
+date: "2026-07-05 12:00:00 +0100"
 categories: [Antigravity, Engineering]
 tags: [Antigravity Engineering Series, Policies, SDK, Priority Model]
 mermaid: true

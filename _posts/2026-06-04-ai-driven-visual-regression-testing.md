@@ -1,6 +1,6 @@
 ---
 title: "AI-Driven Visual Regression Testing with Antigravity 2.0"
-date: "2026-06-04 12:00:00 +0100"
+date: "2026-07-04 12:00:00 +0100"
 categories: [Antigravity, Engineering]
 tags: [Antigravity Engineering Series, Visual Testing, Browser Subagent, Hooks]
 image:

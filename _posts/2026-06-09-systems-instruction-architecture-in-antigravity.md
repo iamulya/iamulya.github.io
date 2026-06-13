@@ -1,6 +1,6 @@
 ---
 title: "System Instructions Architecture in Antigravity"
-date: "2026-06-09 12:00:00 +0100"
+date: "2026-07-08 12:00:00 +0100"
 categories: [Antigravity, Engineering]
 tags: [Antigravity Engineering Series, System Instructions, SDK, Persona]
 mermaid: true

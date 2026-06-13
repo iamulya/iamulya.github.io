@@ -1,6 +1,6 @@
 ---
 title: "Building Self-Correcting Agent Pipelines using Sidecars and Scheduled Tasks in Antigravity"
-date: "2026-06-01 12:00:00 +0100"
+date: "2026-07-01 12:00:00 +0100"
 categories: [Antigravity, Engineering]
 tags: [Antigravity Engineering Series, Sidecars, Hooks]
 mermaid: true

@@ -328,3 +328,8 @@ A multi-agent refactoring system where:
 The agent that tries to refactor 47 files in one context window fails. The team of 5 agents, each handling 10 files with clean context, succeeds. Worktree isolation ensures they can't interfere with each other. Permission inheritance ensures they can't escape the safety boundary.
 
 That's not just parallel execution. That's the difference between one overwhelmed engineer and a coordinated team.
+
+---
+
+> Companion code for this post is available at [antigravity-multi-agent-worktrees](https://github.com/iamulya/antigravity-multi-agent-worktrees).
+{: .prompt-tip }

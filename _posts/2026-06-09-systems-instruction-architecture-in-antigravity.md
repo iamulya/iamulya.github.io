@@ -431,3 +431,8 @@ TemplatedSystemInstructions(
 System instructions are a two-mode system: `TemplatedSystemInstructions` (safe, recommended) appends your identity and sections to the defaults. `CustomSystemInstructions` (nuclear, advanced) replaces everything — including the safety rules you probably want to keep.
 
 The `identity` field is the single most impactful thing you can set. It changes the agent from a generic assistant to a specialist who reasons about your domain. Combine it with `SystemInstructionSection` for project-specific rules, `ThinkingLevel` for cost/quality tradeoff, and `response_schema` for structured output — and you have a fully customized agent that acts like a team member, not a chatbot.
+
+---
+
+> Companion code for this post is available at [antigravity-system-instructions](https://github.com/iamulya/antigravity-system-instructions).
+{: .prompt-tip }

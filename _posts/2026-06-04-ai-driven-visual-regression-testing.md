@@ -346,3 +346,8 @@ An autonomous visual regression pipeline where:
 7. **The Stop hook prevents premature exits** — the agent must capture all critical components before stopping
 
 The traditional visual regression tool says "47 pixels changed in button.png." This system says "the button hover color doesn't match your design token, and there's no transition easing applied." One gives you a diff. The other gives you a diagnosis.
+
+---
+
+> Companion code for this post is available at [antigravity-visual-regression](https://github.com/iamulya/antigravity-visual-regression).
+{: .prompt-tip }

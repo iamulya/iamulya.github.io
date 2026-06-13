@@ -845,3 +845,8 @@ A testing architecture that catches agent workflow failures before they reach pr
 7. **Sidecar config tests** validate schedule definitions, cron syntax, and agentapi integration contracts
 
 The agent that runs your overnight pipeline is only as reliable as the tests around it. You wouldn't deploy a web service without unit tests. Don't deploy an agent workflow without them either.
+
+---
+
+> Companion code for this post is available at [antigravity-testing-strategies](https://github.com/iamulya/antigravity-testing-strategies).
+{: .prompt-tip }

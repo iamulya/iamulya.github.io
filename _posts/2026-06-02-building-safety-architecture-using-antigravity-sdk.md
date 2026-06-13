@@ -550,3 +550,8 @@ A four-layer safety architecture where:
 4. **Platform permissions** enforce the floor — Deny/Ask/Allow lists that no agent can override
 
 The agent that can reason about your codebase is powerful. The agent that *can't* run `rm -rf` regardless of what it reasons is safe. You need both.
+
+---
+
+> Companion code for this post is available at [antigravity-safety-architecture](https://github.com/iamulya/antigravity-safety-architecture).
+{: .prompt-tip }

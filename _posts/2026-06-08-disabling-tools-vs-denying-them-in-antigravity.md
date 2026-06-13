@@ -319,3 +319,8 @@ The `FINISH` tool is automatically included — don't remove it from `enabled_to
 `CapabilitiesConfig` is Layer 0 — the coarsest filter. It decides what the model even *sees*. Policies (Layer 1) decide what the model can *do*. Hooks (Layer 2) add custom runtime logic.
 
 For most agents, the recipe is: use `CapabilitiesConfig` to remove irrelevant tools (save tokens), then use policies to gate the remaining tools conditionally (add safety). Never use `policy.deny()` for a tool the agent should never use in any circumstance — that's `disabled_tools` territory.
+
+---
+
+> Companion code for this post is available at [antigravity-capabilities-config](https://github.com/iamulya/antigravity-capabilities-config).
+{: .prompt-tip }

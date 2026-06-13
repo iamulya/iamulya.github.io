@@ -356,3 +356,8 @@ Multiple hooks on the same point run in registration order. For `DecideHook` typ
 Hook Contexts are the SDK's answer to "where do I put state?" without globals or instance variables leaking between sessions. `SessionContext` survives across turns. `TurnContext` resets every model invocation. `OperationContext` is scoped to a single tool call. Parent-chain lookup means operation-level code can read session-level data without explicit plumbing.
 
 The three tiers map directly to the three questions you ask when debugging an agent: "What happened in this session?" (SessionContext), "What happened in this turn?" (TurnContext), "What happened in this tool call?" (OperationContext).
+
+---
+
+> Companion code for this post is available at [antigravity-hook-contexts](https://github.com/iamulya/antigravity-hook-contexts).
+{: .prompt-tip }

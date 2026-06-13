@@ -414,3 +414,8 @@ if __name__ == "__main__":
 The policy engine isn't a filter list — it's a priority resolver. Specific beats wildcard. Deny beats allow at the same level. First match wins within a group. Predicates that throw are silently skipped. The `"*"` wildcard is the only catch-all. And `run_command` is gated by default because it's the most dangerous tool in the box.
 
 The next time you write `deny("*")` at the end of your policy list and wonder "does this actually work?" — now you know it does, and you know exactly which priority level it occupies.
+
+---
+
+> Companion code for this post is available at [antigravity-policy-priority](https://github.com/iamulya/antigravity-policy-priority).
+{: .prompt-tip }

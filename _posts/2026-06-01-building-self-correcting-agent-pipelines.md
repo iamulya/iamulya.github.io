@@ -576,3 +576,8 @@ An overnight tech debt pipeline that:
 You didn't clear your tech debt backlog by finding three spare weeks. You cleared it by letting the agent work the hours you aren't. The same codebase. The same test suite. The same PR workflow. Just a different schedule.
 
 That's not a code completion tool. That's a second shift.
+
+---
+
+> Companion code for this post is available at [antigravity-sidecar-pipeline](https://github.com/iamulya/antigravity-sidecar-pipeline).
+{: .prompt-tip }

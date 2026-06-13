@@ -335,3 +335,8 @@ Key behaviors:
 Triggers are the SDK's event system. They're async functions that get a `TriggerContext` handle to send messages to the agent. File watchers, webhooks, pollers, crons — anything that waits for an external event and needs to tell the agent about it.
 
 The key mental model: hooks are *interceptors* (they gate what the agent does). Triggers are *injectors* (they push new work into the agent). Use both together and you get an agent that reacts to the world while staying within safety boundaries.
+
+---
+
+> Companion code for this post is available at [antigravity-triggers](https://github.com/iamulya/antigravity-triggers).
+{: .prompt-tip }

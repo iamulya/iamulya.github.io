@@ -2,7 +2,7 @@
 title: "A Quantization Primer: Formats, Architecture Sensitivity, and a Gemma 4 Case Study"
 date: "2026-05-21 16:00:00 +0100"
 categories: [AI Infrastructure, Deep Dives]
-tags: [Quantization, LLM Serving, Gemma, GGUF]
+tags: [Generative AI in Depth, Quantization, LLM Serving, Gemma,]
 mermaid: true
 image:
   path: /assets/img/gemma-4.png
@@ -285,6 +285,78 @@ This doesn't mean K=V sharing is bad — it halves the KV cache. But it means Ge
 
 ---
 
+## GPU vs CPU Quantization Considerations
+
+| Factor | GPU (CUDA/ROCm) | CPU (AVX2/ARM) |
+|---|---|---|
+| **Best format** | GPTQ, AWQ, or FP8 for dedicated GPU; GGUF for llama.cpp | GGUF (K-quants for speed, I-quants for quality) |
+| **Below 4-bit** | I-quants strongly preferred (cuBLAS optimized) | K-quants faster; I-quants slower but better quality |
+| **FP8** | Native on Hopper/Ada, 2× throughput | Not applicable |
+| **Q4_0 vs Q4_K_M** | Q4_K_M better quality | Q4_0 supports online repacking for ARM NEON (faster) |
+| **Key bottleneck** | Memory bandwidth (reading weights from VRAM) | Memory bandwidth (reading weights from RAM) |
+
+---
+
+## KV Cache Quantization: Separate from Weight Quantization
+
+Weight quantization is a one-time conversion. KV cache quantization happens **during inference** — the KV vectors generated at each step are quantized on-the-fly.
+
+| Method | Compression | Quality Impact | Where Supported |
+|---|---|---|---|
+| **FP16 KV** (default) | 1× | Baseline | Everywhere |
+| **FP8 KV** | 2× | <1% degradation | vLLM (Hopper+), TensorRT-LLM |
+| **INT4 KV** (TurboQuant) | 4× | Noticeable on needle-in-haystack | vLLM (experimental) |
+| **INT2 KV** (TurboQuant) | 8× | Model-dependent, under research | vLLM (experimental) |
+
+KV cache quantization is independent of weight quantization. They compress different things:
+
+```
+Total GPU memory = model weights (quantized once) 
+                 + KV cache (quantized during inference) 
+                 + activation memory (not quantized)
+```
+
+### Mixed Precision Is Normal — But There Are Rules
+
+During a single inference forward pass, a model routinely uses multiple numeric formats simultaneously — this is called **mixed precision** and is completely standard:
+
+```
+Weights in memory:     FP8 E4M3
+        ↓
+Tensor core multiply:  FP8 inputs → FP32 accumulator (hardware does this automatically)
+        ↓
+Output activations:    BF16 (cast down after accumulation)
+        ↓
+KV cache stored:       FP8, FP16, or INT8 (separate choice)
+```
+
+At any given moment, the GPU holds values in at least 3 different formats. Each format is chosen for what that value needs to do — fine precision for weights, wide range for accumulators, compressed for memory-bound KV cache.
+
+### FP8 Weight + FP8 KV Cache: A Subtle Trap
+
+You might expect that if your model weights are FP8, using FP8 for the KV cache too would be a natural pairing. In practice it's the most common FP8 misconfiguration.
+
+The problem is **calibration scales**. A pre-calibrated FP8 checkpoint (like Qwen3.6's) doesn't just store weights in FP8 — it ships with pre-computed scaling factors that say "multiply this tensor by *this scale* to convert to BF16." Those scales were computed end-to-end assuming E4M3 throughout the weight→activation→KV data path.
+
+When you try to store the KV cache in E5M2 instead:
+1. You need a *second* set of calibration scales for the E4M3→E5M2 re-quantisation
+2. The checkpoint doesn't have those scales — it only has E4M3 scales
+3. vLLM detects this mismatch and rejects the configuration at model load time
+
+| Scenario | Works? | Why |
+|---|---|---|
+| E4M3 weights + BF16 KV cache | ✅ | Standard |
+| E4M3 weights + E4M3 KV cache (`--kv-cache-dtype auto`) | ✅ | One format, one calibration set |
+| E4M3 weights + E5M2 KV cache | ❌ | vLLM raises a hard `ValueError` regardless of dynamic/static — it refuses to mix FP8 checkpoint scales with a different KV dtype |
+| BF16 weights + E5M2 KV cache | ✅ | No pre-baked weight scales to conflict with; KV scales computed at runtime |
+
+**Resolution**: Use `--kv-cache-dtype auto` — this tells vLLM to use the checkpoint's native format for both weights and KV cache, sharing the same calibrated scales throughout.
+
+> **Note**: The `auto` setting means "match the checkpoint's weight dtype". For an FP8 E4M3 checkpoint, the KV cache will be stored in FP8 E4M3 — which gives you the 2× memory reduction anyway.
+{: .prompt-tip }
+
+---
+
 ## Case Study: Gemma 4 12B Quantization
 
 ### Available Quantizations
@@ -338,46 +410,10 @@ Gemma 4 12B has several architectural features that affect quantization decision
 
 4. **Multimodal (vision encoder)**: The vision encoder has separate weights. GGUF quantization typically handles this, but check that your runtime supports Gemma 4's multimodal architecture.
 
+5. **KV cache**: At 128K context, Gemma 4 uses ~2.4 GB for the KV cache (FP16). Using FP8 KV (`--kv-cache-dtype auto` with an FP8 checkpoint, or explicit FP8 with BF16 weights) cuts this to ~1.2 GB — worthwhile if you're targeting long contexts on a memory-constrained GPU.
+
 > **Practical recommendation**: For Gemma 4 12B on consumer hardware, start with **Q4_K_M** (7.66 GB). If you notice quality issues on reasoning or long-context tasks, step up to **Q5_K_M** (8.77 GB). If you have the VRAM, **Q6_K_L** (10.48 GB) is near-indistinguishable from full precision and protects the large embedding layer.
 {: .prompt-tip }
-
----
-
-## GPU vs CPU Quantization Considerations
-
-| Factor | GPU (CUDA/ROCm) | CPU (AVX2/ARM) |
-|---|---|---|
-| **Best format** | GPTQ, AWQ, or FP8 for dedicated GPU; GGUF for llama.cpp | GGUF (K-quants for speed, I-quants for quality) |
-| **Below 4-bit** | I-quants strongly preferred (cuBLAS optimized) | K-quants faster; I-quants slower but better quality |
-| **FP8** | Native on Hopper/Ada, 2× throughput | Not applicable |
-| **Q4_0 vs Q4_K_M** | Q4_K_M better quality | Q4_0 supports online repacking for ARM NEON (faster) |
-| **Key bottleneck** | Memory bandwidth (reading weights from VRAM) | Memory bandwidth (reading weights from RAM) |
-
----
-
-## KV Cache Quantization: Separate from Weight Quantization
-
-Weight quantization is a one-time conversion. KV cache quantization happens **during inference** — the KV vectors generated at each step are quantized on-the-fly.
-
-| Method | Compression | Quality Impact | Where Supported |
-|---|---|---|---|
-| **FP16 KV** (default) | 1× | Baseline | Everywhere |
-| **FP8 KV** | 2× | <1% degradation | vLLM (Hopper+), TensorRT-LLM |
-| **INT4 KV** (TurboQuant) | 4× | Noticeable on needle-in-haystack | vLLM (experimental) |
-| **INT2 KV** (TurboQuant) | 8× | Model-dependent, under research | vLLM (experimental) |
-
-KV cache quantization is independent of weight quantization. You can run Q4_K_M weights with FP16 KV cache, or BF16 weights with FP8 KV cache. They compress different things:
-
-```
-Total GPU memory = model weights (quantized once) 
-                 + KV cache (quantized during inference) 
-                 + activation memory (not quantized)
-```
-
-For Gemma 4 12B at 128K context (from our [attention deep dive](/posts/attention-mechanisms-and-kv-architectures)):
-- Weights: 7.66 GB (Q4_K_M)
-- KV cache: ~2.4 GB (FP16) → ~1.2 GB with FP8 KV
-- **FP8 KV cache is especially valuable for Gemma 4** because its sliding window layers already minimize KV cache, so the remaining global-layer KV is the expensive part — and that's exactly what FP8 compresses.
 
 ---
 

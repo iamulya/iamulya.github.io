@@ -12,7 +12,7 @@ image:
   alt: "Generative AI in Depth — A Technical Deep Dive Series"
 ---
 
-> This article is **Part 15 of 15** in the [Generative AI in Depth](/categories/Generative AI in Depth/) series.
+> This article is **Part 15 of 15** in the [Generative AI in Depth](/categories/generative-ai-in-depth/) series.
 {: .prompt-info }
 
 
@@ -861,5 +861,4 @@ The second most common mistake is starting with TensorRT-LLM before the team is 
 - [Speculative Decoding](/posts/speculative-decoding) — how DFlash, EAGLE, MTP, and other methods cut latency
 - [CUDA Kernels and FlashAttention](/posts/cuda-kernels-and-flashattention) — why these frameworks all care so much about memory bandwidth
 - [The Memory Math](/posts/llm-memory-math) — understanding VRAM requirements that constrain your serving choices
-- [vLLM Deep Dive Part 1](/posts/vllm-deep-dive-part-1) — PagedAttention internals
 - [A Quantization Primer](/posts/a-quantization-primer) — GPTQ, AWQ, AQLM, and why quantisation format matters for serving

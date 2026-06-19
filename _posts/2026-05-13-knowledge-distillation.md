@@ -11,7 +11,7 @@ image:
   alt: "Generative AI in Depth — A Technical Deep Dive Series"
 ---
 
-> This article is **Part 7 of 15** in the [Generative AI in Depth](/categories/Generative AI in Depth/) series.
+> This article is **Part 7 of 15** in the [Generative AI in Depth](/categories/generative-ai-in-depth/) series.
 {: .prompt-info }
 
 The DeepSeek-R1-Distill-Qwen-7B model — a 7B model beating GPT-4 on maths olympiad problems — made distillation impossible to ignore. But distillation is often confused with fine-tuning. They solve different problems. This article explains the difference, how distillation actually works, and how to do it in practice.

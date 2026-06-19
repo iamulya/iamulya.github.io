@@ -9,7 +9,7 @@ image:
   alt: "Generative AI in Depth — A Technical Deep Dive Series"
 ---
 
-> This article is **Part 4 of 15** in the [Generative AI in Depth](/categories/Generative AI in Depth/) series.
+> This article is **Part 4 of 15** in the [Generative AI in Depth](/categories/generative-ai-in-depth/) series.
 {: .prompt-info }
 
 

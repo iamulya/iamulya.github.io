@@ -2,7 +2,7 @@
 title: Chapter 8 - Fine-Tuning and Alignment
 date: "2026-02-14 13:28:00 +0100"
 categories: [Gen AI, Architecture]
-tags: [ Generative AI Handbook, LLM Fine-Tuning]
+tags: [Generative AI Handbook, LLM Fine-Tuning]
 mermaid: true
 image:
   path: /assets/img/genai-cover.jpg

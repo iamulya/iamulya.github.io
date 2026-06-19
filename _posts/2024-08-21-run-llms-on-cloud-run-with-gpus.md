@@ -3,7 +3,7 @@ layout: postwithads
 title: Run LLMs on Cloud Run with GPUs
 date: 2024-08-21 17:00:00 +0100
 categories: [Google Cloud, Cloud Run]
-tags: [Google Cloud, Cloud Run, Serverless, Gen AI, LLM]
+tags: [google cloud, cloud run, Serverless, Gen AI, LLM]
 ---
 
 Cloud Run as of today became one of the very few services to offer GPUs on a serverless product. It allows you to use one L4 GPU per Cloud Run instance, which as of today has NVIDIA driver version: 535.129.03 (CUDA 12.2). 

@@ -2,7 +2,7 @@
 title: Appendix A - Run Code Examples
 date: "2025-08-22 20:00:00 +0200"
 categories: [Gen AI, Agentic SDKs, Agent Development Kit]
-tags: [ Agentic AI, Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+tags: [Agentic AI, Gen AI, agentic sdks, Agent Development Kit, Building Intelligent Agents with Google ADK]
 mermaid: true
 image:
   path: /assets/img/adk-book-cover.jpg

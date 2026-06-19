@@ -1,13 +1,17 @@
 ---
-title: "Inside LLM Inference: Every Calculation from Text to Token"
-date: "2026-06-16 20:00:00 +0100"
-categories: [AI Infrastructure, Deep Dives]
-tags: [Generative AI in Depth, Transformers, Inference, Gemma]
+title: "Inside LLM Inference: Every Calculation from Text to Token using Gemma 4 12B"
+date: 2026-04-24 09:00:00 +0000
+categories: [Generative AI in Depth, AI Infrastructure, Deep Dives]
+tags: [Transformers, Inference, Gemma, Generative AI in Depth]
 mermaid: true
 image:
-  path: /assets/img/gemma-4.png
-  alt: "Inside a Decoder: Every Calculation from Text to Token"
+  path: /assets/img/generative-ai-in-depth.png
+  alt: "Generative AI in Depth — A Technical Deep Dive Series"
 ---
+
+> This article is **Part 2 of 15** in the [Generative AI in Depth](/categories/Generative AI in Depth/) series.
+{: .prompt-info }
+
 
 When you send a message to an LLM, it runs a very specific sequence of matrix multiplications. Not approximately — *exactly*. Every number that flows through the model has a precise shape at every point.
 
@@ -396,8 +400,8 @@ The gating variant adds a *gate* that controls which dimensions of the expanded 
 **GELU vs SiLU**: Both are smooth, non-linear activation functions with near-zero output for very negative inputs and near-linear output for large positive inputs. GELU (used in Gemma) has a slightly different curve shape from SiLU (used in Llama 3), but the architectural role is identical. The suffix "glu" in both GeGLU and SwiGLU refers to the *gating structure*, not the specific activation.
 
 ```
-SwiGLU (Llama): GELU(gate) × up
-GeGLU  (Gemma): GELU(gate) × up   ← same structure, different activation name
+SwiGLU (Llama): SiLU(gate) × up   ← Swish/SiLU activation
+GeGLU  (Gemma): GELU(gate) × up   ← GELU activation
 ```
 
 **Parameter count for one FFN block:**
@@ -407,7 +411,7 @@ GeGLU  (Gemma): GELU(gate) × up   ← same structure, different activation name
 ```
 
 The FFN contains **more parameters than the attention sublayer** in every layer. For a local layer:
-- Attention (Q+KV+O): `3840×4096 + 3840×2048 + 4096×3840` ≈ 47M
+- Attention (Q+KV+O): `3840×4096 + 3840×2048 + 4096×3840` ≈ **39.3M** (lower than a typical model because K=V share one tensor; a model with separate K and V would be ~47M)
 - FFN: ≈ 177M
 
 The FFN is where the model stores most of its "knowledge" — attention decides *what to look at*, FFN decides *what to do with it*.
@@ -604,8 +608,8 @@ Most models have one attention type. Gemma 4 12B has two:
 | W_V shape | same as W_K | [3840 × 512] |
 | W_O shape | [4096 × 3840] | [8192 × 3840] |
 | KV head count | 8 (GQA 2:1) | 1 (MQA) |
-| KV per token | `8 × 256 = 2,048 floats` | `1 × 512 = 512 floats` |
-| Context window | 1,024 tokens | 256,144 tokens |
+| KV per token | `8 × 256 = 2,048 floats` (K=V shared) | `2 × (1 × 512) = 1,024 floats` (K+V separate) |
+| Context window | 1,024 tokens | 262,144 tokens |
 
 The KV cache for global layers is expensive per-slot (512 dims) but there are only 8 global layers. The KV cache for local layers is cheap per-slot but bounded to 1024 tokens regardless of context length.
 
@@ -681,3 +685,8 @@ The small discrepancy (~400M) comes from bias terms, normalisation scales, and v
 - [*GQA: Training Generalized Multi-Query Transformer Models*](https://arxiv.org/abs/2305.13245) — Grouped-Query Attention
 - [Attention Mechanisms and KV Cache](/posts/attention-mechanisms-and-kv-architectures) — How the KV cache and GQA/MQA fit into the bigger picture
 - [A Quantization Primer](/posts/a-quantization-primer) — How the weight matrices and KV cache in this article are quantized for serving
+- [The Memory Math](/posts/llm-memory-math) — Exactly how much GPU memory the shapes in this article consume
+- [LLM Serving in Depth](/posts/llm-serving-in-depth) — How continuous batching and PagedAttention use the KV cache described here
+- [CUDA Kernels and FlashAttention](/posts/cuda-kernels-and-flashattention) — Why the matrix multiplies in this article are memory-bandwidth bound
+- [Speculative Decoding](/posts/speculative-decoding) — How to emit multiple tokens per forward pass
+- [Training vs Inference](/posts/training-vs-inference) — What the backward pass adds on top of the forward pass described here

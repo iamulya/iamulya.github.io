@@ -2,7 +2,7 @@
 title: Chapter 9 - Context Engineering and RAG
 date: "2026-02-14 13:32:00 +0100"
 categories: [Gen AI, Architecture]
-tags: [ Generative AI Handbook, RAG, Context Engineering]
+tags: [Generative AI Handbook, RAG, Context Engineering]
 mermaid: true
 image:
   path: /assets/img/genai-cover.jpg

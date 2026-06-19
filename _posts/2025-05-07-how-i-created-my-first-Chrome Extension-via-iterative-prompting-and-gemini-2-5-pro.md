@@ -2,7 +2,7 @@
 title: How I created my first Chrome Extension via Iterative Prompting using Gemini 2.5 Pro
 date: 2025-05-07 18:00:00 +0100
 categories: [Gen AI, Gemini, Chrome Extension]
-tags: [Chrome Extension, Gen AI, Gemini]
+tags: [chrome extension, Gen AI, Gemini]
 ---
 
 The process of learning a new language often involves repetitive tasks that, while necessary, can disrupt workflow. For Japanese learners utilizing WaniKani, looking up vocabulary encountered during general web browsing is one such task. I would love to have a chrome extension for this, however I have no previous experience building one. 

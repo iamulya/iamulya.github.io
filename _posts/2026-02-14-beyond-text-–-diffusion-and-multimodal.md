@@ -2,7 +2,7 @@
 title: Chapter 5 - Beyond Text – Diffusion and Multimodal
 date: "2026-02-14 13:16:00 +0100"
 categories: [Gen AI, Architecture]
-tags: [ Generative AI Handbook, Diffusion Models]
+tags: [Generative AI Handbook, Diffusion Models]
 mermaid: true
 image:
   path: /assets/img/genai-cover.jpg

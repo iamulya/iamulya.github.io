@@ -2,7 +2,7 @@
 title: Chapter 7 - Efficient Inference and Quantization
 date: "2026-02-14 13:24:00 +0100"
 categories: [Gen AI, Architecture]
-tags: [ Generative AI Handbook, Inference]
+tags: [Generative AI Handbook, Inference]
 mermaid: true
 image:
   path: /assets/img/genai-cover.jpg

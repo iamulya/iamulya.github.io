@@ -2,7 +2,7 @@
 title: 1. OpenClaw — Gateway, Workspace, and Identity
 date: "2026-02-09 13:00:00 +0100"
 categories: [Gen AI, Personal AI Assistants, OpenClaw]
-tags: [ Agentic AI, Gen AI, OpenClaw, Personal AI Assistants, AI Assistants]
+tags: [Agentic AI, Gen AI, openclaw, Personal AI Assistants, AI Assistants]
 mermaid: true
 image:
   path: /assets/img/openclaw.png

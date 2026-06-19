@@ -2,7 +2,7 @@
 title: Chapter 3 - Attention Is All You Need
 date: "2026-02-14 13:08:00 +0100"
 categories: [Gen AI, Architecture]
-tags: [ Generative AI Handbook, Attention]
+tags: [Generative AI Handbook, Attention]
 mermaid: true
 image:
   path: /assets/img/genai-cover.jpg

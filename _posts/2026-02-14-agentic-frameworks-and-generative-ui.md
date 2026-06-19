@@ -2,7 +2,7 @@
 title: Chapter 10 - Agentic Frameworks and Generative UI
 date: "2026-02-14 13:36:00 +0100"
 categories: [Gen AI, Architecture]
-tags: [ Generative AI Handbook, Generative UI, Agentic UI]
+tags: [Generative AI Handbook, Generative UI, agentic ui]
 mermaid: true
 image:
   path: /assets/img/genai-cover.jpg

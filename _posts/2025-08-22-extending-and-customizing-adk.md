@@ -2,7 +2,7 @@
 title: Chapter 24 - Extending and Customizing ADK 
 date: "2025-08-22 19:30:00 +0200"
 categories: [Gen AI, Agentic SDKs, Agent Development Kit]
-tags: [Gen AI, Agentic SDKs, Agent Development Kit, Building Intelligent Agents with Google ADK]
+tags: [Gen AI, agentic sdks, Agent Development Kit, Building Intelligent Agents with Google ADK]
 mermaid: true
 image:
   path: /assets/img/adk-book-cover.jpg

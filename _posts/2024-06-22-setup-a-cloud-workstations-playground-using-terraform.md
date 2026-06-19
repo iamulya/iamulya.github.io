@@ -3,7 +3,7 @@ layout: postwithads
 title: Setup a Cloud Workstations Playground using Terraform
 date: 2024-06-22 09:00:00 +0100
 categories: [Google Cloud, Cloud Workstations]
-tags: [Google Cloud, Cloud Workstations, DX, Developer Experience, CDE, Terraform]
+tags: [google cloud, cloud workstations, DX, Developer Experience, CDE, Terraform]
 ---
 
 I wrote recently on the official [Google Cloud blog](https://cloud.google.com/blog/products/application-modernization/dz-bank-improves-developer-productivity-with-cloud-workstations) about how I helped one of Germany's biggest banks improve their Developer Experience using Cloud Workstations. 

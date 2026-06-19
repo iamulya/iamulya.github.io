@@ -2,7 +2,7 @@
 title: Chapter 6 - The LLM Zoo
 date: "2026-02-14 13:20:00 +0100"
 categories: [Gen AI, Architecture]
-tags: [ Generative AI Handbook, LLM Architecture]
+tags: [Generative AI Handbook, LLM Architecture]
 mermaid: true
 image:
   path: /assets/img/genai-cover.jpg

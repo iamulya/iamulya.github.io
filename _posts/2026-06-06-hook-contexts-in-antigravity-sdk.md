@@ -2,7 +2,7 @@
 title: "Hook Contexts: Session, Turn, and Operation State in the Antigravity SDK"
 date: "2026-07-07 12:00:00 +0100"
 categories: [Antigravity, Engineering]
-tags: [Antigravity Engineering Series, Hooks, SDK, Session State]
+tags: [Antigravity Engineering Series, hooks, SDK, Session State]
 mermaid: true
 image:
   path: /assets/img/antigravity.png

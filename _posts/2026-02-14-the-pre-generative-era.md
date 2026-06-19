@@ -2,7 +2,7 @@
 title: Chapter 1 - The Pre-Generative Era
 date: "2026-02-14 13:00:00 +0100"
 categories: [Gen AI, Architecture]
-tags: [ Generative AI Handbook]
+tags: [Generative AI Handbook]
 mermaid: true
 image:
   path: /assets/img/genai-cover.jpg

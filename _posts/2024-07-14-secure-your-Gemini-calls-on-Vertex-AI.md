@@ -3,7 +3,7 @@ layout: postwithads
 title: Secure your Gemini Calls on Vertex AI
 date: 2024-07-14 12:00:00 +0100
 categories: [Google Cloud, Vertex AI, Gemini]
-tags: [Google Cloud, Vertex AI, Gemini, VPC Service Controls, Access Context Manager]
+tags: [google cloud, vertex ai, Gemini, VPC Service Controls, Access Context Manager]
 ---
 
 As Gen AI gets more popular and integrated into corporate strategies, the use of models like Gemini, GPT 4, Llama etc. is increasing in an incredibly fast fashion. However, a lot of the times the security aspect is put on the backburner - which is a big mistake. 

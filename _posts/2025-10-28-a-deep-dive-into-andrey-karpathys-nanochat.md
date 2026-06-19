@@ -2,7 +2,7 @@
 title: A Deep Dive into Andrey Karpathy's Nanochat
 date: 2025-10-28 09:00:00 +0100
 categories: [Gen AI, LLM Training]
-tags: [Gen AI, LLM Training, LLM Pre-Training, LLM Post-Training, Nanochat, Andrey Karpathy]
+tags: [Gen AI, LLM Training, LLM Pre-Training, LLM Post-Training, NanoChat, Andrey Karpathy]
 mermaid: true
 image:
   path: /assets/img/nanochat.png

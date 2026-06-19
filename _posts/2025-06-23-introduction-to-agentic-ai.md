@@ -2,7 +2,7 @@
 title: "Chapter 1 - An Introduction to Agentic AI"
 date: "2025-06-23 07:00:00 +0200"
 categories: [Gen AI, Agentic SDKs, OpenAI Agents SDK]
-tags: [Agentic AI, Gen AI, Agentic SDKs, OpenAI Agents SDK, Tinib00k]
+tags: [Agentic AI, Gen AI, agentic sdks, OpenAI Agents SDK, Tinib00k]
 mermaid: true
 image:
   path: /assets/img/tinibook-openai-agents-sdk-final.jpg

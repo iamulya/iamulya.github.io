@@ -2,7 +2,7 @@
 title: Chapter 2 - Tokenization and Embeddings
 date: "2026-02-14 13:04:00 +0100"
 categories: [Gen AI, Architecture]
-tags: [ Generative AI Handbook, Tokenization]
+tags: [Generative AI Handbook, Tokenization]
 mermaid: true
 image:
   path: /assets/img/genai-cover.jpg

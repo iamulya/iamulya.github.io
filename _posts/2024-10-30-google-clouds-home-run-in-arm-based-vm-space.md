@@ -2,7 +2,7 @@
 title: Google Cloud's Home Run in ARM-based VM space
 date: 2024-10-30 17:00:00 +0100
 categories: [Google Cloud, ARM-based Workloads]
-tags: [Google Cloud, ARM-based workloads, Compute Engine, GKE]
+tags: [google cloud, ARM-Based Workloads, compute engine, GKE]
 ---
 
 <p align="center">Audio summary </p> <p align="center">{% include embed-audio.html src='/assets/audio/axion.mp3' %}</p>

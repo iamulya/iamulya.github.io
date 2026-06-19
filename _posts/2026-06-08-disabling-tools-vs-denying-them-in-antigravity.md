@@ -2,7 +2,7 @@
 title: "Disabling Tools vs. Denying Them in Antigravity"
 date: "2026-07-08 12:00:00 +0100"
 categories: [Antigravity, Engineering]
-tags: [Antigravity Engineering Series, Capabilities, SDK, Tool Config]
+tags: [Antigravity Engineering Series, Capabilities, SDK, tool config]
 mermaid: true
 image:
   path: /assets/img/antigravity.png

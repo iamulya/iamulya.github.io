@@ -2,7 +2,7 @@
 title: 4. OpenClaw — Tools, Sandbox, and Scheduler
 date: "2026-02-09 13:30:00 +0100"
 categories: [Gen AI, Personal AI Assistants, OpenClaw]
-tags: [ Agentic AI, Gen AI, OpenClaw, Personal AI Assistants, AI Assistants]
+tags: [Agentic AI, Gen AI, openclaw, Personal AI Assistants, AI Assistants]
 mermaid: true
 image:
   path: /assets/img/openclaw.png

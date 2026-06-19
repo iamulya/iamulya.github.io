@@ -2,7 +2,7 @@
 title: "Building a Safety Architecture for Autonomous Agents using Antigravity SDK"
 date: "2026-07-02 12:00:00 +0100"
 categories: [Antigravity, Engineering]
-tags: [Antigravity Engineering Series, Safety, Hooks, Policies, SDK]
+tags: [Antigravity Engineering Series, Safety, hooks, Policies, SDK]
 mermaid: true
 image:
   path: /assets/img/antigravity.png

@@ -2,7 +2,7 @@
 title: How Gemini 3 is Revolutionizing NFL Film Study
 date: 2025-12-10 09:00:00 +0100
 categories: [Gen AI, Video Understanding]
-tags: [Gen AI, Video Understanding, Image Understanding, NFL Film Study, Gemini 3]
+tags: [Gen AI, Video Understanding, Image Understanding, NFL Film Study, gemini 3]
 mermaid: true
 image:
   path: /assets/img/nfl.jpeg

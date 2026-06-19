@@ -3,7 +3,7 @@ layout: postwithads
 title: End-to-End Serverless RAG Application on GCP
 date: 2024-08-08 07:00:00 +0100
 categories: [Gen AI, RAG Applications, Serverless]
-tags: [Google Cloud, RAG Applications, Serverless, Cloud Workflows, Gemini, Gen AI]
+tags: [google cloud, RAG Applications, Serverless, cloud workflows, Gemini, Gen AI]
 ---
 
 Retrieval-Augmented Generation (RAG) is an approach in LLM-based Applications which enables an LLM like Gemini to answer queries regarding topics it wasn’t even trained with. This is done by **augmenting** the context of a query/prompt with the data necessary to answer the query, **retrieved** from an external source like a Database, so that the LLM can **generate** an answer. The data can be in the form of text, audio, images and even videos - basically anything that you can create embeddings for.

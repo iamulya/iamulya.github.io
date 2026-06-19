@@ -2,7 +2,7 @@
 title: A Cheatsheet on Identities, Tokens, and Keyless Authentication on Google Cloud
 date: 2025-07-02 14:00:00 +0100
 categories: [Google Cloud, Cheatsheets]
-tags: [Google Cloud, Cheatsheet, OAuth, OIDC, IAM, Sevice Accounts, Google Cloud Cheatsheet]
+tags: [google cloud, Cheatsheet, OAuth, OIDC, IAM, sevice accounts, google cloud cheatsheet]
 mermaid: true
 image:
   path: /assets/img/gcp-art.png

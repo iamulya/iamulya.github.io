@@ -2,7 +2,7 @@
 title: Chapter 4 -The Transformer Block
 date: "2026-02-14 13:12:00 +0100"
 categories: [Gen AI, Architecture]
-tags: [ Generative AI Handbook, Transformer]
+tags: [Generative AI Handbook, Transformer]
 mermaid: true
 image:
   path: /assets/img/genai-cover.jpg

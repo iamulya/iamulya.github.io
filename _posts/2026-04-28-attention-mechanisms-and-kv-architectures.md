@@ -1,13 +1,17 @@
 ---
 title: "Attention Mechanisms and KV Cache: From First Principles to Gemma 4's Architecture"
-date: "2026-05-28 15:00:00 +0100"
-categories: [AI Infrastructure, Deep Dives]
-tags: [Generative AI in Depth, Attention, KV Cache, Gemma]
+date: 2026-04-28 09:00:00 +0000
+categories: [Generative AI in Depth, AI Infrastructure, Deep Dives]
+tags: [Attention, KV Cache, Gemma, Generative AI in Depth]
 mermaid: true
 image:
-  path: /assets/img/gemma-4.png
-  alt: "Attention Mechanisms and KV Cache Deep Dive"
+  path: /assets/img/generative-ai-in-depth.png
+  alt: "Generative AI in Depth — A Technical Deep Dive Series"
 ---
+
+> This article is **Part 3 of 15** in the [Generative AI in Depth](/categories/Generative AI in Depth/) series.
+{: .prompt-info }
+
 
 Every modern LLM generates tokens by *attending* to all previous tokens. The way this attention is computed — and the way its intermediate results are stored — is the single most important architectural decision in a transformer. It determines how much GPU memory the model needs, how many concurrent users it can serve, and how long a context it can handle.
 
@@ -227,6 +231,9 @@ Layer 1: token 96 attended to tokens 94-96
 **Used by**: Mistral (all versions), Gemma 3/4 (for local attention layers).
 
 **The catch**: Sliding window alone loses information on tasks requiring precise recall of early context ("What was the third paragraph about?"). That's why modern models don't use it exclusively — they alternate with full attention layers.
+
+> **If the sequence length exceeds the window size W, tokens outside the window are permanently invisible to sliding-window layers — no indirect path can recover them.** The diffusion argument (L×W reach) assumes the relevant information was already carried forward in the hidden state. If the user's key fact appears at token 0 in a 100K-token conversation with W=1024 and L=40, that token's contribution becomes negligible within the first few layers. This is why Gemma 4 uses sliding window for only 83% of layers and reserves 8 full-attention layers for global context.
+{: .prompt-warning }
 
 ---
 
@@ -601,6 +608,9 @@ K=V:       Attention = softmax(Q · Kᵀ / √d) · K   ← K replaces V
 With K=V, there's a single projection `W_KV` and both K and V equal `x · W_KV`. The model is saying: "the representation that makes a token *findable* is the same representation I want to *retrieve* from it." This works because for many tokens, key and value are naturally correlated — the word "Paris" is findable *because* it's about Paris, and the information you want from it is... that it's about Paris. The query heads still provide all the search diversity.
 
 Gemma 4 uses K=V **only on sliding window layers** (1024-token context), where the information is local and K/V overlap is high. The global layers maintain separate K and V with different head configurations. Notably, the smaller E4B model does **not** use K=V (`attention_k_eq_v = false`) — it apparently doesn't have enough capacity to compensate for the information loss.
+
+> **K=V sharing is not free:** forcing Key and Value to share weights reduces the expressiveness of each head. The model must find a single projection that is simultaneously good for *finding* tokens (K's role) and *extracting information* from them (V's role). Gemma 4 compensates by using it only in bounded, local-context layers. For quantised deployments, be aware that K=V sharing can amplify quantisation errors — any rounding noise in the shared KV tensor affects both the attention weights and the output values simultaneously.
+{: .prompt-warning }
 
 The result: instead of storing both K and V, you store one tensor. This halves the KV cache for these layers:
 

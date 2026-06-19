@@ -1,13 +1,17 @@
 ---
 title: "A Quantization Primer: Formats, Architecture Sensitivity, and a Gemma 4 Case Study"
-date: "2026-05-21 16:00:00 +0100"
-categories: [AI Infrastructure, Deep Dives]
-tags: [Generative AI in Depth, Quantization, LLM Serving, Gemma,]
+date: 2026-05-14 09:00:00 +0000
+categories: [Generative AI in Depth, AI Infrastructure, Deep Dives]
+tags: [Quantization, LLM Serving, Gemma, Generative AI in Depth]
 mermaid: true
 image:
-  path: /assets/img/gemma-4.png
-  alt: "LLM Quantization Deep Dive"
+  path: /assets/img/generative-ai-in-depth.png
+  alt: "Generative AI in Depth — A Technical Deep Dive Series"
 ---
+
+> This article is **Part 8 of 15** in the [Generative AI in Depth](/categories/Generative AI in Depth/) series.
+{: .prompt-info }
+
 
 A 70B parameter model in FP16 weighs 140GB. That won't fit on any consumer GPU. Quantization is how you shrink it to 35GB (Q4) or even 18GB (Q2) — trading precision for the ability to actually run the model. But quantization isn't just "make numbers smaller." Different methods work differently on different architectures, and the wrong choice can turn a brilliant model into an incoherent mess.
 
@@ -125,6 +129,9 @@ flowchart LR
 **All of Bartowski's GGUF quantizations** use imatrix calibration. The calibration dataset is [publicly available](https://gist.github.com/bartowski1182/82ae9b520227f57d79ba04add13d0d0d) and includes a mix of English text, code, and diverse content.
 
 **Why calibration data matters**: If you calibrate on English Wikipedia, the importance matrix optimizes for English prose. Code-related weights might get deprioritized. A code model calibrated on prose will perform worse on code than one calibrated on a mixed dataset.
+
+> **Match calibration data to your use case.** If you're deploying primarily for code generation, include substantial code in the calibration dataset. If your users write in non-English languages, include multilingual data. GGUF calibration (like Bartowski's) uses a mixed English + code + multilingual dataset — a reasonable general-purpose choice, but not optimal for narrow domain deployments.
+{: .prompt-warning }
 
 ---
 
@@ -349,6 +356,9 @@ When you try to store the KV cache in E5M2 instead:
 | E4M3 weights + E4M3 KV cache (`--kv-cache-dtype auto`) | ✅ | One format, one calibration set |
 | E4M3 weights + E5M2 KV cache | ❌ | vLLM raises a hard `ValueError` regardless of dynamic/static — it refuses to mix FP8 checkpoint scales with a different KV dtype |
 | BF16 weights + E5M2 KV cache | ✅ | No pre-baked weight scales to conflict with; KV scales computed at runtime |
+
+> **If you're using a pre-calibrated FP8 checkpoint (e.g., a quantized Qwen3 or Gemma 4 from Hugging Face), always set `--kv-cache-dtype auto`.** This tells vLLM to use the checkpoint's calibrated E4M3 format for the KV cache, avoiding the E5M2 mismatch error. Using any other explicit FP8 variant will fail at model load time with a `ValueError`.
+{: .prompt-warning }
 
 **Resolution**: Use `--kv-cache-dtype auto` — this tells vLLM to use the checkpoint's native format for both weights and KV cache, sharing the same calibrated scales throughout.
 

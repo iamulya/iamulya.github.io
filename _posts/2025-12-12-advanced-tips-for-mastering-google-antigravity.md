@@ -2,7 +2,7 @@
 title: Advanced Tips for Mastering Google Antigravity
 date: 2026-01-12 09:00:00 +0100
 categories: [Gen AI, Agentic IDEs, Antigravity]
-tags: [Gen AI, Agentic IDEs, Coding Agents, Antigravity, Gemini 3]
+tags: [Gen AI, agentic ides, Coding Agents, antigravity, gemini 3]
 mermaid: true
 image:
   path: /assets/img/antigravity.png

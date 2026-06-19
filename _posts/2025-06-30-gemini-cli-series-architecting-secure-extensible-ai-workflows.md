@@ -2,7 +2,7 @@
 title: "Gemini CLI Series: Architecting Secure, Extensible AI Workflows"
 date: 2025-06-30 10:00:00 +0100
 categories: [Gen AI, AI Coding Agents, Gemini CLI]
-tags: [Gen AI, Gemini, Gemini CLI, AI Coding Agents, Gemini CLI Series]
+tags: [Gen AI, Gemini, gemini cli, AI Coding Agents, gemini cli series]
 mermaid: true
 image:
   path: /assets/img/gemini-cli.png

@@ -1,6 +1,6 @@
 ---
 title: "vLLM Deep Dive Part 2: Scaling — Speculative Decoding, Parallelism, and Disaggregated Serving"
-date: "2026-07-12 13:00:00 +0100"
+date: "2026-06-12 13:00:00 +0100"
 categories: [AI Infrastructure, Deep Dives]
 tags: [vLLM Deep Dive Series, Inference]
 mermaid: true
@@ -9,7 +9,7 @@ image:
   alt: "vLLM Deep Dive Series — Part 2: Scaling"
 ---
 
-> This article is Part 2 of the [vLLM Deep Dive Series](/tags/vllm-deep-dive-series). [Part 1](/posts/vllm-deep-dive-part-1) covered the core engine.
+> This article is Part 2 of the [vLLM Deep Dive Series](/tags/vllm-deep-dive-series). [Part 1](/posts/vllm-deep-dive-part-1) covered the core engine. For first-principles foundations, see the [Generative AI in Depth](/categories/generative-ai-in-depth/) series.
 {: .prompt-info }
 
 Part 1 explained how vLLM makes a single GPU fast. This part covers how you make it *faster* — speculative decoding to accelerate individual requests, five parallelism strategies to distribute work across GPUs, disaggregated serving to separate the two fundamentally different phases of inference, and the hardware support matrix.
@@ -82,6 +82,9 @@ Speculative decoding, batch size 32, verify 5 tokens each:
 At **high batch sizes**, the GPU is already fully utilized. Making each forward pass larger increases memory traffic disproportionately. Speculative decoding shines at **low batch sizes** (1-4 users), where the GPU has spare capacity and the verification work is essentially "free."
 
 **5. EAGLE heads need training.** You can't just flip a flag — you need a trained head for your specific model, and not all models have one available.
+
+> **Concept covered in depth:** [Speculative Decoding](/posts/speculative-decoding) covers draft models, EAGLE, DFlash, and the acceptance-rate/throughput tradeoff from first principles, with hardware guidance on when each method makes sense.
+{: .prompt-info }
 
 ## Parallelism: Five Ways to Split Work
 
@@ -185,6 +188,9 @@ flowchart TB
 
 **Elastic EP** extends this to dynamically add/remove GPU workers based on load — important for production MoE serving where traffic varies.
 
+> **Concept covered in depth:** [Mixture of Experts](/posts/mixture-of-experts) explains how MoE routing, expert selection, and load balancing work — and why MoE architectures require dedicated parallelism strategies that dense models don't need.
+{: .prompt-info }
+
 ### Context Parallelism (CP) — For Very Long Contexts
 
 Splits the input **sequence** across GPUs. Each GPU processes a portion of the context. Attention requires ring communication between GPUs (each GPU's Q needs to attend to all other GPUs' K/V).
@@ -225,7 +231,12 @@ Multiple KV transfer backends are available:
 - **PegaFlow** — external KV cache as standalone Rust process
 - **LMCache / FlexKV** — KV cache sharing across instances
 
+> **Concept covered in depth:** [LLM Serving in Depth](/posts/llm-serving-in-depth) covers why the prefill/decode distinction exists — the compute-bound vs memory-bandwidth-bound profiles, head-of-line blocking, and how chunked prefill partially addresses it before disaggregation becomes necessary.
+{: .prompt-info }
+
 ## Hardware Support Matrix
+
+Before deploying vLLM, you need to know whether it runs on your hardware — and at what quality level. vLLM's performance optimizations (FlashAttention, CUDA Graphs, TRTLLM-GEN kernels) are NVIDIA-specific by default; other platforms use different kernel backends with different performance characteristics.
 
 | Hardware | Status | Notes |
 |---|---|---|

@@ -1,6 +1,6 @@
 ---
 title: "vLLM Deep Dive: The Engine — How vLLM Turns a Single GPU into a Serving Machine"
-date: "2026-07-12 12:00:00 +0100"
+date: "2026-06-12 12:00:00 +0100"
 categories: [AI Infrastructure, Deep Dives]
 tags: [vLLM Deep Dive Series, LLM Serving]
 mermaid: true
@@ -9,7 +9,7 @@ image:
   alt: "vLLM Deep Dive Series — Part 1: The Engine"
 ---
 
-> This article is Part 1 of the [vLLM Deep Dive Series](/tags/vllm-deep-dive-series). Based on vLLM v0.18+ (June 2026).
+> This article is Part 1 of the [vLLM Deep Dive Series](/tags/vllm-deep-dive-series). Based on vLLM v0.18+ (June 2026). If you're new to LLM serving concepts, the [Generative AI in Depth](/categories/generative-ai-in-depth/) series covers the first-principles foundations this series builds on.
 {: .prompt-info }
 
 vLLM is the most widely deployed open-source LLM inference server. It powers everything from single-GPU side projects to multi-node production clusters serving millions of requests per day. But very few people who use it understand *why* it's fast.
@@ -28,6 +28,9 @@ PagedAttention treats KV cache like virtual memory. Instead of one big contiguou
 {: .prompt-tip }
 
 Published as [*Efficient Memory Management for Large Language Model Serving with PagedAttention*](https://arxiv.org/abs/2309.06180) at SOSP 2023.
+
+> **Concept covered in depth:** [The Memory Math](/posts/llm-memory-math) covers why the KV cache is the dominant memory consumer at long contexts, how it scales, and the per-layer arithmetic behind it. [LLM Serving in Depth](/posts/llm-serving-in-depth) covers PagedAttention, continuous batching, and prefix caching from first principles.
+{: .prompt-info }
 
 ## Continuous Batching: No Wasted Slots
 
@@ -144,6 +147,9 @@ vLLM divides the KV cache into fixed-size blocks (e.g., 16 tokens). Each block i
 > For agentic workloads, APC is transformative. The system prompt + tool definitions + conversation history is identical across every turn. Only the new user message changes. APC means turn 2+ skips almost all prefill work. Enabled by default in vLLM v1.
 {: .prompt-tip }
 
+> **Concept covered in depth:** [LLM Serving in Depth](/posts/llm-serving-in-depth) covers why prefix caching works — the causal attention property that makes shared prefix KV mathematically identical — along with continuous batching and the full scheduling pipeline.
+{: .prompt-info }
+
 ## CUDA Graph Capture: Eliminating Launch Overhead
 
 A single forward pass through a transformer launches **hundreds of GPU kernels** — matrix multiplications, attention, layer norms. Each kernel launch has CPU overhead (~10μs). At 200 kernels per step, that's 2ms of pure overhead per token — which can dominate at small batch sizes.
@@ -163,6 +169,9 @@ vLLM supports two modes:
 - **Piecewise graph capture**: Records individual sections (attention, MLP) as separate graphs. Slightly more overhead but handles dynamic shapes by composing pieces.
 
 HIP Graphs are the AMD ROCm equivalent.
+
+> **Concept covered in depth:** [CUDA Kernels and FlashAttention](/posts/cuda-kernels-and-flashattention) covers CUDA Graph Capture in detail — how the capture/replay mechanism works, why static shapes are required, how vLLM uses batch-size buckets to work around this, and how graph capture interacts with torch.compile.
+{: .prompt-info }
 
 ## torch.compile: Fusing the Gaps
 
@@ -214,6 +223,9 @@ Model weights are static — you quantize them once. But the KV cache grows dyna
 - **FP8 KV cache** — halves KV memory with <1% quality loss. Production-ready.
 - **TurboQuant** — pushes to 4-bit or 2-bit KV cache. Still under active research — quality degrades on needle-in-a-haystack tasks at extreme compression, and the optimal configuration is model-dependent.
 
+> **Concept covered in depth:** [A Quantization Primer](/posts/a-quantization-primer) explains GPTQ, AWQ, FP8, and KV cache quantization from first principles — and how model architecture determines which methods work well.
+{: .prompt-info }
+
 ## Attention Kernels: Why There Are Five
 
 The attention mechanism (`Q·K^T·V`) is the most compute-intensive operation in a transformer. A "kernel" is a specific GPU implementation of this math.
@@ -231,6 +243,9 @@ vLLM has multiple kernel implementations because different situations need diffe
 | **Triton** | Written in Triton. Runs on both NVIDIA and AMD GPUs. Used as the ROCm fallback. |
 
 vLLM auto-selects the best kernel based on your hardware and model.
+
+> **Concept covered in depth:** [CUDA Kernels and FlashAttention](/posts/cuda-kernels-and-flashattention) explains why memory bandwidth — not compute — is the bottleneck, and how FlashAttention's tiling algorithm eliminates the O(n²) attention matrix.
+{: .prompt-info }
 
 ## What's Next
 

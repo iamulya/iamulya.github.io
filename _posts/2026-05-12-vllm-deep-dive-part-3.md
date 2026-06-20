@@ -1,6 +1,6 @@
 ---
 title: "vLLM Deep Dive Part 3: Architectures — 60+ Models, What Actually Makes Them Different, and the 2026 Frontier"
-date: "2026-07-12 14:00:00 +0100"
+date: "2026-06-12 14:00:00 +0100"
 categories: [AI Infrastructure, Deep Dives]
 tags: [vLLM Deep Dive Series, LLM Serving]
 mermaid: true

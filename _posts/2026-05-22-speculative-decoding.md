@@ -488,6 +488,9 @@ At B > ~32, the target model is already approaching compute-bound territory, and
 
 ---
 
+> **See it in production:** [vLLM Deep Dive Part 2](/posts/vllm-deep-dive-part-2) covers how to configure speculative decoding in vLLM — including when NOT to enable it (the throughput/latency tradeoff at high batch sizes that makes it counterintuitive).
+{: .prompt-tip }
+
 ## Further Reading
 
 - [LLM Serving in Depth](/posts/llm-serving-in-depth) — how speculative decoding integrates with continuous batching and scheduling

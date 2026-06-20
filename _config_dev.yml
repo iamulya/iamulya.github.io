@@ -1,0 +1,16 @@
+# Development overrides — faster local builds
+# Usage: bundle exec jekyll serve --incremental --config _config.yml,_config_dev.yml
+
+# Faster Sass (no compression during dev)
+sass:
+  style: expanded
+
+# Skip analytics injection
+google_analytics:
+  id:
+
+# Disable PWA cache generation (saves ~1s)
+pwa:
+  enabled: false
+  cache:
+    enabled: false

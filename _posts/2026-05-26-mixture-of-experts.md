@@ -359,6 +359,9 @@ MoE makes the most sense when:
 
 ---
 
+> **See it in production:** [vLLM Deep Dive Part 2](/posts/vllm-deep-dive-part-2) covers Expert Parallelism in vLLM — how experts are distributed across GPUs, elastic EP for variable load, and when to combine EP with Tensor Parallelism. [vLLM Deep Dive Part 3](/posts/vllm-deep-dive-part-3) covers the MoE architecture families vLLM supports (DeepSeek V3/V4, Mixtral, Qwen3 MoE, DBRX).
+{: .prompt-tip }
+
 ## Further Reading
 
 - [Inside LLM Inference](/posts/decoder-forward-pass-dimensions) — the dense transformer baseline that MoE extends

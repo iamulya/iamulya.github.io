@@ -463,6 +463,9 @@ flowchart TD
 
 ---
 
+> **See it in production:** [vLLM Deep Dive Part 1](/posts/vllm-deep-dive-part-1) covers vLLM's full quantization support matrix — including KV cache quantization (FP8, TurboQuant) and how to configure it alongside weight quantization for maximum memory efficiency.
+{: .prompt-tip }
+
 ## Further Reading
 
 - [Artefact2's GGUF quality charts](https://gist.github.com/Artefact2/b5f810600771265fc1e39442288e8ec9) — Visual perplexity comparisons across quant types

@@ -588,6 +588,115 @@ The result: PagedAttention has slightly lower peak memory bandwidth utilisation 
 
 ---
 
+## CUDA Graph Capture
+
+Kernel fusion reduces HBM round-trips *within* a sequence of operations. But each kernel launch — even a fused one — still carries **CPU-side dispatch overhead**.
+
+Every kernel launch requires the CPU to validate kernel arguments, enqueue the kernel onto the CUDA stream, and signal the GPU driver. For small kernels (RMSNorm, residual add), this overhead (~5–15μs per launch) can exceed the actual GPU execution time.
+
+A single decode step through Gemma 4 12B launches roughly:
+
+```
+48 layers × ~5 kernels (Q/K/V proj, FlashAttention, O proj, rotary) = 240
+48 layers × ~3 kernels (gate+up, GELU×up, down)                     = 144
+48 layers × ~2 kernels (pre/post-attention RMSNorm)                  = 96
+Sampling + embedding                                                  =   5
+                                                          Total ≈ 485 launches
+
+At ~10μs per launch: 4.85ms of CPU dispatch overhead per token
+GPU execution time at B=1: ~5–8ms
+```
+
+The CPU is spending roughly as much time *dispatching* work as the GPU spends *executing* it. The GPU idles while the CPU fills the stream queue one kernel at a time.
+
+### How CUDA Graph Capture works
+
+CUDA Graphs (introduced in CUDA 10) solve this by recording and then replaying the entire launch sequence as a single GPU command.
+
+**Step 1: Capture phase (runs once at startup)**
+
+```python
+stream = torch.cuda.Stream()
+graph  = torch.cuda.CUDAGraph()
+
+with torch.cuda.graph(graph, stream=stream):
+    # Full forward pass runs here — recording kernel calls, not executing
+    output = model.forward(input_template)
+
+# graph now encodes the exact sequence of ~485 kernel launches,
+# their arguments, and the tensor addresses they operate on
+```
+
+**Step 2: Replay phase (every decode step)**
+
+```python
+# Update the input data in-place — same memory address, new content
+input_template.copy_(new_tokens)
+
+# One CPU call triggers all ~485 kernels on the GPU
+graph.replay()
+```
+
+The entire step runs as a single GPU command. CPU overhead collapses from ~485 × 10μs = **4.85ms** to a single dispatch of **~10μs** — a ~500× reduction.
+
+### The constraint: static shapes and memory addresses
+
+The graph records tensor *addresses*, not values. During replay, every tensor must be at the same address with the same shape as during capture. This means:
+
+- Batch size must be fixed (different batch size = different tensor shapes)
+- Sequence length must be fixed (or padded)
+- No dynamic control flow that branches on runtime tensor values
+
+For LLM serving, batch size changes constantly as requests arrive and complete. Production inference servers solve this with **batch-size bucketing** — capturing separate graphs for a fixed set of batch sizes, then rounding the current batch up to the nearest captured size. For example, [vLLM](https://github.com/vllm-project/vllm) — the most widely deployed open-source LLM inference server, which we cover in depth in the [vLLM Deep Dive Series](/tags/vllm-deep-dive-series) — uses the following approach:
+
+```
+Captured graphs:  B = 1, 2, 4, 8, 16, 32, 64, 128, 256
+
+Incoming batch of B=20:
+  → Use B=32 graph (nearest bucket ≥ 20)
+  → 12 padding slots compute but results are discarded
+  → Still ~15× faster than 20 un-graphed steps
+```
+
+Each captured graph requires its own set of static buffers. The default bucket set above adds roughly **200–500 MB** to baseline VRAM — which is why graph capture can be disabled on very small GPU budgets (in vLLM, `--enforce-eager` turns it off).
+
+### Full capture vs piecewise capture
+
+| Mode | What it records | Overhead | Handles dynamic shapes? |
+|---|---|---|---|
+| **Full capture** | Entire forward pass as one graph | Lowest replay overhead | No — batch size must match exactly |
+| **Piecewise capture** | Each attention/FFN block as a sub-graph | Slightly higher overhead | Yes — sub-graphs composed at runtime |
+
+vLLM defaults to piecewise capture. Each layer's attention and FFN blocks are captured separately; the scheduler composes them per batch at runtime without re-capturing. The overhead difference is typically <5% vs full capture.
+
+### Interaction with kernel fusion and torch.compile
+
+CUDA Graph Capture and kernel fusion target different overheads and work together:
+
+```
+Without either:
+  485 kernel launches × 10μs CPU overhead  = 4.85ms overhead
+  485 kernels × variable GPU time          = ~7ms GPU work
+  Total: ~12ms/token
+
+With kernel fusion (torch.compile fuses ~60% of small kernels):
+  ~200 kernel launches × 10μs             = 2ms overhead
+  ~200 fused kernels                       = ~6ms GPU work
+  Total: ~8ms/token
+
+With both fusion + CUDA Graph Capture:
+  1 graph replay × 10μs                   = 0.01ms overhead
+  ~200 fused kernels (recorded)            = ~6ms GPU work
+  Total: ~6.01ms/token
+```
+
+`torch.compile` reduces the *number* of kernels by merging element-wise operations; CUDA Graphs then eliminate the launch overhead for whichever kernels remain. In vLLM, both are typically active simultaneously.
+
+> The speedup from CUDA Graphs is largest at **small batch sizes**, where GPU execution time is short and CPU launch overhead dominates. At B=64, GPU execution time swamps the ~5ms launch overhead and graph capture provides marginal improvement. At B=1, the CPU overhead is nearly half the total step time — capturing it is critical.
+{: .prompt-info }
+
+---
+
 ## Tensor Cores and Shape Requirements
 
 GPU tensor cores operate on fixed-size tiles. On A100 (BF16), the native MMA (Matrix Multiply Accumulate) instruction shape is:
@@ -744,6 +853,9 @@ At B=156, the matrix multiplications cross the A100 roofline — above this, add
 - **Triton** (tile-level DSL) and **CUTLASS** (warp-level C++) are the two main tools for writing custom GPU kernels; **FlexAttention** extends this to PyTorch-native attention bias patterns
 
 ---
+
+> **See it in production:** [vLLM Deep Dive Part 1](/posts/vllm-deep-dive-part-1) covers how vLLM selects between FlashAttention, FlashInfer, TRTLLM-GEN, FlashMLA, and Triton kernels depending on hardware and model architecture — and what torch.compile handles on top of that.
+{: .prompt-tip }
 
 ## Further Reading
 

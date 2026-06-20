@@ -699,6 +699,9 @@ The E4B introduces `num_kv_shared_layers = 18`, meaning **18 consecutive layers 
 ---
 
 
+> **See it in production:** [vLLM Deep Dive Part 3](/posts/vllm-deep-dive-part-3) groups vLLM's 60+ supported architectures by attention type — showing which kernel each variant requires and why MLA needs a completely different KV cache layout than standard GQA models.
+{: .prompt-tip }
+
 ## Further Reading
 
 **Foundational**

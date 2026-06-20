@@ -392,6 +392,9 @@ For most production serving, FP8 weights + INT8 KV hits the best balance: ~2× c
 
 ---
 
+> **See it in production:** [vLLM Deep Dive Part 1](/posts/vllm-deep-dive-part-1) shows how PagedAttention eliminates the memory waste covered here — and why near-zero fragmentation is the single biggest reason vLLM achieves 2–4× higher concurrent request capacity than naive static allocators.
+{: .prompt-tip }
+
 ## Further Reading
 
 - [Inside LLM Inference: Every Calculation from Text to Token](/posts/decoder-forward-pass-dimensions) — where the KV cache shapes in this article come from

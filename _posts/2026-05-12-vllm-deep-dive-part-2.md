@@ -50,6 +50,7 @@ Speculative decoding uses a rejection sampling algorithm that guarantees the out
 | **N-gram** | Finds matching patterns in the prompt and predicts what follows | Zero cost, no extra model | Only works if prompt contains the pattern |
 | **Suffix** | Builds suffix array of the prompt, matches longest suffix | Good for repetitive/structured text | Needs patterns in prompt |
 | **Draft model** | Runs a small model (e.g., 1B) to generate 5-10 candidates, big model (e.g., 70B) verifies | Works for any text | Uses extra VRAM for second model |
+| **MTP** | Prediction modules baked into the model at pretraining time — run in the same forward pass | Near-zero overhead, no extra VRAM | Only available if the model was pretrained with MTP (DeepSeek V3/R1, Qwen 3) |
 | **EAGLE 3.1** | Trained lightweight head using the big model's hidden states — much more accurate than a separate draft model | ~80% acceptance rate, best speedup | Needs model-specific trained head |
 | **DFlash** | Diffusion model generates multiple tokens simultaneously | Novel, potentially very fast | Newest, least mature (2026) |
 
@@ -83,7 +84,7 @@ At **high batch sizes**, the GPU is already fully utilized. Making each forward 
 
 **5. EAGLE heads need training.** You can't just flip a flag — you need a trained head for your specific model, and not all models have one available.
 
-> **Concept covered in depth:** [Speculative Decoding](/posts/speculative-decoding) covers draft models, EAGLE, DFlash, and the acceptance-rate/throughput tradeoff from first principles, with hardware guidance on when each method makes sense.
+> **Concept covered in depth:** [Speculative Decoding](/posts/speculative-decoding) covers draft models, MTP, EAGLE, DFlash, and the acceptance-rate/throughput tradeoff from first principles, with hardware guidance on when each method makes sense.
 {: .prompt-info }
 
 ## Parallelism: Five Ways to Split Work

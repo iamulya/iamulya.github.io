@@ -330,6 +330,63 @@ The target verifies the entire tree in one pass, potentially accepting different
 
 EAGLE-2 reported **2–3× speedup** on standard benchmarks (MT-Bench, HumanEval, Alpaca) with acceptance rates of 0.75–0.85 on typical chat tasks.
 
+### Multi-Token Prediction (MTP)
+
+Medusa and EAGLE both add draft heads *after* pretraining — they are fine-tuned on top of a frozen or partially-frozen base model. **Multi-Token Prediction** (Gloeckle et al., Meta AI 2024) takes a different approach: bake the additional prediction heads into the model *during pretraining itself*.
+
+The insight: if you train a model to predict the next K tokens simultaneously — not just the next one — you get two benefits:
+1. At training time, each token's gradient contains information from K future positions, providing a richer training signal that improves single-token quality as a side effect
+2. At inference time, the additional heads serve as draft tokens for speculative decoding at essentially **zero added cost**, since they're already part of the model's forward pass
+
+**Architecture:**
+
+MTP adds a sequence of K small "prediction modules" to the main model. Each module receives the previous module's hidden state plus the embedding of the token it's predicting — making predictions causally dependent on each other, unlike Medusa's independent heads:
+
+```mermaid
+flowchart LR
+    subgraph Main["Main model (e.g. 48 layers)"]
+        L["Layers 1–48"]
+        H0["LM head → token N+1"]
+    end
+    subgraph M1["MTP Module 1"]
+        T1["emb(token N+1) + hidden_N"]
+        TL1["Transformer block"]
+        H1["→ token N+2"]
+    end
+    subgraph M2["MTP Module 2"]
+        T2["emb(token N+2) + hidden_M1"]
+        TL2["Transformer block"]
+        H2["→ token N+3"]
+    end
+    L --> H0
+    L -->|hidden_N| T1
+    T1 --> TL1 --> H1
+    TL1 -->|hidden_M1| T2
+    T2 --> TL2 --> H2
+```
+
+All modules run in the **same forward pass** as the main model — they don't require a separate model call. The result is draft tokens produced at near-zero additional latency.
+
+**Who uses it:**
+
+- **DeepSeek V3/R1** — 1 MTP module. vLLM, SGLang, and llama.cpp automatically use it as a speculative decoding head: the main model predicts token N+1 and the MTP module predicts N+2 in the same pass
+- **Qwen 3 models** — 3 MTP modules, enabling up to 3 speculative tokens per forward pass. This is what "Qwen 3.6 27B + MTP" refers to in llama.cpp — the MTP heads are part of the model weights and activated automatically
+- **Meta's research models** (original MTP paper, 2024) — reported 3× speedup on code generation with 4 MTP heads
+
+**MTP vs other self-speculative methods:**
+
+| Method | Trained when | Conditioned on | Inference overhead |
+|---|---|---|---|
+| **Medusa** | Post-training fine-tune | Final hidden state (independent per head) | MLP forward pass |
+| **EAGLE** | Post-training fine-tune | Target hidden states + causal chain | Small transformer pass |
+| **MTP** | During pretraining | Previous MTP module's hidden state (causal) | Near-zero — same forward pass |
+| **Lookahead** | No training | Target model via Jacobi iteration | Multiple full passes |
+
+MTP's key advantage is that the draft cost is effectively zero — the modules run as part of the main model's forward pass, not after it. Reported acceptance rates for DeepSeek V3's single MTP module are ~60–70% on typical generation tasks.
+
+> Models with built-in MTP heads (DeepSeek V3/R1, Qwen 3) are used for speculative decoding without any additional configuration in frameworks that support them — vLLM, llama.cpp, and SGLang detect and activate MTP heads automatically when present. For models without native MTP, EAGLE or a separate draft model is required.
+{: .prompt-tip }
+
 ### Lookahead decoding
 
 A different self-speculative approach: instead of training extra heads, use **Jacobi iteration** to generate candidates from the target model itself.
@@ -481,6 +538,7 @@ At B > ~32, the target model is already approaching compute-bound territory, and
 - **Speedup formula**: `(1 - α^(N+1)) / (1 - α)` × `1 / (1 + draft_cost_fraction)` — both acceptance rate and draft efficiency matter
 - **Prompt lookup decoding** offers speculative decoding benefits at zero cost for copy-heavy tasks (summarisation, editing, RAG)
 - **EAGLE-2** and **Medusa** avoid managing a separate model by using the target model's own hidden states, achieving 1.5–3× speedup on typical tasks
+- **MTP (Multi-Token Prediction)** bakes draft heads into the model *during pretraining* — modules run as part of the main forward pass at near-zero extra cost. Used natively in DeepSeek V3/R1 (1 module) and Qwen 3 (3 modules); automatically activated in vLLM, llama.cpp, and SGLang when the model weights include them
 - **DFlash** (ICML 2026) replaces autoregressive drafting with a block diffusion model that generates the entire draft block in **one forward pass** — constant draft cost regardless of block size, achieving >6× acceleration and up to 2.5× over EAGLE-3
 - **No single drafting paradigm dominates**: autoregressive drafters (EAGLE) excel at reasoning-heavy outputs; diffusion drafters (DFlash) excel at structured outputs — WhiFlash dynamically switches between them per token
 - **Best for latency-sensitive, low-batch workloads**: high batch serving is already efficient at the throughput level; speculative decoding helps most for single-user interactive applications

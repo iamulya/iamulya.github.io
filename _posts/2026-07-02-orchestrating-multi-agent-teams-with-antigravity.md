@@ -1,6 +1,6 @@
 ---
 title: "Orchestrating Multi-Agent Teams with Subagents and Worktrees in Antigravity 2.0"
-date: "2026-07-03 12:00:00 +0100"
+date: "2026-07-02 12:00:00 +0100"
 categories: [Antigravity, Engineering]
 tags: [Antigravity Engineering Series, Subagents, Worktrees, Multi-Agent]
 mermaid: true
@@ -12,17 +12,17 @@ image:
 > This article is part of the [Antigravity Engineering Series](https://iamulya.one/tags/antigravity-engineering-series).
 {: .prompt-info }
 
-You have a refactoring task that touches 47 files across 3 modules. The agent starts at file 1. By file 30, its context window is saturated with the memory of files 1–29 — code it no longer needs but can't forget. Coherence drops. It starts making contradictory changes. By file 40, it's undoing work it did at file 15.
+Picture a refactoring task that touches 47 files across 3 modules. A single agent starts at file 1. By file 30, its context window is saturated with the memory of files 1–29 — code it no longer needs but can't discard. Coherence degrades. The agent begins making contradictory changes. By file 40, it's undoing work it did at file 15.
 
-This is the **context pollution problem**, and it's the primary failure mode of single-agent architectures on large tasks. The solution isn't a bigger context window. It's *more agents with smaller scopes.*
+This is the **context pollution problem**, and it's the primary failure mode of single-agent architectures on large tasks. If you've ever watched a monolithic application degrade under load because every request shares the same heap, you'll recognize the pattern. The solution there wasn't more RAM — it was decomposition into independent services with their own address spaces.
 
-Antigravity 2.0's **subagent system** lets the parent agent spawn concurrent child agents, each with an independent context window, optional Git worktree isolation, and a defined role. The **Antigravity SDK** extends this programmatically — building multi-agent teams with custom roles, tool restrictions, and communication patterns. 
+The same principle applies here. Antigravity 2.0's **subagent system** lets the parent agent spawn concurrent child agents, each with an independent context window, optional Git worktree isolation, and a defined role. The **Antigravity SDK** extends this programmatically — building multi-agent teams with custom roles, tool restrictions, and communication patterns. The architecture looks remarkably like a well-designed service mesh: independent workers, a coordinator, and clear boundaries.
 
 ---
 
 ## The Context Pollution Problem
 
-Single-agent coherence degrades predictably with task size:
+Single-agent coherence degrades predictably with task size — a curve that should look familiar to anyone who has benchmarked monolithic vs. distributed systems:
 
 ```mermaid
 xychart-beta
@@ -39,7 +39,7 @@ xychart-beta
 | 20–40 | 🟠 Low | Contradicts earlier changes |
 | 40+ | 🔴 Critical | Undoes own work |
 
-The fix is structural: decompose the task into scoped subtasks, each handled by an agent that only knows about its piece. The parent agent coordinates. The child agents execute. Nobody's context window holds 47 files of accumulated state.
+The fix is structural: decompose the task into scoped subtasks, each handled by an agent that only knows about its piece. The parent agent coordinates. The child agents execute. Nobody's context window holds 47 files of accumulated state. This is the *scatter-gather* pattern applied to agent architectures.
 
 ---
 
@@ -47,7 +47,7 @@ The fix is structural: decompose the task into scoped subtasks, each handled by 
 
 ### Built-In Subagent Types
 
-Antigravity ships three built-in subagent types:
+Antigravity ships three built-in subagent types, each with a clearly defined capability boundary:
 
 | Type | Purpose | Capabilities |
 |------|---------|-------------|
@@ -82,7 +82,7 @@ Each subagent gets:
 
 ### Worktree Isolation
 
-When a subagent specifies `Workspace: "worktree"`, Antigravity creates an isolated Git worktree:
+When a subagent specifies `Workspace: "worktree"`, Antigravity creates an isolated Git worktree. This is the agent equivalent of process isolation — each worker operates in its own address space:
 
 ```mermaid
 ---
@@ -120,13 +120,13 @@ flowchart LR
     style W2b fill:#f9a825,stroke:#f9a825,color:#000
 ```
 
-No shared filesystem state. No merge conflicts during work. The parent integrates the results after all subagents complete.
+No shared filesystem state. No merge conflicts during work. The parent integrates the results after all subagents complete — much like a *scatter-gather* endpoint that collects responses from parallel workers and produces a single aggregated result.
 
 ---
 
 ## Custom Subagents with define_subagent
 
-The built-in types cover common patterns. For specialized work, agents can define custom subagent types at runtime using `define_subagent`:
+The built-in types cover common patterns. For specialized work, agents can define custom subagent types at runtime using `define_subagent` — think of it as registering a new service type in a service registry:
 
 ```
 The parent agent calls define_subagent:
@@ -167,7 +167,7 @@ Parent: invoke_subagent(
 
 ### Tool Restrictions
 
-Custom subagents have fine-grained tool control:
+Custom subagents have fine-grained tool control — the principle of least privilege applied to agent capabilities:
 
 | Setting | Effect |
 |---------|--------|
@@ -180,7 +180,7 @@ Custom subagents have fine-grained tool control:
 
 ## Inter-Agent Communication
 
-Agents communicate using `send_message` with unique agent IDs:
+Agents communicate using `send_message` with unique agent IDs — asynchronous point-to-point messaging:
 
 ```
 Subagent 1 (billing migration) finishes:
@@ -231,7 +231,7 @@ stateDiagram-v2
 
 ## Programmatic Orchestration with the SDK (Python)
 
-The Antigravity SDK lets you build multi-agent systems programmatically:
+The Antigravity SDK lets you build multi-agent systems programmatically. Notice what's *not* in this code: no explicit "spawn a research subagent," no "define a migration-specialist," no manual phase orchestration. You set the boundary conditions and state the goal. The agent handles the decomposition:
 
 ```python
 # multi_agent_refactor.py
@@ -286,14 +286,14 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-Notice what's *not* in this code: no explicit "spawn a research subagent," no "define a migration-specialist," no manual phase orchestration. The agent receives the goal and autonomously decides how to decompose it. On a task this size, it will typically:
+On a task this size, the agent will typically:
 
 1. Spawn a read-only research subagent to map the codebase
 2. Define custom specialist subagents based on what it finds
 3. Spawn them in parallel worktrees to avoid filesystem collisions
 4. Coordinate the results and open PRs
 
-The SDK's role is to set the **safety boundary** (policies) and the **goal** (prompt). The agent handles the orchestration.
+The SDK's role is to set the **safety boundary** (policies) and the **goal** (prompt). The agent handles the orchestration — the same separation of concerns you'd apply between a process manager and the workers it supervises.
 
 ---
 
@@ -325,9 +325,9 @@ A multi-agent refactoring system where:
 5. **The SDK enables programmatic orchestration** — defining custom agents, spawning parallel tasks, collecting results
 6. **Permissions inherit automatically** — every subagent respects the parent's safety boundaries
 
-The agent that tries to refactor 47 files in one context window fails. The team of 5 agents, each handling 10 files with clean context, succeeds. Worktree isolation ensures they can't interfere with each other. Permission inheritance ensures they can't escape the safety boundary.
+The agent that tries to refactor 47 files in one context window fails predictably. A team of 5 agents, each handling 10 files with clean context, succeeds. Worktree isolation ensures they can't interfere with each other. Permission inheritance ensures they can't escape the safety boundary.
 
-That's not just parallel execution. That's the difference between one overwhelmed engineer and a coordinated team.
+That's not just parallel execution. It's the difference between one overwhelmed engineer and a coordinated team — the same lesson the industry learned when it moved from monoliths to microservices, applied to a domain where the workers happen to be language models.
 
 ---
 

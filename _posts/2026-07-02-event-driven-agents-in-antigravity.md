@@ -1,6 +1,6 @@
 ---
 title: "Triggers: Event-Driven Agents That React Without Prompting in Antigravity"
-date: "2026-07-07 12:00:00 +0100"
+date: "2026-07-02 12:00:00 +0100"
 categories: [Antigravity, Engineering]
 tags: [Antigravity Engineering Series, Triggers, SDK, Event-Driven]
 mermaid: true
@@ -9,20 +9,20 @@ image:
   alt: "Antigravity Engineering Series by Amulya Bhatia"
 ---
 
-> This article is part of the [Antigravity Engineering Series](https://iamulya.one/tags/antigravity-engineering-series). For any issues or if you'd like the pdf/epub version, contact me on [LinkedIn](https://www.linkedin.com/in/amulya-bhatia-01627a42/)
+> This article is part of the [Antigravity Engineering Series](https://iamulya.one/tags/antigravity-engineering-series).
 {: .prompt-info }
 
-You're debugging a flaky test. You edit `src/auth/login.ts`, save, switch to the terminal, run `npm test`, wait, read the output, switch back, edit again. Every iteration is the same mechanical loop: edit → save → switch → run → read → switch.
+You're debugging a flaky test. You edit `src/auth/login.ts`, save, switch to the terminal, run `npm test`, wait, read the output, switch back, edit again. Each iteration follows the same mechanical loop: edit → save → switch → run → read → switch. The feedback loop has five steps too many.
 
-What if the agent ran the tests *automatically* when you saved the file?
+If you've ever worked with event-driven architectures, you'll recognize this as a polling problem masquerading as a workflow. The developer is polling the file system by hand, checking whether something changed, and then triggering a downstream action. The entire sequence begs to be replaced by an event.
 
-**Triggers** are long-lived async functions that run alongside the agent session. They watch for external events — file changes, webhooks, timers — and push messages into the agent's conversation. The agent reacts to these messages exactly as it would to a user prompt. No polling. No prompting. Just: file changes → agent acts.
+**Triggers** are the SDK's answer. They're long-lived async functions that run alongside the agent session, watching for external events — file changes, webhooks, timers — and pushing messages into the agent's conversation. The agent reacts to these messages exactly as it would to a user prompt. No polling. No prompting. Just: event occurs → agent acts.
 
 ---
 
 ## What Triggers Are (and Aren't)
 
-Triggers are **not** hooks. This distinction matters:
+Triggers are **not** hooks. The distinction maps to a fundamental pattern in event-driven design:
 
 | | Hooks | Triggers |
 |---|---|---|
@@ -31,6 +31,8 @@ Triggers are **not** hooks. This distinction matters:
 | **Lifetime** | Per-tool-call or per-turn | Entire session |
 | **Blocking?** | Can block execution | Never block — they inject messages |
 | **Direction** | Inside-out (agent → hook) | Outside-in (event → agent) |
+
+In integration pattern terms: hooks are *message filters* on outbound channels. Triggers are *event-driven consumers* on inbound channels. Both are essential, and conflating them creates the kind of architectural confusion that's difficult to untangle later.
 
 ```mermaid
 ---
@@ -63,7 +65,7 @@ flowchart LR
 
 ## `TriggerContext` — The Bridge to the Agent
 
-Every trigger receives a `TriggerContext` when it starts. This is the handle for sending messages back to the agent:
+Every trigger receives a `TriggerContext` when it starts. This is the channel adapter — the handle that converts an external event into an internal message:
 
 ```python
 from google.antigravity.triggers.triggers import TriggerContext
@@ -77,7 +79,7 @@ async def my_trigger(ctx: TriggerContext):
     # just as if the user had typed it.
 ```
 
-`send_message()` is fire-and-forget from the trigger's perspective. The agent processes it asynchronously. Multiple triggers can send messages concurrently — they're queued and processed in order.
+`send_message()` is fire-and-forget from the trigger's perspective. The agent processes it asynchronously. Multiple triggers can send messages concurrently — they're queued and processed in order, like messages on a channel with guaranteed ordering.
 
 ---
 
@@ -189,7 +191,7 @@ if __name__ == "__main__":
 
 ## Custom Triggers
 
-Any async function with the `TriggerContext` signature is a trigger. Here are three patterns:
+Any async function with the `TriggerContext` signature is a trigger. The pattern is the same in every case: wait for an event, translate it into a message, send it to the agent. Here are three variations on this theme:
 
 ### Webhook trigger
 
@@ -291,6 +293,8 @@ async def hourly_coverage_check(ctx: TriggerContext):
 
 ## Triggers vs Sidecars
 
+Both mechanisms initiate agent work without a human prompt, but they occupy different points in the design space:
+
 | | Triggers | Sidecars |
 |---|---|---|
 | **Process** | In-process (same Python process) | Out-of-process (managed by platform) |
@@ -299,7 +303,7 @@ async def hourly_coverage_check(ctx: TriggerContext):
 | **Use when** | Reactive: "do X when Y happens" | Scheduled: "do X every night at 11 PM" |
 | **Communication** | Direct `send_message()` | Via `agentapi new-conversation` |
 
-Use triggers for in-session reactive behavior. Use sidecars for autonomous background work that runs independently of any user session.
+The distinction maps cleanly to the event-driven vs. batch-processing divide. Triggers are *event-driven consumers*: they react to individual events in real time. Sidecars are *scheduled batch processors*: they run on a cron and work through a queue of tasks. Use triggers for in-session reactive behavior. Use sidecars for autonomous background work that runs independently of any user session.
 
 ---
 
@@ -332,9 +336,9 @@ Key behaviors:
 
 ## What You Now Know
 
-Triggers are the SDK's event system. They're async functions that get a `TriggerContext` handle to send messages to the agent. File watchers, webhooks, pollers, crons — anything that waits for an external event and needs to tell the agent about it.
+Triggers are the SDK's event system — the mechanism that turns an agent from a request-reply service into an event-driven processor. They're async functions that receive a `TriggerContext` handle for sending messages to the agent. File watchers, webhooks, pollers, crons — anything that waits for an external event and needs to tell the agent about it.
 
-The key mental model: hooks are *interceptors* (they gate what the agent does). Triggers are *injectors* (they push new work into the agent). Use both together and you get an agent that reacts to the world while staying within safety boundaries.
+The key mental model: hooks are *interceptors* (they gate what the agent does). Triggers are *injectors* (they push new work into the agent). Used together, you get an agent that reacts to the world while staying within safety boundaries — the event-driven architecture's promise of responsiveness combined with the policy engine's guarantee of control.
 
 ---
 

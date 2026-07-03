@@ -1,6 +1,6 @@
 ---
 title: "Understanding the Policy Priority Model in Antigravity"
-date: "2026-07-05 12:00:00 +0100"
+date: "2026-07-02 12:00:00 +0100"
 categories: [Antigravity, Engineering]
 tags: [Antigravity Engineering Series, Policies, SDK, Priority Model]
 mermaid: true
@@ -9,20 +9,20 @@ image:
   alt: "Antigravity Engineering Series by Amulya Bhatia"
 ---
 
-> This article is part of the [Antigravity Engineering Series](https://iamulya.one/tags/antigravity-engineering-series). For any issues or if you'd like the pdf/epub version, contact me on [LinkedIn](https://www.linkedin.com/in/amulya-bhatia-01627a42/)
+> This article is part of the [Antigravity Engineering Series](https://iamulya.one/tags/antigravity-engineering-series).
 {: .prompt-info }
 
 You have 15 policies. The agent calls `run_command` with `npm install lodash`. Which policy fires? Why *that* one and not the three others that also match `run_command`?
 
-The Antigravity SDK's policy engine isn't a flat list. It's a **six-level priority hierarchy** with specificity rules, wildcard semantics, and first-match-wins within each tier. Understanding how it resolves is the difference between a safety policy that works and one that silently allows what you thought was blocked.
+If you've ever debugged a firewall rule set or traced a message through a content-based router, you already know the shape of this problem. Multiple rules match the same input. The resolution depends not on the rules themselves but on the *priority model* that orders them. Get the model wrong, and rules that look correct in isolation produce the wrong outcome in combination.
 
-This post opens the source code of `google.antigravity.hooks.policy` and traces exactly how every policy decision is made.
+The Antigravity SDK's policy engine isn't a flat list. It's a **six-level priority hierarchy** with specificity rules, wildcard semantics, and first-match-wins within each tier. This post opens the source code of `google.antigravity.hooks.policy` and traces exactly how every policy decision is made.
 
 ---
 
 ## The Six-Level Priority Hierarchy
 
-When the agent calls a tool, the policy engine evaluates every registered policy against the tool call. But not in the order you registered them. The engine groups policies by **specificity** and **decision type**, then evaluates in this strict order:
+When the agent calls a tool, the policy engine evaluates every registered policy against the tool call. But not in the order you registered them. The engine groups policies by **specificity** and **decision type**, then evaluates in strict precedence order — the same kind of specificity-based resolution you find in CSS selectors or network routing tables:
 
 ```mermaid
 ---
@@ -52,7 +52,7 @@ flowchart TD
     style X7 fill:#6c757d,color:#fff
 ```
 
-The key insight: **deny always beats allow at the same specificity level.** A specific deny beats a specific allow, even if the allow was registered first. And specific policies always beat wildcards, regardless of decision type.
+The key insight: **deny always beats allow at the same specificity level.** A specific deny beats a specific allow, even if the allow was registered first. And specific policies always beat wildcards, regardless of decision type. This is not an accident — it's a deliberate design choice that mirrors the *fail-safe defaults* principle in security engineering.
 
 ### What counts as "specific" vs "wildcard"?
 
@@ -83,7 +83,7 @@ policies = [
 
 ## The `when=` Predicate
 
-The `when=` parameter turns a blanket policy into a conditional one. Without `when=`, a policy matches any call to the named tool. With `when=`, it only matches when the predicate returns `True`.
+The `when=` parameter turns a blanket policy into a conditional one. Without `when=`, a policy matches any call to the named tool. With `when=`, it only matches when the predicate returns `True` — a *message filter* applied to the policy evaluation.
 
 ### Basic predicates
 
@@ -125,7 +125,7 @@ allow("run_command",
 
 ### What happens when a predicate throws?
 
-If a `when=` predicate raises an exception, the policy is treated as **non-matching**. The engine logs the error and moves to the next policy. This is a safety decision: a broken predicate should not accidentally block safe operations.
+If a `when=` predicate raises an exception, the policy is treated as **non-matching**. The engine logs the error and moves to the next policy. This is a deliberate safety decision: a broken predicate should not accidentally block safe operations. But it also means a broken predicate can accidentally *allow* unsafe ones — a subtlety worth understanding:
 
 ```python
 deny("run_command",
@@ -221,7 +221,7 @@ At compile time, `enforce()` validates:
 
 ## The `confirm_run_command()` Default
 
-`LocalAgentConfig` ships with a default policy: `confirm_run_command()`. This means **`run_command` requires user confirmation by default** — even if you don't set any policies.
+`LocalAgentConfig` ships with a default policy: `confirm_run_command()`. This means **`run_command` requires user confirmation by default** — even if you don't set any policies:
 
 ```python
 from google.antigravity import LocalAgentConfig
@@ -237,7 +237,7 @@ config = LocalAgentConfig(
 )
 ```
 
-The rationale from the source code: "the most dangerous tool" should require explicit opt-in for autonomous execution.
+The rationale is straightforward: shell access is the most powerful capability an agent possesses. The default should require explicit opt-in for autonomous execution — the principle of least privilege applied at the framework level.
 
 ---
 
@@ -266,8 +266,11 @@ flowchart LR
     style Layer2 fill:#533483,stroke:#e94560,color:#eee
 ```
 
-- **Use `CapabilitiesConfig.disabled_tools`** when a tool is irrelevant to the agent's purpose. The model never sees it, never wastes tokens on it.
-- **Use `policy.deny()`** when a tool is relevant but dangerous under certain conditions. The model knows it exists but gets a denial message if it tries something unsafe.
+These two layers serve different architectural purposes:
+- **Use `CapabilitiesConfig.disabled_tools`** when a tool is irrelevant to the agent's purpose. The model never sees it, never wastes tokens on it. This is *visibility control*.
+- **Use `policy.deny()`** when a tool is relevant but dangerous under certain conditions. The model knows it exists but gets a denial message if it tries something unsafe. This is *access control*.
+
+The distinction mirrors a common pattern in service architecture: the difference between not advertising a service endpoint (discovery control) and denying access to it at runtime (authorization control).
 
 ---
 
@@ -411,9 +414,9 @@ if __name__ == "__main__":
 
 ## What You Now Know
 
-The policy engine isn't a filter list — it's a priority resolver. Specific beats wildcard. Deny beats allow at the same level. First match wins within a group. Predicates that throw are silently skipped. The `"*"` wildcard is the only catch-all. And `run_command` is gated by default because it's the most dangerous tool in the box.
+The policy engine isn't a filter list — it's a priority resolver. Specific beats wildcard. Deny beats allow at the same level. First match wins within a group. Predicates that throw are silently skipped. The `"*"` wildcard is the only catch-all. And `run_command` is gated by default because it's the most powerful tool in the box.
 
-The next time you write `deny("*")` at the end of your policy list and wonder "does this actually work?" — now you know it does, and you know exactly which priority level it occupies.
+These rules form a complete resolution algebra. Once you internalize it, you can look at any policy set and predict the outcome for any tool call — which is exactly the property you want from a security mechanism. Predictability isn't merely convenient. In security, it's the whole point.
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: "Testing Strategies for Automating Antigravity Workflows"
-date: "2026-07-10 12:00:00 +0100"
+date: "2026-07-02 12:00:00 +0100"
 categories: [Antigravity, Engineering]
 tags: [Antigravity Engineering Series, Testing, hooks, SDK, CI]
 mermaid: true
@@ -18,6 +18,8 @@ At 3 AM, a one-character typo in your `PreToolUse` hook emitted malformed JSON, 
 
 The hook logic was sound. You just never tested it.
 
+Anyone who has operated a production system long enough knows this failure pattern. The safety mechanism that was never tested is the safety mechanism that fails when you need it most. In integration architecture, we call this the *untested dead-letter channel* — the error handler that's never handled an error.
+
 Antigravity workflows are built from composable pieces: shell scripts that consume stdin JSON and emit stdout JSON, Python policies that resolve to allow/deny decisions, configuration files that wire everything together, and SKILL.md files that teach agents what to do. Every one of these is **locally testable** — without an API key, without a running agent, without deploying anything. But the testing patterns aren't obvious because the pieces look different from traditional application code.
 
 This post walks through seven strategies for testing Antigravity customizations, from subprocess-based hook contract verification to transcript-based post-hoc assertions. Each strategy targets a specific failure mode and uses a specific product surface.
@@ -26,7 +28,7 @@ This post walks through seven strategies for testing Antigravity customizations,
 
 ## The Testing Pyramid for Agent Workflows
 
-Traditional testing pyramids have unit tests at the base, integration tests in the middle, and E2E tests at the top. Agent workflows need a different model:
+Traditional testing pyramids have unit tests at the base, integration tests in the middle, and E2E tests at the top. Agent workflows need a different model — one that accounts for the fact that agent behavior is non-deterministic while the infrastructure around it is fully deterministic:
 
 ```mermaid
 ---
@@ -55,7 +57,7 @@ flowchart TB
     style E2E fill:#533483,stroke:#e94560,color:#eee
 ```
 
-The bottom two layers are pure, deterministic, and fast. They run in CI in seconds. The top layers involve agent behavior, which is non-deterministic — you verify properties, not exact outputs. This post focuses on the bottom four layers.
+The bottom two layers are pure, deterministic, and fast. They run in CI in seconds. The top layers involve agent behavior, which is non-deterministic — you verify properties, not exact outputs. This post focuses on the bottom four layers — the ones you can fully automate and run on every commit.
 
 ---
 
@@ -70,7 +72,7 @@ Hooks follow a strict I/O contract documented in the [Hooks documentation](https
 - **Input**: JSON on stdin containing `toolCall`, `stepIdx`, and system metadata
 - **Output**: JSON on stdout containing `decision`, `reason`, and optionally `permissionOverrides`
 
-This makes hooks **pure functions** from a testing perspective. Spawn the script as a subprocess, pipe mock JSON to stdin, parse the JSON from stdout.
+This makes hooks **pure functions** from a testing perspective — a property that any integration architect would recognize and celebrate. Spawn the script as a subprocess, pipe mock JSON to stdin, parse the JSON from stdout. No mocks. No stubs. No running agent.
 
 ### The test harness
 
@@ -169,7 +171,7 @@ def test_stop_hook_continues_when_no_prs_opened(tmp_path):
 **Failure mode**: Hook passes wrong arguments to external tool, doesn't handle failure  
 **Product surface**: Antigravity 2.0 (sidecars, agentapi)
 
-Many hooks call external tools: `curl` for Slack notifications, `gh` for GitHub PR queries, `agentapi` for starting agent conversations. You can't (and shouldn't) call these in tests. Instead, **prepend a mock `bin/` directory to `PATH`** with dummy scripts that log their invocations.
+Many hooks call external tools: `curl` for Slack notifications, `gh` for GitHub PR queries, `agentapi` for starting agent conversations. You can't (and shouldn't) call these in tests. Instead, **prepend a mock `bin/` directory to `PATH`** with dummy scripts that log their invocations. This is the test double pattern applied at the process boundary — the same technique used for testing shell-based integration pipelines.
 
 ### Mocking curl to verify Slack notifications
 
@@ -313,7 +315,7 @@ async def test_unknown_commands_trigger_ask(make_tool_call):
 
 ### Testing the priority bucket model
 
-Post 06 (Policy Priority Model) introduced priority levels. Test that higher-priority rules take precedence:
+The Policy Priority Model article introduced priority levels. Test that higher-priority rules take precedence:
 
 ```python
 @pytest.mark.asyncio
@@ -352,7 +354,7 @@ async def test_priority_resolution(make_tool_call):
 **Failure mode**: Invalid event names, missing required fields, non-existent command paths  
 **Product surface**: Antigravity 2.0, IDE (configuration files)
 
-Configuration errors are silent killers. A typo in a hook event name (`"PreTooluse"` instead of `"PreToolUse"`) means the hook never fires. A sidecar with both `command` and `builtin` set will fail at runtime. These are trivially checkable with structural tests.
+Configuration errors are silent killers — the *integration anti-pattern* where a system fails by doing nothing instead of throwing an error. A typo in a hook event name (`"PreTooluse"` instead of `"PreToolUse"`) means the hook never fires. A sidecar with both `command` and `builtin` set will fail at runtime. These are trivially checkable with structural tests.
 
 ```python
 # test_config_schemas.py
@@ -524,7 +526,7 @@ class TestPluginJson:
 **Failure mode**: Agent used a denied tool, exceeded step limits, skipped required steps  
 **Product surface**: Antigravity 2.0, CLI (transcript.jsonl)
 
-Every agent conversation produces a `transcript.jsonl` file — a chronological log of every step, tool call, and model response. Every hook receives the `transcriptPath` in its stdin payload. This makes transcripts a **first-class testing surface**: run an agent (or simulate one), then parse the transcript and assert behavioral properties.
+Every agent conversation produces a `transcript.jsonl` file — a chronological log of every step, tool call, and model response. Every hook receives the `transcriptPath` in its stdin payload. This makes transcripts a **first-class testing surface**: run an agent (or simulate one), then parse the transcript and assert behavioral properties. It's *event sourcing* applied to agent verification — you can replay the entire session and check invariants after the fact.
 
 ```python
 # test_transcript_verification.py
@@ -627,7 +629,7 @@ This is a static fixture. In production, you'd use a `PostInvocation` hook or `S
 **Failure mode**: Missing `description` field, broken script references, malformed YAML  
 **Product surface**: Antigravity 2.0, IDE, CLI (skills, workflows)
 
-Skills and workflows are the instructions that teach agents what to do. If a skill has no `description`, the agent can't discover it. If it references a script that doesn't exist, the agent will fail mid-execution.
+Skills and workflows are the instructions that teach agents what to do. A skill without a `description` is invisible to discovery. A skill that references a nonexistent script fails mid-execution. These are structural invariants that can and should be checked at build time:
 
 ```python
 # test_skills_workflows.py
@@ -683,7 +685,7 @@ class TestSkills:
                 content = f.read()
             # Find script references like `scripts/verify.sh` or `./scripts/run.sh`
             refs = re.findall(
-                r'(?:scripts/|\./)([a-zA-Z0-9_\-/]+\.(?:sh|py))', content
+                r'(?:scripts/|\./)([\w\-/]+\.(?:sh|py))', content
             )
             for ref in refs:
                 # Resolve relative to skill directory
@@ -744,7 +746,7 @@ class TestWorkflows:
 **Failure mode**: Invalid cron expression, missing project binding, wrong command path  
 **Product surface**: Antigravity 2.0 (sidecars, agentapi, schedule builtin)
 
-Sidecars are configured via `sidecar.json` and enabled in `config.json`. A misconfigured sidecar won't crash — it just won't run. These tests catch the silent failures:
+Sidecars are configured via `sidecar.json` and enabled in `config.json`. A misconfigured sidecar won't crash — it just won't run. These tests catch the silent failures, turning invisible misconfigurations into visible test failures:
 
 ```python
 # Included in test_config_schemas.py (see Strategy 4)
@@ -844,7 +846,7 @@ A testing architecture that catches agent workflow failures before they reach pr
 6. **Skill smoke tests** verify that SKILL.md files have proper frontmatter and that referenced scripts actually exist on disk
 7. **Sidecar config tests** validate schedule definitions, cron syntax, and agentapi integration contracts
 
-The agent that runs your overnight pipeline is only as reliable as the tests around it. You wouldn't deploy a web service without unit tests. Don't deploy an agent workflow without them either.
+The agent that runs your overnight pipeline is only as reliable as the tests around it. You wouldn't deploy a web service without unit tests. You wouldn't push a database migration without a rollback plan. The same discipline applies here — the only difference is that the system under test happens to include a language model. Everything around it is deterministic, testable infrastructure. Treat it accordingly.
 
 ---
 

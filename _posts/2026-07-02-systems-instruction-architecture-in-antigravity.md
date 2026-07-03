@@ -1,6 +1,6 @@
 ---
 title: "System Instructions Architecture in Antigravity"
-date: "2026-07-08 12:00:00 +0100"
+date: "2026-07-02 12:00:00 +0100"
 categories: [Antigravity, Engineering]
 tags: [Antigravity Engineering Series, System Instructions, SDK, Persona]
 mermaid: true
@@ -12,9 +12,9 @@ image:
 > This article is part of the [Antigravity Engineering Series](https://iamulya.one/tags/antigravity-engineering-series).
 {: .prompt-info }
 
-Your agent writes code like a chatbot — overly polite, hedging every suggestion with "you might want to consider…", outputting markdown where you need raw code. You want it to act like a senior engineer: direct, opinionated, testing everything it ships.
+Your agent writes code like a chatbot — overly polite, hedging every suggestion with "you might want to consider…", emitting markdown explanations where you need raw code. You want it to act like a senior engineer: direct, opinionated, testing everything it ships.
 
-The system instructions control all of this. They define *who the agent thinks it is*, *how it communicates*, and *what rules it follows*. The Antigravity SDK provides two modes: one safe (append to defaults) and one nuclear (replace everything). Understanding when to use each — and what's in the defaults you'd be replacing — is the difference between a well-behaved agent and one that ignores safety rules because you accidentally deleted them.
+This is a configuration problem, not a training problem. The system instructions control *who the agent thinks it is*, *how it communicates*, and *what rules it follows*. The Antigravity SDK provides two modes: one safe (append to defaults) and one nuclear (replace everything). Understanding when to use each — and what's in the defaults you'd be replacing — is the difference between a well-tuned agent and one that ignores safety rules because you accidentally discarded them. It's the architectural equivalent of the difference between extending a base configuration and overriding it entirely.
 
 ---
 
@@ -60,7 +60,7 @@ The union type `SystemInstructions = CustomSystemInstructions | TemplatedSystemI
 
 ## `TemplatedSystemInstructions` — The Safe Path
 
-This is the recommended approach. It **preserves all default instructions** and lets you add an identity and custom sections on top.
+This is the recommended approach. It **preserves all default instructions** and lets you add an identity and custom sections on top — the *open-closed principle* applied to system prompts: open for extension, closed for modification.
 
 ### Setting the identity
 
@@ -137,7 +137,7 @@ Sections are appended to the system prompt in registration order. The `title` fi
 
 ## `CustomSystemInstructions` — The Nuclear Option
 
-This replaces **everything**. The default system prompt — including all safety rules, engineering standards, and tool usage guidelines — is discarded:
+This replaces **everything**. The default system prompt — including all safety rules, engineering standards, and tool usage guidelines — is discarded. Use this only when you understand what you're discarding:
 
 ```python
 config = LocalAgentConfig(
@@ -205,7 +205,7 @@ gemini = GeminiConfig(
 
 ### ThinkingLevel
 
-Controls how much reasoning the model does before responding:
+Controls how much reasoning the model does before responding — a cost/quality tradeoff that maps directly to the complexity of the task:
 
 | Level | Use Case | Token Cost |
 |-------|----------|-----------|
@@ -263,7 +263,7 @@ gemini = GeminiConfig(
 
 ## Structured Output with `response_schema`
 
-`response_schema` compiles a Pydantic model or JSON schema into the `finish` tool's schema. The agent returns structured data instead of free text:
+`response_schema` compiles a Pydantic model or JSON schema into the `finish` tool's schema. The agent returns structured data instead of free text — transforming the agent from a conversational endpoint into a typed service:
 
 ```python
 from pydantic import BaseModel, Field
@@ -430,7 +430,9 @@ TemplatedSystemInstructions(
 
 System instructions are a two-mode system: `TemplatedSystemInstructions` (safe, recommended) appends your identity and sections to the defaults. `CustomSystemInstructions` (nuclear, advanced) replaces everything — including the safety rules you probably want to keep.
 
-The `identity` field is the single most impactful thing you can set. It changes the agent from a generic assistant to a specialist who reasons about your domain. Combine it with `SystemInstructionSection` for project-specific rules, `ThinkingLevel` for cost/quality tradeoff, and `response_schema` for structured output — and you have a fully customized agent that acts like a team member, not a chatbot.
+The `identity` field is the single most impactful configuration you can set. It transforms the agent from a generic assistant into a specialist who reasons about your domain. Combine it with `SystemInstructionSection` for project-specific rules, `ThinkingLevel` for cost/quality tradeoff, and `response_schema` for structured output — and you have a fully customized agent that behaves like a team member, not a chatbot.
+
+This is ultimately a question of *interface design*: how do you tell a system what kind of system it should be? The answer, as in most well-designed architectures, is through explicit, declarative configuration — not through hints scattered across conversations.
 
 ---
 

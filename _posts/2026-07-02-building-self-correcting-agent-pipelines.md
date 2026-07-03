@@ -1,6 +1,6 @@
 ---
 title: "Building Self-Correcting Agent Pipelines using Sidecars and Scheduled Tasks in Antigravity"
-date: "2026-07-01 12:00:00 +0100"
+date: "2026-07-02 12:00:00 +0100"
 categories: [Antigravity, Engineering]
 tags: [Antigravity Engineering Series, Sidecars, hooks]
 mermaid: true
@@ -12,32 +12,28 @@ image:
 > This article is part of the [Antigravity Engineering Series](https://iamulya.one/tags/antigravity-engineering-series). 
 {: .prompt-info }
 
-You're still prompting your AI agent like it's 2024.
+Most teams treat their AI coding agent the way a 1970s mainframe operator treated a batch job: submit a request, wait for the result, inspect the output, repeat. The human is the scheduler. The human is the retry logic. The human is the verification gate. Close the laptop, and the whole operation stops.
 
-Every morning you open your IDE, type a request, watch the agent work, approve the changes, and move on. You're the scheduler. You're the retry logic. You're the verification gate. And when you close the laptop, the agent stops.
-
-What if it didn't?
+This is an architectural problem, not a productivity one. We have confused *interactivity* with *capability*.
 
 Antigravity 2.0 introduced **Sidecars** — background processes that run alongside the agent, automatically launched, monitored, and restarted by the platform. Combined with the **`schedule` builtin** and the **`agentapi`** CLI, sidecars turn your agent from an interactive pair programmer into persistent engineering infrastructure. You define the work. The platform runs it on a cron schedule. The agent reasons about it. You wake up to pull requests.
 
-This post walks through building an autonomous tech debt pipeline: a system that works through your backlog overnight — migrating deprecated APIs, expanding test coverage, updating documentation — and has PRs waiting for you in the morning.
+This post walks through building an overnight tech debt pipeline: a system that works through your backlog while you sleep — migrating deprecated APIs, expanding test coverage, updating documentation — and has PRs waiting for you in the morning.
 
 ---
 
 ## The Prompt Trap
 
-Interactive prompting is the wrong abstraction for repetitive engineering tasks.
-
-Every codebase has a backlog that never gets prioritized:
+Every sufficiently large codebase accumulates a backlog of work that everyone agrees needs doing and nobody can justify prioritizing:
 
 - 37 calls to `legacy.createUser()` that should be `userService.create()`
 - 12 modules below 60% test coverage
 - 8 config files still referencing the old environment variable naming convention
 - Documentation that hasn't been updated since the last major refactor
 
-Nobody disputes these need fixing. Nobody has time. And each individual fix is *exactly* the kind of mechanical, well-scoped task an AI agent excels at. But doing them one by one — prompt, wait, review, prompt, wait, review — takes longer than just doing it manually.
+Each individual fix is *exactly* the kind of mechanical, well-scoped task an AI agent excels at. But performing them interactively — prompt, wait, review, prompt, wait, review — is slower than doing it by hand. The overhead of the human-in-the-loop exceeds the value of the automation.
 
-The mental model shift: **agents aren't collaborators you watch work. They're background processes that work while you don't.** Antigravity 2.0 gives you the infrastructure to treat them that way.
+The mental model shift is subtle but important: **agents aren't collaborators you watch work. They're background processes that work while you don't.** In enterprise integration terms, you're moving from a *request-reply* pattern to a *fire-and-forget* pattern with a *document message* (the PR) as the output. Antigravity 2.0 provides the messaging infrastructure to make this work.
 
 ---
 
@@ -83,7 +79,7 @@ Three products, three roles:
 
 ## Step 1: Create a Tech Debt Skill
 
-Before anything runs autonomously, encode your team's tech debt patterns as an agent Skill. Skills are reusable packages of instructions — the agent discovers them automatically and follows them when relevant.
+Before anything runs autonomously, encode your team's tech debt patterns as an agent Skill. If you've ever worked with enterprise service contracts, think of a Skill as the agent's equivalent of a service definition — it declares what the agent can do and how it should do it. The agent discovers Skills automatically and follows them when relevant.
 
 Create the skill:
 
@@ -200,7 +196,7 @@ done
 exit $EXIT_CODE
 ```
 
-Test this interactively first. In the IDE or CLI, ask the agent:
+Test this interactively first — the same way you'd test a messaging route before putting it into production. In the IDE or CLI, ask the agent:
 
 ```
 > Migrate all legacy.createUser() calls using the tech-debt-patrol skill.
@@ -213,7 +209,7 @@ The agent discovers the skill, reads the migration map, and reports what it woul
 
 ## Step 2: Configure the Sidecar (Antigravity 2.0)
 
-Sidecars are background processes managed by Antigravity. They live in `~/.gemini/config/sidecars/<name>/` and are configured with a `sidecar.json` file.
+Sidecars are background processes managed by Antigravity. They live in `~/.gemini/config/sidecars/<name>/` and are configured with a `sidecar.json` file. If the skill is the *what*, the sidecar is the *when* and *how often*.
 
 Create the sidecar directory:
 
@@ -261,7 +257,7 @@ The `projectId` tells `agentapi` which project context to use — the agent will
 
 ### What happens at runtime
 
-When the cron fires at 11 PM:
+When the cron fires at 11 PM, the sequence is straightforward:
 
 1. The `schedule` builtin executes `agentapi new-conversation` with the prompt
 2. A new agent conversation starts in the `payment-platform` project
@@ -278,7 +274,7 @@ Runtime data is stored in `~/.gemini/antigravity/sidecar_data/tech-debt-patrol/`
 
 ## Step 3: Safety Gates with Hooks (Antigravity 2.0)
 
-The agent running overnight needs guardrails. Hooks let you run custom scripts at critical points in the agent's execution loop — before a tool is called, after it completes, and when the agent stops.
+An overnight pipeline without guardrails is like a batch job with production database access and no audit log — it's only a matter of time before something goes wrong. Hooks let you run custom scripts at critical points in the agent's execution loop — before a tool is called, after it completes, and when the agent stops.
 
 Create `hooks.json` in your workspace's `.agents/` directory:
 
@@ -324,7 +320,7 @@ Create `hooks.json` in your workspace's `.agents/` directory:
 }
 ```
 
-The `command-gate.sh` hook runs before every terminal command. It receives the proposed command as JSON on stdin and returns a decision:
+The `command-gate.sh` hook runs before every terminal command. It receives the proposed command as JSON on stdin and returns a decision — a pattern familiar to anyone who has implemented a *message filter* in an integration pipeline:
 
 ```bash
 #!/bin/bash
@@ -375,7 +371,7 @@ echo '{"decision": "stop"}'
 
 ### Permission configuration
 
-The permission system controls what the agent can do. Configure permissions for the project to allow automated git operations while blocking dangerous ones:
+The permission system provides a second layer of defense — defense in depth, applied to agent operations. Configure permissions for the project to allow automated git operations while blocking dangerous ones:
 
 **Allow list** — auto-approved without prompting:
 ```text
@@ -406,13 +402,13 @@ write_file(.env)
 write_file(package.json)
 ```
 
-This is defense in depth: hooks gate at the tool level, permissions gate at the action level.
+Hooks gate at the tool level, permissions gate at the action level. Together they form a *claim check* pattern for safety: the hook verifies the request, the permission system verifies the caller's authority.
 
 ---
 
 ## Step 4: The `/agents` Panel (CLI Monitoring)
 
-The Antigravity CLI gives you full visibility into what the agent did overnight.
+The Antigravity CLI gives you full visibility into what the agent did overnight — the operational equivalent of checking your message broker's dead-letter queue in the morning.
 
 Type `/agents` in the CLI prompt to open the Agent Manager Panel:
 
@@ -467,7 +463,7 @@ tail -f ~/.gemini/antigravity/sidecar_data/tech-debt-patrol/logs/2026-06-09T23:0
 
 ## Step 5: Multi-Task Orchestration with agentapi
 
-For more complex nightly runs, the sidecar can execute a script that calls `agentapi` multiple times — one conversation per task:
+For more complex nightly runs, the sidecar can execute a script that calls `agentapi` multiple times — one conversation per task. This is the agent equivalent of a *splitter* pattern: one inbound schedule event fans out into multiple independent work items.
 
 ```bash
 #!/bin/bash
@@ -519,7 +515,7 @@ Each `agentapi new-conversation` call creates an independent agent session. The 
 
 ## Step 6: The Stop Hook — Preventing Premature Exits
 
-One subtle problem with automated runs: the agent might decide it's "done" before actually finishing. The `Stop` hook lets you override this:
+One subtle problem with autonomous runs: the agent might decide it's "done" before actually finishing. In messaging terms, this is the *premature acknowledgement* problem — the consumer ACKs the message before completing the work. The `Stop` hook lets you override this:
 
 ```bash
 #!/bin/bash
@@ -546,7 +542,7 @@ fi
 echo '{"decision": "allow"}'
 ```
 
-The hook returns `{"decision": "continue"}` to force the agent back into the execution loop with an injected message explaining why. This is the closed loop — the agent doesn't just run, it's *required* to finish.
+The hook returns `{"decision": "continue"}` to force the agent back into the execution loop with an injected message explaining why. This closes the feedback loop — the agent doesn't just run, it's *required to finish*.
 
 ---
 
@@ -573,7 +569,7 @@ An overnight tech debt pipeline that:
 7. **Produces reviewable PRs** — not raw diffs, but proper pull requests with passing CI
 8. **Never merges its own work** — `command(git merge)` is on the deny list
 
-You didn't clear your tech debt backlog by finding three spare weeks. You cleared it by letting the agent work the hours you aren't. The same codebase. The same test suite. The same PR workflow. Just a different schedule.
+You didn't clear your tech debt backlog by finding three spare weeks. You cleared it by recognizing that the work was mechanical, the scope was well-defined, and the only missing ingredient was unattended compute time. The same codebase. The same test suite. The same PR workflow. Just a different relationship between the human and the machine.
 
 That's not a code completion tool. That's a second shift.
 

@@ -12,15 +12,17 @@ image:
 > This article is part of the [Antigravity Engineering Series](https://iamulya.one/tags/antigravity-engineering-series).
 {: .prompt-info }
 
-The moment you give an agent write access to your codebase, you're making a security decision. The question isn't *if* the agent will attempt something destructive — it's whether your system is designed to catch it before it happens.
+The moment you grant an agent write access to your codebase, you've made a security decision — whether you intended to or not. The question isn't *if* the agent will attempt something destructive. The question is whether your architecture is designed to make that structurally impossible.
 
-Most AI coding tools default to permissive. The agent can run whatever commands it wants, write wherever it pleases, and the only guardrail is your attention. That works for interactive use. It fails catastrophically for autonomous pipelines, overnight sidecars, and multi-agent teams.
+Most AI coding tools default to permissive. The agent can run whatever commands it wants, write wherever it pleases, and the only guardrail is your attention. For interactive use, this is acceptable. For autonomous pipelines, overnight sidecars, and multi-agent teams, it's the equivalent of giving every microservice root access to production and hoping for the best.
 
-Antigravity takes the opposite approach: **deny by default, allow by exception.** The SDK provides a programmatic Python policy engine with three layers of hooks — Inspect, Decide, and Transform. Antigravity 2.0 adds a platform-level permission system (`Allow`/`Deny`/`Ask`) and JSON hooks that gate every tool call through custom shell scripts. Together, they create defense in depth: the SDK enforces policies in code, the platform enforces them in infrastructure.
+Antigravity takes the opposite position: **deny by default, allow by exception.** The SDK provides a programmatic Python policy engine with three layers of hooks — Inspect, Decide, and Transform. Antigravity 2.0 adds a platform-level permission system (`Allow`/`Deny`/`Ask`) and JSON hooks that gate every tool call through custom shell scripts. Together, they create defense in depth: the SDK enforces policies in code, the platform enforces them in infrastructure. If you've ever designed a security architecture around the principle that no single layer should be trusted to catch everything, you'll recognize the pattern.
 
 ---
 
 ## The Three Failures of Permissive Agents
+
+These aren't hypothetical. They're the natural consequence of permissive defaults in autonomous systems — the same failure modes that plagued early service-oriented architectures before we learned to apply the principle of least privilege.
 
 ### 1. The Eager Delete
 You ask the agent to clean up unused code. It runs `rm -rf src/utils/` — deleting the utils directory that contained helper functions other modules depend on. The tests still passed because those modules haven't been imported in the current test suite.
@@ -31,13 +33,13 @@ You ask the agent to debug a deployment issue. It runs `cat .env` and includes t
 ### 3. The Package Injection
 You ask the agent to fix a dependency issue. It runs `npm install some-package` — a package it found in a Stack Overflow answer. The package exists, installs cleanly, and contains a post-install script that exfiltrates your SSH keys.
 
-These aren't hypothetical. They're the natural consequence of permissive defaults in autonomous systems. The fix isn't telling the agent to "be careful." It's making destructive actions structurally impossible.
+The fix isn't telling the agent to "be careful." It's making destructive actions structurally impossible — the same way a well-designed message channel makes message loss structurally impossible, regardless of what the sender intends.
 
 ---
 
 ## Layer 1: SDK Safety Policies (Python)
 
-The Antigravity SDK is a Python framework for building autonomous agents. Its policy system lets you define what the agent can and cannot do before it ever starts:
+The Antigravity SDK is a Python framework for building autonomous agents. Its policy system lets you declare what the agent can and cannot do before it ever starts — a static routing table for agent capabilities:
 
 ```python
 # safety_policies.py
@@ -121,6 +123,8 @@ if __name__ == "__main__":
 
 ### How policies are evaluated
 
+The evaluation order is not the registration order. It's a priority hierarchy — a pattern you'll recognize if you've ever implemented firewall rules or message routing tables:
+
 ```mermaid
 ---
 title: "Policy Evaluation Flow. Specific deny rules are checked first, then ask, then allow, then wildcard fallbacks."
@@ -159,11 +163,11 @@ flowchart TD
 
 ## Layer 2: SDK Lifecycle Hooks (Python)
 
-Policies are binary (allow/deny). Hooks give you continuous visibility and control across nine lifecycle points. The SDK organizes hooks into three categories:
+Policies are binary decisions — allow or deny. Hooks give you continuous visibility and control across the agent's execution lifecycle. The SDK organizes hooks into three categories, each serving a distinct architectural purpose.
 
 ### Inspect Hooks (`PostToolCallHook` — Non-Blocking)
 
-For logging, audit trails, and metrics. They observe tool results but can't block anything. Must subclass `PostToolCallHook` and implement `async def run(self, context, data)`:
+These are the *wire taps* of the agent architecture: they observe everything but interfere with nothing. Use them for logging, audit trails, and metrics. They must subclass `PostToolCallHook` and implement `async def run(self, context, data)`:
 
 ```python
 # audit_hook.py
@@ -202,7 +206,7 @@ class AuditTrailHook(PostToolCallHook):
 
 ### Decide Hooks (`PreTurnHook` + `PostTurnHook` — Blocking)
 
-For custom approval logic. `PreTurnHook` can block execution by returning `HookResult(allow=False)`. `PostTurnHook` observes results. Each must be a separate class:
+These are the *content-based routers* of the hook system: they inspect the message and decide whether it should proceed. `PreTurnHook` can block execution by returning `HookResult(allow=False)`. `PostTurnHook` observes results. Each must be a separate class:
 
 ```python
 # budget_hook.py
@@ -267,7 +271,7 @@ def TokenBudgetHook(max_tokens=200_000, velocity_limit=2000):
 
 ### Secret Detection (`PreToolCallDecideHook` — Blocking)
 
-The SDK's hook model is **observe-or-decide**, not transform — hooks cannot silently modify tool arguments. For secret protection, use a `PreToolCallDecideHook` that **blocks** writes containing secrets:
+The SDK's hook model is **observe-or-decide**, not transform — hooks cannot silently modify tool arguments. This is a deliberate design choice: silent transformation creates systems that are difficult to reason about. For secret protection, use a `PreToolCallDecideHook` that **blocks** writes containing secrets and tells the agent why:
 
 ```python
 # sanitize_hook.py
@@ -308,7 +312,7 @@ class SecretSanitizer(PreToolCallDecideHook):
 
 ### Composing the full agent
 
-All hooks go in a single `hooks=[]` list. The `HookRunner` uses `isinstance` checks to dispatch each hook to the right lifecycle point:
+All hooks go in a single `hooks=[]` list. The `HookRunner` uses `isinstance` checks to dispatch each hook to the right lifecycle point — a form of *content-based routing* where the message type determines the handler:
 
 ```python
 # agent_with_hooks.py
@@ -367,7 +371,7 @@ if __name__ == "__main__":
 
 ## Layer 3: Platform Hooks (Antigravity 2.0)
 
-SDK policies run in your Python code. Platform hooks run in the Antigravity 2.0 runtime — they gate *every* agent, including those started by sidecars and scheduled tasks.
+SDK policies run in your Python process. Platform hooks run in the Antigravity 2.0 runtime — they gate *every* agent, including those started by sidecars and scheduled tasks. Think of this as the difference between application-level validation and network-level firewalling: both are necessary, and neither is sufficient alone.
 
 Hooks are configured in `hooks.json` (in `.agents/` or `~/.gemini/config/`):
 
@@ -464,7 +468,7 @@ echo '{"injectSteps": [], "terminationBehavior": ""}'
 
 ## Layer 4: Platform Permissions (Antigravity 2.0)
 
-The permission system is the final layer. It operates at the platform level and applies to all agents regardless of how they were started:
+The permission system is the final layer — the *dead letter channel* for agent operations. It operates at the platform level and applies to all agents regardless of how they were started:
 
 | Precedence | List | Behavior |
 |-----------|------|----------|
@@ -498,7 +502,7 @@ The `command()` target supports regex for flexible matching: `command(npm run (b
 
 ## Defense in Depth
 
-The four layers work together:
+The four layers work together in the same way that a well-designed enterprise security architecture combines network segmentation, application firewalls, authentication, and audit logging:
 
 ```mermaid
 ---
@@ -527,7 +531,7 @@ flowchart TD
     style X2 fill:#34a853,stroke:#34a853,color:#fff
 ```
 
-If any layer says no, the action is blocked. The agent never gets to choose whether to obey a policy — the policy is enforced structurally.
+If any layer says no, the action is blocked. The agent never gets to choose whether to obey a policy — the policy is enforced structurally. This is the key insight: safety is not a property of the agent's reasoning. It's a property of the architecture that contains it.
 
 ---
 
@@ -549,7 +553,7 @@ A four-layer safety architecture where:
 3. **Platform hooks** gate every tool call — shell scripts that run before/after every operation, even in sidecar-started agents
 4. **Platform permissions** enforce the floor — Deny/Ask/Allow lists that no agent can override
 
-The agent that can reason about your codebase is powerful. The agent that *can't* run `rm -rf` regardless of what it reasons is safe. You need both.
+The agent that can reason about your codebase is powerful. The agent that *can't* run `rm -rf` regardless of what it reasons is safe. A mature architecture needs both — capability and constraint, working in tension, by design.
 
 ---
 

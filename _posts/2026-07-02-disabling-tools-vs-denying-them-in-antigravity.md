@@ -1,6 +1,6 @@
 ---
 title: "Disabling Tools vs. Denying Them in Antigravity"
-date: "2026-07-08 12:00:00 +0100"
+date: "2026-07-02 12:00:00 +0100"
 categories: [Antigravity, Engineering]
 tags: [Antigravity Engineering Series, Capabilities, SDK, tool config]
 mermaid: true
@@ -17,9 +17,9 @@ Your agent has access to 15 tools. It's a code reviewer — it only needs `view_
 1. Use `policy.deny()` to block the 12 tools
 2. Use `CapabilitiesConfig.disabled_tools` to remove them entirely
 
-Both achieve the same outcome: the agent can't use those tools. But option 1 costs you ~1,600 extra tokens per turn for tool schemas the model will never use. Over a 40-turn review session, that's **64,000 wasted tokens**.
+Both achieve the same functional outcome: the agent can't use those tools. But option 1 costs you ~1,600 extra tokens per turn for tool schemas the model will never use. Over a 40-turn review session, that's **64,000 wasted tokens**.
 
-This post explains when to use each approach — and why the distinction matters for cost, reliability, and agent behavior.
+The difference seems cosmetic until you examine it architecturally. This post explains when to use each approach — and why the distinction matters for cost, reliability, and agent behavior. If you've ever debated whether to remove an API endpoint from a service contract versus protecting it with authorization, you'll recognize the tradeoff.
 
 ---
 
@@ -68,6 +68,8 @@ flowchart TD
 - Tool is irrelevant to the task → `disabled_tools` (save tokens)
 - Tool is relevant but dangerous in some conditions → `policy.deny(when=...)` (let model learn)
 
+The first is a *contract-level* decision: this service doesn't offer that operation. The second is an *authorization-level* decision: this service offers the operation but you don't have permission right now.
+
 ---
 
 ## `BuiltinTools` — The Tool Enum
@@ -93,7 +95,7 @@ BuiltinTools.FINISH           # "finish"
 
 ### Presets
 
-The enum provides convenience presets:
+The enum provides convenience presets — pre-assembled capability profiles for common agent roles:
 
 ```python
 # Read-only: list, search, find, view, finish
@@ -122,7 +124,7 @@ BuiltinTools.none()
 
 ## `enabled_tools` vs `disabled_tools`
 
-`CapabilitiesConfig` has two mutually exclusive fields:
+`CapabilitiesConfig` has two mutually exclusive fields — an allowlist and a denylist:
 
 ```python
 from google.antigravity.types import CapabilitiesConfig, BuiltinTools
@@ -154,14 +156,14 @@ config = CapabilitiesConfig(
 ```
 
 **When to use which:**
-- `enabled_tools` (allowlist): when you know exactly which 3-5 tools the agent needs
+- `enabled_tools` (allowlist): when you know exactly which 3-5 tools the agent needs — fewer tools means fewer tokens and less ambiguity
 - `disabled_tools` (denylist): when you want most tools but need to remove a few dangerous ones
 
 ---
 
 ## The Default: Read-Only
 
-`AgentConfig` defaults to read-only capabilities:
+`AgentConfig` defaults to read-only capabilities — an intentionally conservative starting point:
 
 ```python
 from google.antigravity.connections.connection import AgentConfig
@@ -206,13 +208,13 @@ config = CapabilitiesConfig(
 )
 ```
 
-Even if `START_SUBAGENT` is in `enabled_tools`, setting `enable_subagents=False` blocks it. This double-gate exists because subagent spawning has recursive implications — a subagent could spawn its own subagents, up to 10 levels deep.
+Even if `START_SUBAGENT` is in `enabled_tools`, setting `enable_subagents=False` blocks it. This double-gate exists because subagent spawning has recursive implications — a subagent could spawn its own subagents, up to 10 levels deep. The extra gate makes this *opt-in at two levels*, preventing accidental recursion.
 
 ---
 
 ## Token Cost Analysis
 
-Each tool in the model's context costs tokens for its schema definition. Here's the approximate cost per tool per turn:
+Each tool in the model's context costs tokens for its schema definition. The economics are straightforward:
 
 | Tool | Schema Tokens (approx) |
 |------|----------------------|
@@ -236,7 +238,7 @@ All-tools agent:  ~1,500 tokens/turn × 40 turns = ~60,000 tokens
                                          Savings:  38,400 tokens (64%)
 ```
 
-At current Gemini pricing, that's meaningful for high-volume automated pipelines.
+At current Gemini pricing, that's meaningful for high-volume automated pipelines. Small multipliers matter at scale — the same lesson every cloud architect learns when they first see a monthly bill with six-digit line items.
 
 ---
 
@@ -310,15 +312,15 @@ config = LocalAgentConfig(
 )
 ```
 
-The `FINISH` tool is automatically included — don't remove it from `enabled_tools` or the agent can't return results.
+The `FINISH` tool is automatically included — don't remove it from `enabled_tools` or the agent can't return results. It's the equivalent of closing a connection after sending a response: omit it, and the conversation hangs.
 
 ---
 
 ## What You Now Know
 
-`CapabilitiesConfig` is Layer 0 — the coarsest filter. It decides what the model even *sees*. Policies (Layer 1) decide what the model can *do*. Hooks (Layer 2) add custom runtime logic.
+`CapabilitiesConfig` is Layer 0 — the coarsest filter. It decides what the model even *sees*. Policies (Layer 1) decide what the model can *do*. Hooks (Layer 2) add custom runtime logic. Each layer operates at a different level of granularity, and each serves a distinct architectural purpose.
 
-For most agents, the recipe is: use `CapabilitiesConfig` to remove irrelevant tools (save tokens), then use policies to gate the remaining tools conditionally (add safety). Never use `policy.deny()` for a tool the agent should never use in any circumstance — that's `disabled_tools` territory.
+For most agents, the recipe is: use `CapabilitiesConfig` to remove irrelevant tools (save tokens), then use policies to gate the remaining tools conditionally (add safety). Never use `policy.deny()` for a tool the agent should never use in any circumstance — that's `disabled_tools` territory. The distinction between "not offered" and "not permitted" may seem pedantic, but it's the same distinction that separates well-designed APIs from those that surprise their consumers.
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: "Hook Contexts: Session, Turn, and Operation State in the Antigravity SDK"
-date: "2026-07-07 12:00:00 +0100"
+date: "2026-07-02 12:00:00 +0100"
 categories: [Antigravity, Engineering]
 tags: [Antigravity Engineering Series, hooks, SDK, Session State]
 mermaid: true
@@ -14,9 +14,9 @@ image:
 
 You're building a token budget hook. It needs to track total tokens across the entire session. But it also needs to track tokens *per turn* to catch retry loops. And it needs to time individual tool calls to detect slow operations.
 
-Three different lifetimes. Three different scopes. If you use instance variables, you end up resetting the wrong thing at the wrong time. If you use globals, you've got shared state between concurrent sessions.
+Three different lifetimes. Three different scopes. If you use instance variables, you end up resetting the wrong thing at the wrong time. If you use globals, you've created shared mutable state between concurrent sessions — a classic concurrency bug dressed up as a design shortcut.
 
-The SDK solves this with **Hook Contexts** — a three-tier state system where each tier has a defined lifetime and automatic parent-chain lookup.
+Anyone who has worked with scoped dependency injection or hierarchical naming contexts will recognize the problem. The SDK solves it with **Hook Contexts** — a three-tier state system where each tier has a defined lifetime and automatic parent-chain lookup. It's the agent equivalent of request scope, session scope, and application scope in a web framework.
 
 ---
 
@@ -61,7 +61,7 @@ flowchart TD
 
 ### Parent-chain lookup
 
-Contexts form a chain via `HookContext.parent`. When you call `context.get("key")`, it searches the current context first, then walks up the chain:
+Contexts form a chain via `HookContext.parent`. When you call `context.get("key")`, it searches the current context first, then walks up the chain — the same delegation pattern used in prototype-based inheritance or JNDI context hierarchies:
 
 ```python
 from google.antigravity.hooks.hooks import HookContext
@@ -82,7 +82,7 @@ op.get("project")     # "payment-platform" (found in session)
 op.get("missing")     # None             (not found anywhere)
 ```
 
-Values set on a child context **do not propagate up**. Setting a key on `OperationContext` does not modify the parent `TurnContext`.
+Values set on a child context **do not propagate up**. Setting a key on `OperationContext` does not modify the parent `TurnContext`. This is *lexical scoping* for agent state — inner scopes can read outer scopes, but never write to them.
 
 ---
 
@@ -90,7 +90,7 @@ Values set on a child context **do not propagate up**. Setting a key on `Operati
 
 ### Example 1: Session-level token budget
 
-Track total token usage across the entire session. Reject new turns when the budget is exhausted.
+Track total token usage across the entire session. Reject new turns when the budget is exhausted:
 
 ```python
 # session_budget_hook.py
@@ -150,7 +150,7 @@ class SessionBudgetPostTurn(PostTurnHook):
 
 ### Example 2: Turn-level retry detector
 
-Detect when the agent is stuck in a retry loop within a single turn by counting tool calls per turn.
+Detect when the agent is stuck in a retry loop within a single turn. The `TurnContext` resets automatically at each new turn, so the counter is naturally scoped:
 
 ```python
 # turn_retry_detector.py
@@ -197,7 +197,7 @@ class TurnRetryDetector(PreToolCallDecideHook):
 
 ### Example 3: Operation-level tool timer
 
-Measure how long each individual tool call takes. Flag slow operations.
+Measure how long each individual tool call takes. Flag slow operations:
 
 ```python
 # operation_timer.py
@@ -229,7 +229,7 @@ class ToolCallTimer(PostToolCallHook):
 
 ## Interaction Hooks: Structured Questions
 
-Beyond simple allow/deny, hooks can present **structured questions** to the user using `AskQuestionInteractionSpec`:
+Beyond simple allow/deny, hooks can present **structured questions** to the user using `AskQuestionInteractionSpec` — a form of *request-reply* messaging where the hook sends a structured request and blocks until the user responds:
 
 ```python
 # interaction_hook.py
@@ -332,7 +332,7 @@ if __name__ == "__main__":
 
 ## Hook Registration and Dispatch
 
-The `HookRunner` uses `isinstance` checks to register each hook by its base class:
+The `HookRunner` uses `isinstance` checks to register each hook by its base class — a form of *type-based routing* that determines which lifecycle point each hook participates in:
 
 | Base Class | Lifecycle Point | Type | Blocking? |
 |------------|----------------|------|-----------|
@@ -353,9 +353,9 @@ Multiple hooks on the same point run in registration order. For `DecideHook` typ
 
 ## What You Now Know
 
-Hook Contexts are the SDK's answer to "where do I put state?" without globals or instance variables leaking between sessions. `SessionContext` survives across turns. `TurnContext` resets every model invocation. `OperationContext` is scoped to a single tool call. Parent-chain lookup means operation-level code can read session-level data without explicit plumbing.
+Hook Contexts are the SDK's answer to the age-old question: "where do I put state?" Without globals. Without instance variables leaking between sessions. `SessionContext` survives across turns. `TurnContext` resets every model invocation. `OperationContext` is scoped to a single tool call. Parent-chain lookup means operation-level code can read session-level data without explicit plumbing.
 
-The three tiers map directly to the three questions you ask when debugging an agent: "What happened in this session?" (SessionContext), "What happened in this turn?" (TurnContext), "What happened in this tool call?" (OperationContext).
+The three tiers map directly to the three questions you ask when debugging an agent: "What happened in this session?" (SessionContext), "What happened in this turn?" (TurnContext), "What happened in this tool call?" (OperationContext). If you get the scoping right, the debugging follows naturally — and if you've ever worked with well-designed logging contexts in a distributed system, you know how much that's worth.
 
 ---
 
